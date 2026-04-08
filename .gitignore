@@ -39,5 +39,8 @@ Thumbs.db
 .env.*
 !.env.example
 
+# TypeScript cache
+*.tsbuildinfo
+
 # misc
 .npmrc
