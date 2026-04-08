@@ -1,0 +1,18 @@
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document } from 'mongoose';
+
+export type CursoDocument = Curso & Document;
+
+@Schema({ timestamps: true })
+export class Curso {
+  @Prop({ required: true, trim: true }) nivel: string;
+  @Prop({ required: true, trim: true }) especialidad: string;
+  @Prop({ required: true, trim: true, uppercase: true }) paralelo: string;
+  @Prop({ required: true, enum: ['Matutina', 'Vespertina', 'Nocturna'] }) jornada: string;
+  @Prop({ enum: ['active', 'inactive'], default: 'active' }) status: string;
+}
+
+export const CursoSchema = SchemaFactory.createForClass(Curso);
+
+// Un curso es único por la combinación de sus cuatro atributos
+CursoSchema.index({ nivel: 1, especialidad: 1, paralelo: 1, jornada: 1 }, { unique: true });
