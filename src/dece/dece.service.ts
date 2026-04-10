@@ -31,7 +31,7 @@ export class DeceService {
           as: 'student',
         },
       },
-      { $unwind: { path: '$student', preserveNullAndEmpty: false } },
+      { $unwind: '$student' },
       ...(search
         ? [{
             $match: {
