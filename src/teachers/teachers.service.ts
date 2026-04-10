@@ -6,6 +6,8 @@ import { User, UserDocument } from '../users/schemas/user.schema';
 import { Role } from '../users/schemas/user.schema';
 import { CreateTeacherDto } from './dto/create-teacher.dto';
 import { UpdateTeacherDto } from './dto/update-teacher.dto';
+import { UpdateTeacherMedicalInfoDto } from './dto/update-medical-info.dto';
+import { UpdateTeacherFamilyInfoDto } from './dto/update-family-info.dto';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 
 @Injectable()
@@ -87,5 +89,68 @@ export class TeachersService {
   async remove(id: string): Promise<void> {
     const result = await this.teacherModel.findByIdAndDelete(id);
     if (!result) throw new NotFoundException('Teacher not found');
+  }
+
+  async findByUserId(userId: string): Promise<TeacherDocument> {
+    const teacher = await this.teacherModel.findOne({ userId }).populate('departmentId', 'departmentName');
+    if (!teacher) throw new NotFoundException('Teacher profile not found');
+    return teacher;
+  }
+
+  async updateMedicalInfo(id: string, dto: UpdateTeacherMedicalInfoDto): Promise<TeacherDocument> {
+    const update: Record<string, any> = {};
+    for (const [key, val] of Object.entries(dto)) {
+      update[`medicalInfo.${key}`] = val;
+    }
+    const updated = await this.teacherModel
+      .findByIdAndUpdate(id, { $set: update }, { new: true })
+      .populate('departmentId', 'departmentName');
+    if (!updated) throw new NotFoundException('Teacher not found');
+    return updated;
+  }
+
+  async updateFamilyInfo(id: string, dto: UpdateTeacherFamilyInfoDto): Promise<TeacherDocument> {
+    const update: Record<string, any> = {};
+    for (const [key, val] of Object.entries(dto)) {
+      update[`familyInfo.${key}`] = val;
+    }
+    const updated = await this.teacherModel
+      .findByIdAndUpdate(id, { $set: update }, { new: true })
+      .populate('departmentId', 'departmentName');
+    if (!updated) throw new NotFoundException('Teacher not found');
+    return updated;
+  }
+
+  async getReporteMedico(filters: {
+    hasDisability?: string;
+    hasAllergies?: string;
+    hasChronicCondition?: string;
+    hasConadis?: string;
+    bloodType?: string;
+    maritalStatus?: string;
+    numberOfChildren?: string;
+  }) {
+    const match: Record<string, any> = {};
+
+    if (filters.hasDisability !== undefined)
+      match['medicalInfo.hasDisability'] = filters.hasDisability === 'true';
+    if (filters.hasAllergies !== undefined)
+      match['medicalInfo.hasAllergies'] = filters.hasAllergies === 'true';
+    if (filters.hasChronicCondition !== undefined)
+      match['medicalInfo.hasChronicCondition'] = filters.hasChronicCondition === 'true';
+    if (filters.hasConadis !== undefined)
+      match['medicalInfo.hasConadis'] = filters.hasConadis === 'true';
+    if (filters.bloodType)
+      match['medicalInfo.bloodType'] = filters.bloodType;
+    if (filters.maritalStatus)
+      match['familyInfo.maritalStatus'] = filters.maritalStatus;
+    if (filters.numberOfChildren !== undefined)
+      match['familyInfo.numberOfChildren'] = Number(filters.numberOfChildren);
+
+    return this.teacherModel.find(match)
+      .select('name dni mobile address gender birthdate status laboralDependency salarialCategory medicalInfo familyInfo')
+      .populate('departmentId', 'departmentName')
+      .sort({ name: 1 })
+      .exec();
   }
 }

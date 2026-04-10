@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { v2 as cloudinary, UploadApiResponse } from 'cloudinary';
 import { Readable } from 'stream';
@@ -6,6 +6,8 @@ import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class CloudinaryService {
+  private readonly logger = new Logger(CloudinaryService.name);
+
   constructor(private config: ConfigService) {
     cloudinary.config({
       cloud_name: this.config.get<string>('CLOUDINARY_CLOUD_NAME'),
@@ -69,7 +71,7 @@ export class CloudinaryService {
 
       await cloudinary.uploader.destroy(publicId, { resource_type: resourceType });
     } catch {
-      console.warn(`CloudinaryService: could not delete ${url}`);
+      this.logger.warn(`Could not delete asset: ${url}`);
     }
   }
 }

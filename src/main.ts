@@ -1,15 +1,23 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ValidationPipe } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
+import * as compression from 'compression';
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const helmet = require('helmet');
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  app.use(helmet());
+  app.use(compression());
+
   app.setGlobalPrefix('api');
 
+  const corsOrigin = process.env.CORS_ORIGIN || 'http://localhost:4200';
   app.enableCors({
-    origin: 'http://localhost:4200',
+    origin: corsOrigin.split(',').map((o) => o.trim()),
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     credentials: true,
   });
@@ -26,6 +34,8 @@ async function bootstrap() {
 
   const port = process.env.PORT ?? 3000;
   await app.listen(port);
-  console.log(`🚀 Server running on http://localhost:${port}/api`);
+
+  const logger = new Logger('Bootstrap');
+  logger.log(`Server running on http://localhost:${port}/api`);
 }
 bootstrap();

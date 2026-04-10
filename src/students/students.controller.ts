@@ -5,9 +5,12 @@ import {
 import { StudentsService } from './students.service';
 import { CreateStudentDto } from './dto/create-student.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
+import { UpdateStudentMedicalInfoDto } from './dto/update-medical-info.dto';
+import { UpdateStudentFamilyInfoDto } from './dto/update-family-info.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Role } from '../users/schemas/user.schema';
 import { ParseObjectIdPipe } from '../common/pipes/parse-object-id.pipe';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
@@ -18,6 +21,40 @@ import { Types } from 'mongoose';
 @Roles(Role.SuperAdmin, Role.Admin)
 export class StudentsController {
   constructor(private readonly studentsService: StudentsService) {}
+
+  // ─── Rutas /me — DEBEN ir antes de /:id ───────────────────────────────────
+
+  @Get('me')
+  @Roles(Role.Student)
+  getMe(@CurrentUser() user: any) {
+    return this.studentsService.findByUserId(user.id);
+  }
+
+  @Patch('me/medical')
+  @Roles(Role.Student)
+  updateMyMedical(@CurrentUser() user: any, @Body() dto: UpdateStudentMedicalInfoDto) {
+    return this.studentsService.findByUserId(user.id).then(s =>
+      this.studentsService.updateMedicalInfo(s._id.toString(), dto),
+    );
+  }
+
+  @Patch('me/family')
+  @Roles(Role.Student)
+  updateMyFamily(@CurrentUser() user: any, @Body() dto: UpdateStudentFamilyInfoDto) {
+    return this.studentsService.findByUserId(user.id).then(s =>
+      this.studentsService.updateFamilyInfo(s._id.toString(), dto),
+    );
+  }
+
+  // ─── Reporte médico (solo admin) ──────────────────────────────────────────
+
+  @Get('reporte-medico')
+  @Roles(Role.SuperAdmin, Role.Admin)
+  getReporteMedico(@Query() filters: any) {
+    return this.studentsService.getReporteMedico(filters);
+  }
+
+  // ─── CRUD estándar ────────────────────────────────────────────────────────
 
   @Get()
   findAll(@Query() query: PaginationQueryDto) {
@@ -48,6 +85,22 @@ export class StudentsController {
     @Body('status') status: string,
   ) {
     return this.studentsService.toggleStatus(id.toString(), status);
+  }
+
+  @Patch(':id/medical')
+  updateMedical(
+    @Param('id', ParseObjectIdPipe) id: Types.ObjectId,
+    @Body() dto: UpdateStudentMedicalInfoDto,
+  ) {
+    return this.studentsService.updateMedicalInfo(id.toString(), dto);
+  }
+
+  @Patch(':id/family')
+  updateFamily(
+    @Param('id', ParseObjectIdPipe) id: Types.ObjectId,
+    @Body() dto: UpdateStudentFamilyInfoDto,
+  ) {
+    return this.studentsService.updateFamilyInfo(id.toString(), dto);
   }
 
   @Delete(':id')

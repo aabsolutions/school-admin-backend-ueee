@@ -54,8 +54,9 @@ export class ExpedientesController {
     @Query('fechaHasta') fechaHasta?: string,
     @Query('tipo') tipo?: string,
     @Query('creadoPor') creadoPor?: string,
+    @Query('studentId') studentId?: string,
   ) {
-    return this.svc.getReporte({ fechaDesde, fechaHasta, tipo, creadoPor });
+    return this.svc.getReporte({ fechaDesde, fechaHasta, tipo, creadoPor, studentId });
   }
 
   @Get('student/:studentId')

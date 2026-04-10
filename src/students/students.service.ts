@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Student, StudentDocument } from './schemas/student.schema';
@@ -6,10 +6,14 @@ import { User, UserDocument } from '../users/schemas/user.schema';
 import { Role } from '../users/schemas/user.schema';
 import { CreateStudentDto } from './dto/create-student.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
+import { UpdateStudentMedicalInfoDto } from './dto/update-medical-info.dto';
+import { UpdateStudentFamilyInfoDto } from './dto/update-family-info.dto';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 
 @Injectable()
 export class StudentsService {
+  private readonly logger = new Logger(StudentsService.name);
+
   constructor(
     @InjectModel(Student.name)
     private readonly studentModel: Model<StudentDocument>,
@@ -62,7 +66,7 @@ export class StudentsService {
         const savedUser = await user.save();
         return await new this.studentModel({ ...studentData, userId: savedUser._id }).save();
       }
-      console.warn(studentData);
+      this.logger.warn(`Creating student without user account: ${studentData.name}`);
       return await new this.studentModel(studentData).save();
     } catch (err: any) {
       if (err.code === 11000) {
@@ -90,5 +94,68 @@ export class StudentsService {
     );
     if (!updated) throw new NotFoundException('Student not found');
     return updated;
+  }
+
+  async findByUserId(userId: string): Promise<StudentDocument> {
+    const student = await this.studentModel.findOne({ userId });
+    if (!student) throw new NotFoundException('Student profile not found');
+    return student;
+  }
+
+  async updateMedicalInfo(id: string, dto: UpdateStudentMedicalInfoDto): Promise<StudentDocument> {
+    const update: Record<string, any> = {};
+    for (const [key, val] of Object.entries(dto)) {
+      update[`medicalInfo.${key}`] = val;
+    }
+    const updated = await this.studentModel.findByIdAndUpdate(id, { $set: update }, { new: true });
+    if (!updated) throw new NotFoundException('Student not found');
+    return updated;
+  }
+
+  async updateFamilyInfo(id: string, dto: UpdateStudentFamilyInfoDto): Promise<StudentDocument> {
+    const update: Record<string, any> = {};
+    for (const [key, val] of Object.entries(dto)) {
+      update[`familyInfo.${key}`] = val;
+    }
+    const updated = await this.studentModel.findByIdAndUpdate(id, { $set: update }, { new: true });
+    if (!updated) throw new NotFoundException('Student not found');
+    return updated;
+  }
+
+  async getReporteMedico(filters: {
+    hasDisability?: string;
+    hasAllergies?: string;
+    hasChronicCondition?: string;
+    hasConadis?: string;
+    bloodType?: string;
+    familySituation?: string;
+    socioeconomicLevel?: string;
+    housingType?: string;
+    numberOfSiblings?: string;
+  }) {
+    const match: Record<string, any> = {};
+
+    if (filters.hasDisability !== undefined)
+      match['medicalInfo.hasDisability'] = filters.hasDisability === 'true';
+    if (filters.hasAllergies !== undefined)
+      match['medicalInfo.hasAllergies'] = filters.hasAllergies === 'true';
+    if (filters.hasChronicCondition !== undefined)
+      match['medicalInfo.hasChronicCondition'] = filters.hasChronicCondition === 'true';
+    if (filters.hasConadis !== undefined)
+      match['medicalInfo.hasConadis'] = filters.hasConadis === 'true';
+    if (filters.bloodType)
+      match['medicalInfo.bloodType'] = filters.bloodType;
+    if (filters.familySituation)
+      match['familyInfo.familySituation'] = filters.familySituation;
+    if (filters.socioeconomicLevel)
+      match['familyInfo.socioeconomicLevel'] = filters.socioeconomicLevel;
+    if (filters.housingType)
+      match['familyInfo.housingType'] = filters.housingType;
+    if (filters.numberOfSiblings !== undefined)
+      match['familyInfo.numberOfSiblings'] = Number(filters.numberOfSiblings);
+
+    return this.studentModel.find(match).select(
+      'name dni mobile address gender birthdate status medicalInfo familyInfo parentGuardianName parentGuardianMobile'
+    ).sort({ name: 1 }).exec();
   }
 }

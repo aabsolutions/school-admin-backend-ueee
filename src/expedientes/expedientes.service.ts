@@ -140,6 +140,7 @@ export class ExpedientesService {
     fechaHasta?: string;
     tipo?: string;
     creadoPor?: string;
+    studentId?: string;
   }) {
     const match: any = {};
     if (filters.tipo) match.tipo = filters.tipo;
@@ -150,7 +151,7 @@ export class ExpedientesService {
       if (filters.fechaHasta) match.fecha.$lte = new Date(filters.fechaHasta);
     }
 
-    return this.registroModel.aggregate([
+    const pipeline: any[] = [
       { $match: match },
       {
         $lookup: {
@@ -170,16 +171,31 @@ export class ExpedientesService {
         },
       },
       { $unwind: '$student' },
+    ];
+
+    if (filters.studentId) {
+      pipeline.push({
+        $match: { 'expediente.studentId': new Types.ObjectId(filters.studentId) },
+      });
+    }
+
+    pipeline.push(
       {
         $project: {
           tipo: 1, fecha: 1, descripcion: 1, creadoPor: 1, evidencias: 1, createdAt: 1,
           expedienteId: 1,
-          studentName:  '$student.name',
-          studentDni:   '$student.dni',
+          studentName:            '$student.name',
+          studentDni:             '$student.dni',
+          studentMobile:          '$student.mobile',
+          studentAddress:         '$student.address',
+          parentGuardianName:     '$student.parentGuardianName',
+          parentGuardianMobile:   '$student.parentGuardianMobile',
         },
       },
       { $sort: { fecha: -1 } },
-    ]);
+    );
+
+    return this.registroModel.aggregate(pipeline);
   }
 
   async remove(id: string): Promise<void> {
