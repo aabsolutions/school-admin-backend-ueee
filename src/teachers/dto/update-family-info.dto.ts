@@ -1,10 +1,12 @@
+import { IsNumber, IsOptional, IsString } from 'class-validator';
+
 export class UpdateTeacherFamilyInfoDto {
-  maritalStatus?: string;
-  spouseName?: string;
-  spouseOccupation?: string;
-  spouseMobile?: string;
-  numberOfChildren?: number;
-  childrenAges?: string;
-  housingType?: string;
-  familyNotes?: string;
+  @IsOptional() @IsString()  maritalStatus?: string;
+  @IsOptional() @IsString()  spouseName?: string;
+  @IsOptional() @IsString()  spouseOccupation?: string;
+  @IsOptional() @IsString()  spouseMobile?: string;
+  @IsOptional() @IsNumber()  numberOfChildren?: number;
+  @IsOptional() @IsString()  childrenAges?: string;
+  @IsOptional() @IsString()  housingType?: string;
+  @IsOptional() @IsString()  familyNotes?: string;
 }

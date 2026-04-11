@@ -3,6 +3,7 @@ import {
   NotFoundException,
   ForbiddenException,
   ConflictException,
+  BadRequestException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
@@ -20,7 +21,15 @@ export class UsersService {
   // Roles an ADMIN is allowed to manage
   private readonly ADMIN_MANAGEABLE_ROLES = [Role.Teacher, Role.Student];
 
+  // Roles reservados para creación automática desde estudiantes/docentes
+  private readonly RESERVED_ROLES = [Role.Student, Role.Teacher];
+
   async create(dto: CreateUserDto, callerRole: Role): Promise<UserDocument> {
+    if (this.RESERVED_ROLES.includes(dto.role)) {
+      throw new BadRequestException(
+        'Los roles STUDENT y TEACHER se asignan automáticamente al dar de alta un estudiante o docente. No se pueden crear desde esta UI.',
+      );
+    }
     this.assertCanManageRole(callerRole, dto.role);
     const existing = await this.userModel.findOne({
       $or: [{ username: dto.username }, { email: dto.email }],
@@ -54,6 +63,11 @@ export class UsersService {
     dto: UpdateUserDto,
     callerRole: Role,
   ): Promise<UserDocument> {
+    if (dto.role && this.RESERVED_ROLES.includes(dto.role as Role)) {
+      throw new BadRequestException(
+        'No se puede asignar el rol STUDENT o TEACHER manualmente.',
+      );
+    }
     const target = await this.findOne(id);
     this.assertCanManageRole(callerRole, target.role);
 

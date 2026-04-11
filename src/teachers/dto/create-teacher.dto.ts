@@ -9,7 +9,7 @@ export class CreateTeacherDto {
   @IsOptional() @IsString() @MinLength(6) password?: string;
 
   @IsOptional() @IsString() img?: string;
-  @IsOptional() @IsString() dni?: string;
+  @IsNotEmpty() @IsString() dni: string;
   @IsOptional() @IsEnum(['Male', 'Female', 'Other']) gender?: string;
   @IsOptional() @IsString() mobile?: string;
   @IsOptional() @IsString() departmentId?: string;

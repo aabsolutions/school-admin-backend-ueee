@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { Teacher, TeacherDocument } from './schemas/teacher.schema';
 import { User, UserDocument } from '../users/schemas/user.schema';
 import { Role } from '../users/schemas/user.schema';
@@ -50,26 +50,27 @@ export class TeachersService {
   async create(dto: CreateTeacherDto): Promise<TeacherDocument> {
     const { username, password, ...teacherData } = dto;
 
-    try {
-      // If credentials provided, create a linked User account
-      if (username && password) {
-        const user = new this.userModel({
-          username,
-          password,
-          name: teacherData.name,
-          email: teacherData.email,
-          role: Role.Teacher,
-          permissions: ['canEdit', 'canRead'],
-          isActive: true,
-        });
-        const savedUser = await user.save();
-        const savedWithUser = await new this.teacherModel({ ...teacherData, userId: savedUser._id }).save();
-      return savedWithUser.populate('departmentId', 'departmentName');
-      }
+    // Credenciales: las explícitas del DTO tienen prioridad; si no, se usa la cédula como default
+    const resolvedUsername = username ?? teacherData.dni ?? teacherData.email;
+    const resolvedPassword = password ?? teacherData.dni ?? teacherData.email;
 
-      const saved = await new this.teacherModel(teacherData).save();
+    let savedUser: any = null;
+    try {
+      const user = new this.userModel({
+        username: resolvedUsername,
+        password: resolvedPassword,
+        name: teacherData.name,
+        email: teacherData.email,
+        role: Role.Teacher,
+        permissions: ['canEdit', 'canRead'],
+        isActive: true,
+      });
+      savedUser = await user.save();
+      const saved = await new this.teacherModel({ ...teacherData, userId: savedUser._id }).save();
       return saved.populate('departmentId', 'departmentName');
-    } catch (err) {
+    } catch (err: any) {
+      // Rollback del usuario si el docente falló
+      if (savedUser) await this.userModel.findByIdAndDelete(savedUser._id).catch(() => {});
       if (err.code === 11000) {
         const field = Object.keys(err.keyPattern)[0];
         throw new ConflictException(`Ya existe un docente con ese ${field}`);
@@ -92,7 +93,26 @@ export class TeachersService {
   }
 
   async findByUserId(userId: string): Promise<TeacherDocument> {
-    const teacher = await this.teacherModel.findOne({ userId }).populate('departmentId', 'departmentName');
+    // Intento 1: buscar por userId (docentes creados con el nuevo flujo)
+    let teacher = await this.teacherModel
+      .findOne({ userId: new Types.ObjectId(userId) })
+      .populate('departmentId', 'departmentName');
+
+    // Intento 2: fallback por email (docentes migrados sin userId)
+    if (!teacher) {
+      const user = await this.userModel.findById(userId).select('email').exec();
+      if (user) {
+        teacher = await this.teacherModel
+          .findOne({ email: user.email })
+          .populate('departmentId', 'departmentName');
+        // Vincular userId para que la próxima vez sea directo
+        if (teacher) {
+          teacher.userId = new Types.ObjectId(userId) as any;
+          await teacher.save();
+        }
+      }
+    }
+
     if (!teacher) throw new NotFoundException('Teacher profile not found');
     return teacher;
   }

@@ -12,7 +12,7 @@ export class CreateStudentDto {
   @IsOptional() @IsString() @MinLength(6) password?: string;
 
   @IsOptional() @IsString() img?: string;
-  @IsOptional() @IsString() dni?: string;
+  @IsNotEmpty() @IsString() dni: string;
   @IsOptional() @IsString() mobile?: string;
   @IsOptional() @IsEnum(['Male', 'Female', 'Other']) gender?: string;
   @IsOptional() @IsEnum(['URBANA', 'RURAL', 'FUERA DEL CANTÓN']) residenceZone?: string;
