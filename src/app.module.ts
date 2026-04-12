@@ -17,6 +17,8 @@ import { CursoLectivoModule } from './curso-lectivo/curso-lectivo.module';
 import { EnrollmentsModule } from './enrollments/enrollments.module';
 import { ExpedientesModule } from './expedientes/expedientes.module';
 import { DeceModule } from './dece/dece.module';
+import { DocumentalEstudianteModule } from './documental-estudiante/documental-estudiante.module';
+import { DocumentalDocenteModule } from './documental-docente/documental-docente.module';
 
 @Module({
   imports: [
@@ -58,6 +60,8 @@ import { DeceModule } from './dece/dece.module';
     EnrollmentsModule,
     ExpedientesModule,
     DeceModule,
+    DocumentalEstudianteModule,
+    DocumentalDocenteModule,
   ],
   providers: [
     { provide: APP_INTERCEPTOR, useClass: TransformInterceptor },
