@@ -14,6 +14,7 @@ import { CreateExpedienteDto } from './dto/create-expediente.dto';
 import { CreateExpedienteRegistroDto } from './dto/create-expediente-registro.dto';
 import { UpdateExpedienteRegistroDto } from './dto/update-expediente-registro.dto';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
+import { StudentsService } from '../students/students.service';
 
 @Injectable()
 export class ExpedientesService {
@@ -22,6 +23,7 @@ export class ExpedientesService {
     private readonly expedienteModel: Model<ExpedienteDocument>,
     @InjectModel(ExpedienteRegistro.name)
     private readonly registroModel: Model<ExpedienteRegistroDocument>,
+    private readonly studentsService: StudentsService,
   ) {}
 
   // ─── Expedientes ───────────────────────────────────────────────────────────
@@ -102,6 +104,22 @@ export class ExpedientesService {
       .findOne({ studentId: new Types.ObjectId(studentId) })
       .populate('studentId', 'name email dni gender mobile img')
       .exec();
+  }
+
+  async findByUserIdWithRegistros(userId: string) {
+    let student: any;
+    try {
+      student = await this.studentsService.findByUserId(userId);
+    } catch {
+      return { expediente: null, registros: [] };
+    }
+    const expediente = await this.findByStudent(student._id.toString());
+    if (!expediente) return { expediente: null, registros: [] };
+    const registros = await this.registroModel
+      .find({ expedienteId: expediente._id })
+      .sort({ fecha: -1 })
+      .exec();
+    return { expediente, registros };
   }
 
   async findOne(id: string): Promise<ExpedienteDocument> {

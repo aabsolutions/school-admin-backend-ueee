@@ -1,16 +1,22 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CursoLectivo, CursoLectivoDocument } from './schemas/curso-lectivo.schema';
 import { CreateCursoLectivoDto } from './dto/create-curso-lectivo.dto';
 import { UpdateCursoLectivoDto } from './dto/update-curso-lectivo.dto';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
+import { TeachersService } from '../teachers/teachers.service';
+import { EnrollmentsService } from '../enrollments/enrollments.service';
 
 @Injectable()
 export class CursoLectivoService {
+  private readonly logger = new Logger(CursoLectivoService.name);
+
   constructor(
     @InjectModel(CursoLectivo.name)
     private readonly cursoLectivoModel: Model<CursoLectivoDocument>,
+    private readonly teachersService: TeachersService,
+    private readonly enrollmentsService: EnrollmentsService,
   ) {}
 
   async findAll(query: PaginationQueryDto & { academicYear?: string; status?: string; cursoId?: string }) {
@@ -77,5 +83,47 @@ export class CursoLectivoService {
   async remove(id: string): Promise<void> {
     const result = await this.cursoLectivoModel.findByIdAndDelete(id);
     if (!result) throw new NotFoundException('Curso lectivo no encontrado');
+  }
+
+  async findTutorAlumnos(userId: string) {
+    let teacher: any;
+    try {
+      teacher = await this.teachersService.findByUserId(userId);
+    } catch (err) {
+      return { cursoLectivo: null, estudiantes: [] };
+    }
+
+    const teacherIdStr = teacher._id.toString();
+    const cursoLectivo = await this.cursoLectivoModel
+      .findOne({ $or: [{ tutorId: teacher._id }, { tutorId: teacherIdStr }] })
+      .populate('cursoId', 'nivel especialidad paralelo jornada subnivel')
+      .populate('tutorId', 'name email')
+      .sort({ createdAt: -1 })
+      .exec();
+
+    if (!cursoLectivo) return { cursoLectivo: null, estudiantes: [] };
+
+    const result = await this.enrollmentsService.findAll({
+      cursoLectivoId: cursoLectivo._id.toString(),
+      limit: 500,
+      page: 1,
+      sortBy: 'enrolledAt',
+      sortOrder: 'asc',
+      status: 'enrolled',
+    });
+
+    const estudiantes = result.data.map((e: any) => {
+      const s = e.studentId ?? {};
+      return {
+        dni:       s.dni       ?? '',
+        name:      s.name      ?? '',
+        email:     s.email     ?? '',
+        gender:    s.gender    ?? '',
+        birthdate: s.birthdate ?? null,
+        mobile:    s.mobile    ?? '',
+      };
+    });
+
+    return { cursoLectivo, estudiantes };
   }
 }

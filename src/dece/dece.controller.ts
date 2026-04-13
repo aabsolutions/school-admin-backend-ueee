@@ -13,6 +13,7 @@ import { UpdateDeceRegistroDto } from './dto/update-dece-registro.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Role } from '../users/schemas/user.schema';
 import { ParseObjectIdPipe } from '../common/pipes/parse-object-id.pipe';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
@@ -39,6 +40,12 @@ export class DeceController {
     private readonly svc: DeceService,
     private readonly cloudinary: CloudinaryService,
   ) {}
+
+  @Get('me')
+  @Roles(Role.Student)
+  getMyExpediente(@CurrentUser() user: any) {
+    return this.svc.findByUserIdWithRegistros(user.id);
+  }
 
   @Get()
   findAll(@Query() query: PaginationQueryDto) { return this.svc.findAll(query); }
