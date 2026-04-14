@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
 
 export type CursoDocument = Curso & Document;
 
@@ -11,6 +11,7 @@ export class Curso {
   @Prop({ required: true, enum: ['Matutina', 'Vespertina', 'Nocturna'] }) jornada: string;
   @Prop({ required: true, enum: ['EGB Superior', 'Bachillerato General', 'Bachillerato Tecnico'] }) subnivel: string;
   @Prop({ enum: ['active', 'inactive'], default: 'active' }) status: string;
+  @Prop({ type: [{ type: Types.ObjectId, ref: 'Materia' }], default: [] }) materias: Types.ObjectId[];
 }
 
 export const CursoSchema = SchemaFactory.createForClass(Curso);

@@ -19,6 +19,8 @@ import { ExpedientesModule } from './expedientes/expedientes.module';
 import { DeceModule } from './dece/dece.module';
 import { DocumentalEstudianteModule } from './documental-estudiante/documental-estudiante.module';
 import { DocumentalDocenteModule } from './documental-docente/documental-docente.module';
+import { MateriasModule } from './materias/materias.module';
+import { CargaHorariaModule } from './carga-horaria/carga-horaria.module';
 
 @Module({
   imports: [
@@ -62,6 +64,8 @@ import { DocumentalDocenteModule } from './documental-docente/documental-docente
     DeceModule,
     DocumentalEstudianteModule,
     DocumentalDocenteModule,
+    MateriasModule,
+    CargaHorariaModule,
   ],
   providers: [
     { provide: APP_INTERCEPTOR, useClass: TransformInterceptor },

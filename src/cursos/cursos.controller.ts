@@ -2,6 +2,7 @@ import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards } fro
 import { CursosService } from './cursos.service';
 import { CreateCursoDto } from './dto/create-curso.dto';
 import { UpdateCursoDto } from './dto/update-curso.dto';
+import { SetMateriasDto } from './dto/set-materias.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -39,5 +40,15 @@ export class CursosController {
   @Delete(':id')
   remove(@Param('id', ParseObjectIdPipe) id: Types.ObjectId) {
     return this.cursosService.remove(id.toString());
+  }
+
+  @Get(':id/materias')
+  getMaterias(@Param('id', ParseObjectIdPipe) id: Types.ObjectId) {
+    return this.cursosService.getMaterias(id.toString());
+  }
+
+  @Put(':id/materias')
+  setMaterias(@Param('id', ParseObjectIdPipe) id: Types.ObjectId, @Body() dto: SetMateriasDto) {
+    return this.cursosService.setMaterias(id.toString(), dto.materias);
   }
 }

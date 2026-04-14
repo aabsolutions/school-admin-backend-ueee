@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { Curso, CursoDocument } from './schemas/curso.schema';
 import { CreateCursoDto } from './dto/create-curso.dto';
 import { UpdateCursoDto } from './dto/update-curso.dto';
@@ -73,5 +73,25 @@ export class CursosService {
   async remove(id: string): Promise<void> {
     const result = await this.cursoModel.findByIdAndDelete(id);
     if (!result) throw new NotFoundException('Curso no encontrado');
+  }
+
+  async getMaterias(id: string) {
+    const curso = await this.cursoModel
+      .findById(id)
+      .populate('materias')
+      .exec();
+    if (!curso) throw new NotFoundException('Curso no encontrado');
+    return curso.materias;
+  }
+
+  async setMaterias(id: string, materiaIds: string[]) {
+    const objectIds = materiaIds.map((mid) => new Types.ObjectId(mid));
+    const updated = await this.cursoModel.findByIdAndUpdate(
+      id,
+      { materias: objectIds },
+      { new: true },
+    ).populate('materias').exec();
+    if (!updated) throw new NotFoundException('Curso no encontrado');
+    return updated.materias;
   }
 }
