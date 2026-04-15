@@ -65,6 +65,9 @@ export class Teacher {
   userId: Types.ObjectId;
 
   @Prop() img: string;
+  @Prop() imgCuerpoEntero: string;
+  @Prop({ type: Number }) peso: number;
+  @Prop({ type: Number }) talla: number;
   @Prop({ required: true, trim: true }) name: string;
   @Prop({ required: true, unique: true, lowercase: true }) email: string;
   @Prop({ unique: true, sparse: true }) dni: string;
@@ -74,7 +77,9 @@ export class Teacher {
   @Prop({ enum: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'] }) salarialCategory: string;
   @Prop() emergencyName: string;
   @Prop() emergencyMobile: string;
+  /** @deprecated Usar areaEstudioId — se mantiene por compatibilidad con datos históricos */
   @Prop({ type: Types.ObjectId, ref: 'Department' }) departmentId: Types.ObjectId;
+  @Prop({ type: Types.ObjectId, ref: 'AreaEstudio' }) areaEstudioId: Types.ObjectId;
   @Prop() address: string;
   @Prop() subjectSpecialization: string;
   @Prop({ default: 0 }) experienceYears: number;

@@ -1,6 +1,6 @@
 import {
-  IsEmail, IsEnum, IsNotEmpty, IsOptional,
-  IsString, IsDateString, MinLength,
+  IsEmail, IsEnum, IsNotEmpty, IsNumber, IsOptional,
+  IsString, IsDateString, Min, MinLength,
 } from 'class-validator';
 
 export class CreateStudentDto {
@@ -12,6 +12,9 @@ export class CreateStudentDto {
   @IsOptional() @IsString() @MinLength(6) password?: string;
 
   @IsOptional() @IsString() img?: string;
+  @IsOptional() @IsString() imgCuerpoEntero?: string;
+  @IsOptional() @IsNumber() @Min(0) peso?: number;
+  @IsOptional() @IsNumber() @Min(0) talla?: number;
   @IsNotEmpty() @IsString() dni: string;
   @IsOptional() @IsString() mobile?: string;
   @IsOptional() @IsEnum(['Male', 'Female', 'Other']) gender?: string;

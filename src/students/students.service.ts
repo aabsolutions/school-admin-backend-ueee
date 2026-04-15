@@ -9,6 +9,7 @@ import { UpdateStudentDto } from './dto/update-student.dto';
 import { UpdateStudentMedicalInfoDto } from './dto/update-medical-info.dto';
 import { UpdateStudentFamilyInfoDto } from './dto/update-family-info.dto';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 
 @Injectable()
 export class StudentsService {
@@ -19,6 +20,7 @@ export class StudentsService {
     private readonly studentModel: Model<StudentDocument>,
     @InjectModel(User.name)
     private readonly userModel: Model<UserDocument>,
+    private readonly cloudinaryService: CloudinaryService,
   ) {}
 
   async findAll(query: PaginationQueryDto) {
@@ -176,5 +178,22 @@ export class StudentsService {
     return this.studentModel.find(match).select(
       'name dni mobile address gender birthdate status medicalInfo familyInfo parentGuardianName parentGuardianMobile'
     ).sort({ name: 1 }).exec();
+  }
+
+  async uploadPhoto(
+    id: string,
+    file: Express.Multer.File,
+    type: 'credencial' | 'cuerpo',
+    peso?: number,
+    talla?: number,
+  ): Promise<StudentDocument> {
+    const folder = type === 'credencial' ? 'students/credencial' : 'students/cuerpo';
+    const url = await this.cloudinaryService.uploadBuffer(file.buffer, folder);
+    const update: any = type === 'credencial'
+      ? { img: url }
+      : { imgCuerpoEntero: url, ...(peso != null && { peso }), ...(talla != null && { talla }) };
+    const updated = await this.studentModel.findByIdAndUpdate(id, update, { new: true });
+    if (!updated) throw new NotFoundException('Student not found');
+    return updated;
   }
 }

@@ -9,6 +9,7 @@ import { UpdateTeacherDto } from './dto/update-teacher.dto';
 import { UpdateTeacherMedicalInfoDto } from './dto/update-medical-info.dto';
 import { UpdateTeacherFamilyInfoDto } from './dto/update-family-info.dto';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 
 @Injectable()
 export class TeachersService {
@@ -17,6 +18,7 @@ export class TeachersService {
     private readonly teacherModel: Model<TeacherDocument>,
     @InjectModel(User.name)
     private readonly userModel: Model<UserDocument>,
+    private readonly cloudinaryService: CloudinaryService,
   ) {}
 
   async findAll(query: PaginationQueryDto) {
@@ -32,6 +34,7 @@ export class TeachersService {
       this.teacherModel
         .find(filter)
         .populate('departmentId', 'departmentName')
+        .populate('areaEstudioId', 'nombre')
         .sort({ [sortBy]: sortOrder === 'asc' ? 1 : -1 })
         .skip((page - 1) * limit)
         .limit(limit)
@@ -42,7 +45,7 @@ export class TeachersService {
   }
 
   async findOne(id: string): Promise<TeacherDocument> {
-    const teacher = await this.teacherModel.findById(id).populate('departmentId', 'departmentName');
+    const teacher = await this.teacherModel.findById(id).populate('departmentId', 'departmentName').populate('areaEstudioId', 'nombre');
     if (!teacher) throw new NotFoundException('Teacher not found');
     return teacher;
   }
@@ -67,7 +70,7 @@ export class TeachersService {
       });
       savedUser = await user.save();
       const saved = await new this.teacherModel({ ...teacherData, userId: savedUser._id }).save();
-      return saved.populate('departmentId', 'departmentName');
+      return (await saved.populate('departmentId', 'departmentName')).populate('areaEstudioId', 'nombre');
     } catch (err: any) {
       // Rollback del usuario si el docente falló
       if (savedUser) await this.userModel.findByIdAndDelete(savedUser._id).catch(() => {});
@@ -82,7 +85,8 @@ export class TeachersService {
   async update(id: string, dto: UpdateTeacherDto): Promise<TeacherDocument> {
     const updated = await this.teacherModel
       .findByIdAndUpdate(id, dto, { new: true })
-      .populate('departmentId', 'departmentName');
+      .populate('departmentId', 'departmentName')
+      .populate('areaEstudioId', 'nombre');
     if (!updated) throw new NotFoundException('Teacher not found');
     return updated;
   }
@@ -96,7 +100,8 @@ export class TeachersService {
     // Intento 1: buscar por userId (docentes creados con el nuevo flujo)
     let teacher = await this.teacherModel
       .findOne({ userId: new Types.ObjectId(userId) })
-      .populate('departmentId', 'departmentName');
+      .populate('departmentId', 'departmentName')
+      .populate('areaEstudioId', 'nombre');
 
     // Intento 2: fallback por email (docentes migrados sin userId)
     if (!teacher) {
@@ -104,7 +109,8 @@ export class TeachersService {
       if (user) {
         teacher = await this.teacherModel
           .findOne({ email: user.email })
-          .populate('departmentId', 'departmentName');
+          .populate('departmentId', 'departmentName')
+          .populate('areaEstudioId', 'nombre');
         // Vincular userId para que la próxima vez sea directo
         if (teacher) {
           teacher.userId = new Types.ObjectId(userId) as any;
@@ -124,7 +130,8 @@ export class TeachersService {
     }
     const updated = await this.teacherModel
       .findByIdAndUpdate(id, { $set: update }, { new: true })
-      .populate('departmentId', 'departmentName');
+      .populate('departmentId', 'departmentName')
+      .populate('areaEstudioId', 'nombre');
     if (!updated) throw new NotFoundException('Teacher not found');
     return updated;
   }
@@ -136,7 +143,8 @@ export class TeachersService {
     }
     const updated = await this.teacherModel
       .findByIdAndUpdate(id, { $set: update }, { new: true })
-      .populate('departmentId', 'departmentName');
+      .populate('departmentId', 'departmentName')
+      .populate('areaEstudioId', 'nombre');
     if (!updated) throw new NotFoundException('Teacher not found');
     return updated;
   }
@@ -170,7 +178,25 @@ export class TeachersService {
     return this.teacherModel.find(match)
       .select('name dni mobile address gender birthdate status laboralDependency salarialCategory medicalInfo familyInfo')
       .populate('departmentId', 'departmentName')
+      .populate('areaEstudioId', 'nombre')
       .sort({ name: 1 })
       .exec();
+  }
+
+  async uploadPhoto(
+    id: string,
+    file: Express.Multer.File,
+    type: 'credencial' | 'cuerpo',
+    peso?: number,
+    talla?: number,
+  ): Promise<TeacherDocument> {
+    const folder = type === 'credencial' ? 'teachers/credencial' : 'teachers/cuerpo';
+    const url = await this.cloudinaryService.uploadBuffer(file.buffer, folder);
+    const update: any = type === 'credencial'
+      ? { img: url }
+      : { imgCuerpoEntero: url, ...(peso != null && { peso }), ...(talla != null && { talla }) };
+    const updated = await this.teacherModel.findByIdAndUpdate(id, update, { new: true });
+    if (!updated) throw new NotFoundException('Teacher not found');
+    return updated;
   }
 }

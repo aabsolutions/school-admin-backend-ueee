@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { Enrollment, EnrollmentDocument } from './schemas/enrollment.schema';
 import { CreateEnrollmentDto } from './dto/create-enrollment.dto';
 import { UpdateEnrollmentDto } from './dto/update-enrollment.dto';
@@ -72,7 +72,11 @@ export class EnrollmentsService {
 
   async create(dto: CreateEnrollmentDto): Promise<EnrollmentDocument> {
     try {
-      const saved = await new this.enrollmentModel(dto).save();
+      const saved = await new this.enrollmentModel({
+        ...dto,
+        studentId:      new Types.ObjectId(dto.studentId),
+        cursoLectivoId: new Types.ObjectId(dto.cursoLectivoId),
+      }).save();
       return this.findOne(saved._id.toString());
     } catch (err) {
       if (err.code === 11000) {

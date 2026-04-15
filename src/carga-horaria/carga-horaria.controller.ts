@@ -36,6 +36,28 @@ export class CargaHorariaController {
   }
 
   /**
+   * GET /carga-horaria/docente/:docenteId
+   * Carga horaria completa de un docente (agrupada por cursoLectivo, con totalHoras).
+   * Acceso: Teacher (su propio perfil), Admin, SuperAdmin.
+   */
+  @Get('docente/:docenteId')
+  @Roles(Role.Teacher)
+  findByDocente(@Param('docenteId', ParseObjectIdPipe) docenteId: Types.ObjectId) {
+    return this.service.findByDocente(docenteId.toString());
+  }
+
+  /**
+   * GET /carga-horaria/estudiante/:estudianteId
+   * Materias del cursoLectivo del estudiante con docente a cargo.
+   * Acceso: Student (su propio perfil), Admin, SuperAdmin.
+   */
+  @Get('estudiante/:estudianteId')
+  @Roles(Role.Student)
+  findMateriasByEstudiante(@Param('estudianteId', ParseObjectIdPipe) estudianteId: Types.ObjectId) {
+    return this.service.findMateriasByEstudiante(estudianteId.toString());
+  }
+
+  /**
    * PUT /carga-horaria/curso-lectivo/:id/docente/:docenteId
    * Establece las materias del docente en el curso lectivo (reemplaza).
    */

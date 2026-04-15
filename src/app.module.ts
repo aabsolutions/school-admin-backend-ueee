@@ -21,6 +21,8 @@ import { DocumentalEstudianteModule } from './documental-estudiante/documental-e
 import { DocumentalDocenteModule } from './documental-docente/documental-docente.module';
 import { MateriasModule } from './materias/materias.module';
 import { CargaHorariaModule } from './carga-horaria/carga-horaria.module';
+import { AreaEstudioModule } from './area-estudio/area-estudio.module';
+import { InstitucionModule } from './institucion/institucion.module';
 
 @Module({
   imports: [
@@ -66,6 +68,8 @@ import { CargaHorariaModule } from './carga-horaria/carga-horaria.module';
     DocumentalDocenteModule,
     MateriasModule,
     CargaHorariaModule,
+    AreaEstudioModule,
+    InstitucionModule,
   ],
   providers: [
     { provide: APP_INTERCEPTOR, useClass: TransformInterceptor },

@@ -1,7 +1,9 @@
 import {
   Controller, Get, Post, Put, Patch, Delete,
-  Body, Param, Query, UseGuards,
+  Body, Param, Query, UseGuards, UseInterceptors, UploadedFile, ParseFilePipe,
+  MaxFileSizeValidator, FileTypeValidator,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { StudentsService } from './students.service';
 import { CreateStudentDto } from './dto/create-student.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
@@ -106,5 +108,30 @@ export class StudentsController {
   @Delete(':id')
   remove(@Param('id', ParseObjectIdPipe) id: Types.ObjectId) {
     return this.studentsService.remove(id.toString());
+  }
+
+  @Post(':id/photo')
+  @Roles(Role.Student, Role.Teacher, Role.Admin, Role.SuperAdmin)
+  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: 5 * 1024 * 1024 } }))
+  uploadPhoto(
+    @Param('id', ParseObjectIdPipe) id: Types.ObjectId,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 5 * 1024 * 1024 }),
+          new FileTypeValidator({ fileType: /^image\/(jpeg|png|webp)$/ }),
+        ],
+      }),
+    )
+    file: Express.Multer.File,
+    @Body('type') type: 'credencial' | 'cuerpo',
+    @Body('peso') peso?: string,
+    @Body('talla') talla?: string,
+  ) {
+    return this.studentsService.uploadPhoto(
+      id.toString(), file, type,
+      peso ? +peso : undefined,
+      talla ? +talla : undefined,
+    );
   }
 }

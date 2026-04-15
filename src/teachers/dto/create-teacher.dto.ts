@@ -1,4 +1,4 @@
-import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, IsNumber, IsDateString, MinLength } from 'class-validator';
+import { IsEmail, IsEnum, IsMongoId, IsNotEmpty, IsOptional, IsString, IsNumber, IsDateString, Min, MinLength } from 'class-validator';
 
 export class CreateTeacherDto {
   @IsNotEmpty() @IsString() name: string;
@@ -9,10 +9,14 @@ export class CreateTeacherDto {
   @IsOptional() @IsString() @MinLength(6) password?: string;
 
   @IsOptional() @IsString() img?: string;
+  @IsOptional() @IsString() imgCuerpoEntero?: string;
+  @IsOptional() @IsNumber() @Min(0) peso?: number;
+  @IsOptional() @IsNumber() @Min(0) talla?: number;
   @IsNotEmpty() @IsString() dni: string;
   @IsOptional() @IsEnum(['Male', 'Female', 'Other']) gender?: string;
   @IsOptional() @IsString() mobile?: string;
   @IsOptional() @IsString() departmentId?: string;
+  @IsOptional() @IsMongoId() areaEstudioId?: string;
   @IsOptional() @IsEnum(['Contrato', 'Nomb. Definitivo', 'Nomb. Provisional']) laboralDependency?: string;
   @IsOptional() @IsEnum(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']) salarialCategory?: string;
   @IsOptional() @IsString() emergencyName?: string;

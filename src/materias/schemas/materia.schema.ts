@@ -8,6 +8,7 @@ export class Materia {
   @Prop({ required: true, trim: true }) nombre: string;
   @Prop({ trim: true, uppercase: true }) codigo: string;
   @Prop({ trim: true }) descripcion: string;
+  @Prop({ type: Number, default: 0, min: 0 }) horas: number;
   @Prop({ enum: ['active', 'inactive'], default: 'active' }) status: string;
 }
 

@@ -85,6 +85,9 @@ export class Student {
   userId: Types.ObjectId;
 
   @Prop() img: string;
+  @Prop() imgCuerpoEntero: string;
+  @Prop({ type: Number }) peso: number;
+  @Prop({ type: Number }) talla: number;
 
   @Prop({ required: true, trim: true })
   name: string;
