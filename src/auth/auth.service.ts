@@ -22,11 +22,11 @@ export class AuthService {
   async login(username: string, password: string) {
     const user = await this.usersService.findByUsername(username);
     if (!user || !user.isActive) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException('Credenciales inválidas');
     }
 
     const valid = await (user as any).validatePassword(password);
-    if (!valid) throw new UnauthorizedException('Invalid credentials');
+    if (!valid) throw new UnauthorizedException('Credenciales inválidas');
 
     const payload = {
       sub: user._id.toString(),
@@ -57,7 +57,7 @@ export class AuthService {
     try {
       return this.jwtService.verify(token);
     } catch {
-      throw new UnauthorizedException('Invalid or expired token');
+      throw new UnauthorizedException('Token inválido o expirado');
     }
   }
 }
