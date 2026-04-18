@@ -40,6 +40,9 @@ import { InstitucionModule } from './institucion/institucion.module';
         CLOUDINARY_CLOUD_NAME: Joi.string().optional(),
         CLOUDINARY_API_KEY: Joi.string().optional(),
         CLOUDINARY_API_SECRET: Joi.string().optional(),
+        RESEND_API_KEY: Joi.string().required(),
+        RESEND_FROM_EMAIL: Joi.string().email().optional(),
+        FRONTEND_URL: Joi.string().uri().optional(),
       }),
     }),
     ThrottlerModule.forRoot({

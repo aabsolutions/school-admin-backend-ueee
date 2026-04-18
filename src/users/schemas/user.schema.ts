@@ -36,6 +36,13 @@ export class User {
 
   @Prop({ default: true })
   isActive: boolean;
+
+  // Guardamos el HASH del token, nunca el token raw
+  @Prop({ select: false })
+  resetPasswordToken?: string;
+
+  @Prop({ select: false })
+  resetPasswordExpires?: Date;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

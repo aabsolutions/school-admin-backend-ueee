@@ -97,6 +97,36 @@ export class UsersService {
     await this.userModel.findByIdAndDelete(id);
   }
 
+  async findByEmail(email: string): Promise<UserDocument | null> {
+    return this.userModel.findOne({ email: email.toLowerCase() }).exec();
+  }
+
+  async setResetToken(userId: string, tokenHash: string, expires: Date): Promise<void> {
+    await this.userModel.findByIdAndUpdate(userId, {
+      resetPasswordToken: tokenHash,
+      resetPasswordExpires: expires,
+    });
+  }
+
+  async findByResetToken(tokenHash: string): Promise<UserDocument | null> {
+    return this.userModel
+      .findOne({
+        resetPasswordToken: tokenHash,
+        resetPasswordExpires: { $gt: new Date() },
+      })
+      .select('+resetPasswordToken +resetPasswordExpires +password')
+      .exec();
+  }
+
+  async resetPassword(userId: string, newPassword: string): Promise<void> {
+    const user = await this.userModel.findById(userId).select('+password');
+    if (!user) throw new NotFoundException('User not found');
+    user.password = newPassword;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+    await user.save();
+  }
+
   async findMe(id: string): Promise<UserDocument> {
     return this.findOne(id);
   }
