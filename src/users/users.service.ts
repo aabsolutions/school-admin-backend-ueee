@@ -97,6 +97,14 @@ export class UsersService {
     await this.userModel.findByIdAndDelete(id);
   }
 
+  async resetPasswordToUsername(id: string, callerRole: Role): Promise<void> {
+    const target = await this.userModel.findById(id).select('+password');
+    if (!target) throw new NotFoundException('User not found');
+    this.assertCanManageRole(callerRole, target.role);
+    target.password = target.username;
+    await target.save();
+  }
+
   async findByEmail(email: string): Promise<UserDocument | null> {
     return this.userModel.findOne({ email: email.toLowerCase() }).exec();
   }

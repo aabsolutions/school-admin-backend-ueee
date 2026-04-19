@@ -9,6 +9,7 @@ import { CreateStudentDto } from './dto/create-student.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
 import { UpdateStudentMedicalInfoDto } from './dto/update-medical-info.dto';
 import { UpdateStudentFamilyInfoDto } from './dto/update-family-info.dto';
+import { UpdateStudentGeneralDto } from './dto/update-student-general.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -30,6 +31,14 @@ export class StudentsController {
   @Roles(Role.Student)
   getMe(@CurrentUser() user: any) {
     return this.studentsService.findByUserId(user.id);
+  }
+
+  @Patch('me')
+  @Roles(Role.Student)
+  updateMyGeneral(@CurrentUser() user: any, @Body() dto: UpdateStudentGeneralDto) {
+    return this.studentsService.findByUserId(user.id).then(s =>
+      this.studentsService.updateGeneralInfo(s._id.toString(), dto),
+    );
   }
 
   @Patch('me/medical')

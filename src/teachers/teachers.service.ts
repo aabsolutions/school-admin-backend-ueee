@@ -8,6 +8,7 @@ import { CreateTeacherDto } from './dto/create-teacher.dto';
 import { UpdateTeacherDto } from './dto/update-teacher.dto';
 import { UpdateTeacherMedicalInfoDto } from './dto/update-medical-info.dto';
 import { UpdateTeacherFamilyInfoDto } from './dto/update-family-info.dto';
+import { UpdateTeacherGeneralDto } from './dto/update-teacher-general.dto';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 
@@ -121,6 +122,15 @@ export class TeachersService {
 
     if (!teacher) throw new NotFoundException('Teacher profile not found');
     return teacher;
+  }
+
+  async updateGeneralInfo(id: string, dto: UpdateTeacherGeneralDto): Promise<TeacherDocument> {
+    const updated = await this.teacherModel
+      .findByIdAndUpdate(id, { $set: dto }, { new: true })
+      .populate('departmentId', 'departmentName')
+      .populate('areaEstudioId', 'nombre');
+    if (!updated) throw new NotFoundException('Teacher not found');
+    return updated;
   }
 
   async updateMedicalInfo(id: string, dto: UpdateTeacherMedicalInfoDto): Promise<TeacherDocument> {

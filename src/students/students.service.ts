@@ -8,6 +8,7 @@ import { CreateStudentDto } from './dto/create-student.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
 import { UpdateStudentMedicalInfoDto } from './dto/update-medical-info.dto';
 import { UpdateStudentFamilyInfoDto } from './dto/update-family-info.dto';
+import { UpdateStudentGeneralDto } from './dto/update-student-general.dto';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 
@@ -121,6 +122,12 @@ export class StudentsService {
 
     if (!student) throw new NotFoundException('Student profile not found');
     return student;
+  }
+
+  async updateGeneralInfo(id: string, dto: UpdateStudentGeneralDto): Promise<StudentDocument> {
+    const updated = await this.studentModel.findByIdAndUpdate(id, { $set: dto }, { new: true });
+    if (!updated) throw new NotFoundException('Student not found');
+    return updated;
   }
 
   async updateMedicalInfo(id: string, dto: UpdateStudentMedicalInfoDto): Promise<StudentDocument> {

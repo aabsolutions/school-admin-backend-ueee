@@ -73,6 +73,15 @@ export class UsersController {
     return this.usersService.toggleStatus(id.toString(), req.user.role);
   }
 
+  @Patch(':id/reset-password')
+  @Roles(Role.SuperAdmin, Role.Admin)
+  resetPassword(
+    @Param('id', ParseObjectIdPipe) id: Types.ObjectId,
+    @Request() req,
+  ) {
+    return this.usersService.resetPasswordToUsername(id.toString(), req.user.role);
+  }
+
   @Delete(':id')
   @Roles(Role.SuperAdmin, Role.Admin)
   remove(

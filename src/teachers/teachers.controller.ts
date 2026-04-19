@@ -8,6 +8,7 @@ import { CreateTeacherDto } from './dto/create-teacher.dto';
 import { UpdateTeacherDto } from './dto/update-teacher.dto';
 import { UpdateTeacherMedicalInfoDto } from './dto/update-medical-info.dto';
 import { UpdateTeacherFamilyInfoDto } from './dto/update-family-info.dto';
+import { UpdateTeacherGeneralDto } from './dto/update-teacher-general.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -29,6 +30,14 @@ export class TeachersController {
   @Roles(Role.Teacher)
   getMe(@CurrentUser() user: any) {
     return this.teachersService.findByUserId(user.id);
+  }
+
+  @Patch('me')
+  @Roles(Role.Teacher)
+  updateMyGeneral(@CurrentUser() user: any, @Body() dto: UpdateTeacherGeneralDto) {
+    return this.teachersService.findByUserId(user.id).then(t =>
+      this.teachersService.updateGeneralInfo(t._id.toString(), dto),
+    );
   }
 
   @Patch('me/medical')
