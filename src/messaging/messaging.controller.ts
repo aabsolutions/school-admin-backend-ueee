@@ -9,6 +9,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { MessagingService } from './messaging.service';
+import { MessagingGateway } from './messaging.gateway';
 import { UsersService } from '../users/users.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
@@ -23,6 +24,7 @@ import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 export class MessagingController {
   constructor(
     private readonly messagingService: MessagingService,
+    private readonly messagingGateway: MessagingGateway,
     private readonly usersService: UsersService,
   ) {}
 
@@ -63,12 +65,15 @@ export class MessagingController {
   }
 
   @Post('conversations/:id/messages')
-  sendMessage(
+  async sendMessage(
     @CurrentUser() user: any,
     @Param('id', ParseObjectIdPipe) id: any,
     @Body() dto: SendMessageDto,
   ) {
-    return this.messagingService.sendMessage(user.id, user.name, id.toString(), dto);
+    const conversationId = id.toString();
+    const message = await this.messagingService.sendMessage(user.id, user.name, conversationId, dto);
+    this.messagingGateway.emitNewMessage(conversationId, message);
+    return message;
   }
 
   @Patch('conversations/:id/read')

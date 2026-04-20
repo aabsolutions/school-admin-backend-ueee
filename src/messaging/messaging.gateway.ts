@@ -150,6 +150,13 @@ export class MessagingGateway implements OnGatewayConnection, OnGatewayDisconnec
     }
   }
 
+  emitNewMessage(conversationId: string, message: any) {
+    this.server.to(`conv-${conversationId}`).emit('new-message', {
+      message,
+      conversationId,
+    });
+  }
+
   emitConversationUpdated(conversationId: string, conversation: any) {
     this.server.to(`conv-${conversationId}`).emit('conversation-updated', conversation);
   }
