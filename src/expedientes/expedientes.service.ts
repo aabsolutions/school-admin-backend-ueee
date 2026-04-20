@@ -15,6 +15,7 @@ import { CreateExpedienteRegistroDto } from './dto/create-expediente-registro.dt
 import { UpdateExpedienteRegistroDto } from './dto/update-expediente-registro.dto';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { StudentsService } from '../students/students.service';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class ExpedientesService {
@@ -24,6 +25,7 @@ export class ExpedientesService {
     @InjectModel(ExpedienteRegistro.name)
     private readonly registroModel: Model<ExpedienteRegistroDocument>,
     private readonly studentsService: StudentsService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   // ─── Expedientes ───────────────────────────────────────────────────────────
@@ -133,10 +135,15 @@ export class ExpedientesService {
 
   async create(dto: CreateExpedienteDto): Promise<ExpedienteDocument> {
     try {
-      return await new this.expedienteModel({
+      const saved = await new this.expedienteModel({
         studentId: new Types.ObjectId(dto.studentId),
         notas: dto.notas,
       }).save();
+      this.notificationsService
+        .createForStudentId(dto.studentId, 'expediente', 'Expediente disciplinario abierto',
+          'Se ha abierto un expediente disciplinario asociado a tu perfil.', '/student/mi-expediente')
+        .catch(() => {});
+      return saved;
     } catch (err: any) {
       if (err.code === 11000)
         throw new ConflictException('Este estudiante ya tiene un expediente');

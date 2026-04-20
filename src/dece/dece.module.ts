@@ -5,6 +5,7 @@ import { DeceController } from './dece.controller';
 import { DeceExpediente, DeceExpedienteSchema } from './schemas/dece-expediente.schema';
 import { DeceRegistro, DeceRegistroSchema } from './schemas/dece-registro.schema';
 import { StudentsModule } from '../students/students.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { StudentsModule } from '../students/students.module';
       { name: DeceRegistro.name, schema: DeceRegistroSchema },
     ]),
     StudentsModule,
+    NotificationsModule,
   ],
   controllers: [DeceController],
   providers: [DeceService],

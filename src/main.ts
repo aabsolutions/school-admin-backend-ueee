@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
+import { IoAdapter } from '@nestjs/platform-socket.io';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const compression = require('compression');
@@ -13,6 +14,8 @@ async function bootstrap() {
 
   app.use(helmet());
   app.use(compression());
+
+  app.useWebSocketAdapter(new IoAdapter(app));
 
   app.setGlobalPrefix('api');
 

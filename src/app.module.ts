@@ -23,6 +23,8 @@ import { MateriasModule } from './materias/materias.module';
 import { CargaHorariaModule } from './carga-horaria/carga-horaria.module';
 import { AreaEstudioModule } from './area-estudio/area-estudio.module';
 import { InstitucionModule } from './institucion/institucion.module';
+import { MessagingModule } from './messaging/messaging.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -73,6 +75,8 @@ import { InstitucionModule } from './institucion/institucion.module';
     CargaHorariaModule,
     AreaEstudioModule,
     InstitucionModule,
+    MessagingModule,
+    NotificationsModule,
   ],
   providers: [
     { provide: APP_INTERCEPTOR, useClass: TransformInterceptor },

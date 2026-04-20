@@ -5,12 +5,14 @@ import { Enrollment, EnrollmentDocument } from './schemas/enrollment.schema';
 import { CreateEnrollmentDto } from './dto/create-enrollment.dto';
 import { UpdateEnrollmentDto } from './dto/update-enrollment.dto';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class EnrollmentsService {
   constructor(
     @InjectModel(Enrollment.name)
     private readonly enrollmentModel: Model<EnrollmentDocument>,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async findAll(
@@ -77,6 +79,10 @@ export class EnrollmentsService {
         studentId:      new Types.ObjectId(dto.studentId),
         cursoLectivoId: new Types.ObjectId(dto.cursoLectivoId),
       }).save();
+      this.notificationsService
+        .createForStudentId(dto.studentId, 'enrollment', 'Nueva matrícula registrada',
+          'Tu matrícula ha sido registrada en el sistema.', '/student/dashboard')
+        .catch(() => {});
       return this.findOne(saved._id.toString());
     } catch (err) {
       if (err.code === 11000) {

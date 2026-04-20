@@ -48,6 +48,10 @@ export class UsersService {
     return this.userModel.find(filter).select('-password').exec();
   }
 
+  async findAllForMessaging(): Promise<UserDocument[]> {
+    return this.userModel.find({ isActive: true }).select('name username role avatar').exec();
+  }
+
   async findOne(id: string): Promise<UserDocument> {
     const user = await this.userModel.findById(id).select('-password');
     if (!user) throw new NotFoundException('User not found');

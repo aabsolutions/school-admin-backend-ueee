@@ -8,6 +8,7 @@ import { CreateDeceRegistroDto } from './dto/create-dece-registro.dto';
 import { UpdateDeceRegistroDto } from './dto/update-dece-registro.dto';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { StudentsService } from '../students/students.service';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class DeceService {
@@ -17,6 +18,7 @@ export class DeceService {
     @InjectModel(DeceRegistro.name)
     private readonly registroModel: Model<DeceRegistroDocument>,
     private readonly studentsService: StudentsService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   // ─── Expedientes ───────────────────────────────────────────────────────────
@@ -106,10 +108,15 @@ export class DeceService {
 
   async create(dto: CreateDeceExpedienteDto): Promise<DeceExpedienteDocument> {
     try {
-      return await new this.expedienteModel({
+      const saved = await new this.expedienteModel({
         studentId: new Types.ObjectId(dto.studentId),
         notas: dto.notas,
       }).save();
+      this.notificationsService
+        .createForStudentId(dto.studentId, 'dece', 'Atención DECE registrada',
+          'Se ha registrado una atención psicológica DECE en tu perfil.', '/student/mi-dece')
+        .catch(() => {});
+      return saved;
     } catch (err: any) {
       if (err.code === 11000)
         throw new ConflictException('Este estudiante ya tiene un expediente DECE');
