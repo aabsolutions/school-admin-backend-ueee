@@ -74,7 +74,7 @@ export class AuthService {
     const tokenHash = crypto.createHash('sha256').update(rawToken).digest('hex');
     const expires = new Date(Date.now() + 15 * 60 * 1000); // 15 minutos
 
-    await this.usersService.setResetToken((user._id as string), tokenHash, expires);
+    await this.usersService.setResetToken((user._id as unknown as string), tokenHash, expires);
 
     const frontendUrl = this.config.get<string>(
       'FRONTEND_URL',
@@ -93,6 +93,6 @@ export class AuthService {
       throw new BadRequestException('El enlace es inválido o ya expiró');
     }
 
-    await this.usersService.resetPassword((user._id as string), newPassword);
+    await this.usersService.resetPassword((user._id as unknown as string), newPassword);
   }
 }
