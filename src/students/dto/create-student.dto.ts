@@ -1,6 +1,6 @@
 import {
   IsEmail, IsEnum, IsNotEmpty, IsNumber, IsOptional,
-  IsString, IsDateString, Min, MinLength,
+  IsString, IsDateString, Min, MinLength, IsMongoId,
 } from 'class-validator';
 
 export class CreateStudentDto {
@@ -28,4 +28,7 @@ export class CreateStudentDto {
   @IsOptional() @IsString() motherName?: string;
   @IsOptional() @IsString() motherMobile?: string;
   @IsOptional() @IsEnum(['active', 'inactive', 'graduated', 'suspended']) status?: string;
+  @IsOptional() @IsMongoId() fatherId?: string | null;
+  @IsOptional() @IsMongoId() motherId?: string | null;
+  @IsOptional() @IsMongoId() guardianId?: string | null;
 }

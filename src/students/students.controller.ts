@@ -68,6 +68,7 @@ export class StudentsController {
   // ─── CRUD estándar ────────────────────────────────────────────────────────
 
   @Get()
+  @Roles(Role.SuperAdmin, Role.Admin, Role.Teacher)
   findAll(@Query() query: PaginationQueryDto) {
     return this.studentsService.findAll(query);
   }

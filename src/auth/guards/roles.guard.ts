@@ -4,10 +4,11 @@ import { Role } from '../../users/schemas/user.schema';
 import { ROLES_KEY } from '../decorators/roles.decorator';
 
 const ROLE_HIERARCHY: Record<Role, Role[]> = {
-  [Role.SuperAdmin]: [Role.SuperAdmin, Role.Admin, Role.Teacher, Role.Student],
-  [Role.Admin]: [Role.Admin, Role.Teacher, Role.Student],
+  [Role.SuperAdmin]: [Role.SuperAdmin, Role.Admin, Role.Teacher, Role.Student, Role.Parent],
+  [Role.Admin]: [Role.Admin, Role.Teacher, Role.Student, Role.Parent],
   [Role.Teacher]: [Role.Teacher],
   [Role.Student]: [Role.Student],
+  [Role.Parent]: [Role.Parent],
 };
 
 @Injectable()

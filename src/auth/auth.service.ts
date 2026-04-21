@@ -11,6 +11,7 @@ const ROLE_PRIORITY: Record<Role, number> = {
   [Role.Admin]: 1,
   [Role.Teacher]: 2,
   [Role.Student]: 3,
+  [Role.Parent]: 4,
 };
 
 @Injectable()

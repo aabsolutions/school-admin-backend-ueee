@@ -123,6 +123,19 @@ export class Student {
 
   @Prop({ type: StudentFamilyInfoSchema, default: {} })
   familyInfo: StudentFamilyInfo;
+
+  @Prop({ type: Types.ObjectId, ref: 'Parent', default: null })
+  fatherId: Types.ObjectId | null;
+
+  @Prop({ type: Types.ObjectId, ref: 'Parent', default: null })
+  motherId: Types.ObjectId | null;
+
+  @Prop({ type: Types.ObjectId, ref: 'Parent', default: null })
+  guardianId: Types.ObjectId | null;
+
+  @Prop({ type: [{ type: Types.ObjectId, ref: 'Parent' }], default: [] })
+  parentIds: Types.ObjectId[];
 }
 
 export const StudentSchema = SchemaFactory.createForClass(Student);
+StudentSchema.index({ parentIds: 1 });

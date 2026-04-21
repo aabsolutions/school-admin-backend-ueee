@@ -3,14 +3,14 @@ import { Document, Types } from 'mongoose';
 
 export type NotificationDocument = Notification & Document;
 
-export type NotificationType = 'message' | 'system' | 'enrollment' | 'expediente' | 'dece';
+export type NotificationType = 'message' | 'system' | 'enrollment' | 'expediente' | 'dece' | 'communicado';
 
 @Schema({ timestamps: true })
 export class Notification {
   @Prop({ type: Types.ObjectId, required: true, index: true })
   recipient: Types.ObjectId;
 
-  @Prop({ type: String, required: true, enum: ['message', 'system', 'enrollment', 'expediente', 'dece'] })
+  @Prop({ type: String, required: true, enum: ['message', 'system', 'enrollment', 'expediente', 'dece', 'communicado'] })
   type: NotificationType;
 
   @Prop({ required: true })

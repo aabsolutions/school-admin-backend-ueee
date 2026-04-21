@@ -4,6 +4,7 @@ import { Model, Types } from 'mongoose';
 import { Student, StudentDocument } from './schemas/student.schema';
 import { User, UserDocument } from '../users/schemas/user.schema';
 import { Role } from '../users/schemas/user.schema';
+import { Parent, ParentDocument } from '../parents/schemas/parent.schema';
 import { CreateStudentDto } from './dto/create-student.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
 import { UpdateStudentMedicalInfoDto } from './dto/update-medical-info.dto';
@@ -21,6 +22,8 @@ export class StudentsService {
     private readonly studentModel: Model<StudentDocument>,
     @InjectModel(User.name)
     private readonly userModel: Model<UserDocument>,
+    @InjectModel(Parent.name)
+    private readonly parentModel: Model<ParentDocument>,
     private readonly cloudinaryService: CloudinaryService,
   ) {}
 
@@ -36,6 +39,7 @@ export class StudentsService {
     const [data, total] = await Promise.all([
       this.studentModel
         .find(filter)
+        .populate('fatherId motherId guardianId', 'name email dni')
         .sort({ [sortBy]: sortOrder === 'asc' ? 1 : -1 })
         .skip((page - 1) * limit)
         .limit(limit)
@@ -52,11 +56,12 @@ export class StudentsService {
   }
 
   async create(dto: CreateStudentDto): Promise<StudentDocument> {
-    const { username, password, ...studentData } = dto;
+    const { username, password, fatherId, motherId, guardianId, ...studentData } = dto;
 
-    // Credenciales: las explícitas del DTO tienen prioridad; si no, se usa la cédula como default
     const resolvedUsername = username ?? studentData.dni ?? studentData.email;
     const resolvedPassword = password ?? studentData.dni ?? studentData.email;
+
+    const parentIds = this._deriveParentIds(fatherId, motherId, guardianId);
 
     let savedUser: any = null;
     try {
@@ -70,9 +75,25 @@ export class StudentsService {
         isActive: true,
       });
       savedUser = await user.save();
-      return await new this.studentModel({ ...studentData, userId: savedUser._id }).save();
+      const student = await new this.studentModel({
+        ...studentData,
+        userId: savedUser._id,
+        fatherId: fatherId ? new Types.ObjectId(fatherId) : null,
+        motherId: motherId ? new Types.ObjectId(motherId) : null,
+        guardianId: guardianId ? new Types.ObjectId(guardianId) : null,
+        parentIds: parentIds.map((p) => new Types.ObjectId(p)),
+      }).save();
+
+      if (parentIds.length) {
+        const studentOid = student._id as Types.ObjectId;
+        await this.parentModel.updateMany(
+          { _id: { $in: parentIds.map((p) => new Types.ObjectId(p)) } },
+          { $addToSet: { studentIds: studentOid } },
+        );
+      }
+
+      return this.studentModel.findById(student._id).populate('fatherId motherId guardianId', 'name email dni') as Promise<StudentDocument>;
     } catch (err: any) {
-      // Rollback del usuario si el estudiante falló
       if (savedUser) await this.userModel.findByIdAndDelete(savedUser._id).catch(() => {});
       if (err.code === 11000) {
         const field = Object.keys(err.keyPattern)[0];
@@ -83,9 +104,53 @@ export class StudentsService {
   }
 
   async update(id: string, dto: UpdateStudentDto): Promise<StudentDocument> {
-    const updated = await this.studentModel.findByIdAndUpdate(id, dto, { new: true });
+    const { fatherId, motherId, guardianId, ...rest } = dto;
+
+    const updateData: any = { ...rest };
+
+    if (fatherId !== undefined || motherId !== undefined || guardianId !== undefined) {
+      const current = await this.studentModel.findById(id).select('fatherId motherId guardianId parentIds').lean();
+      if (!current) throw new NotFoundException('Student not found');
+
+      const newFather = fatherId !== undefined ? fatherId : current.fatherId?.toString() ?? null;
+      const newMother = motherId !== undefined ? motherId : current.motherId?.toString() ?? null;
+      const newGuardian = guardianId !== undefined ? guardianId : current.guardianId?.toString() ?? null;
+
+      const newParentIds = this._deriveParentIds(newFather, newMother, newGuardian);
+      const oldParentIds: string[] = (current.parentIds ?? []).map((o: Types.ObjectId) => o.toString());
+
+      const toAdd = newParentIds.filter((p) => !oldParentIds.includes(p));
+      const toRemove = oldParentIds.filter((p) => !newParentIds.includes(p));
+
+      const studentOid = new Types.ObjectId(id);
+      await Promise.all([
+        toAdd.length
+          ? this.parentModel.updateMany({ _id: { $in: toAdd.map((p) => new Types.ObjectId(p)) } }, { $addToSet: { studentIds: studentOid } })
+          : Promise.resolve(),
+        toRemove.length
+          ? this.parentModel.updateMany({ _id: { $in: toRemove.map((p) => new Types.ObjectId(p)) } }, { $pull: { studentIds: studentOid } })
+          : Promise.resolve(),
+      ]);
+
+      updateData.fatherId = newFather ? new Types.ObjectId(newFather) : null;
+      updateData.motherId = newMother ? new Types.ObjectId(newMother) : null;
+      updateData.guardianId = newGuardian ? new Types.ObjectId(newGuardian) : null;
+      updateData.parentIds = newParentIds.map((p) => new Types.ObjectId(p));
+    }
+
+    const updated = await this.studentModel
+      .findByIdAndUpdate(id, updateData, { new: true })
+      .populate('fatherId motherId guardianId', 'name email dni');
     if (!updated) throw new NotFoundException('Student not found');
     return updated;
+  }
+
+  private _deriveParentIds(
+    fatherId?: string | null,
+    motherId?: string | null,
+    guardianId?: string | null,
+  ): string[] {
+    return [...new Set([fatherId, motherId, guardianId].filter(Boolean) as string[])];
   }
 
   async remove(id: string): Promise<void> {

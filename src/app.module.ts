@@ -25,6 +25,8 @@ import { AreaEstudioModule } from './area-estudio/area-estudio.module';
 import { InstitucionModule } from './institucion/institucion.module';
 import { MessagingModule } from './messaging/messaging.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { ParentsModule } from './parents/parents.module';
+import { CommunicadosModule } from './communicados/communicados.module';
 
 @Module({
   imports: [
@@ -77,6 +79,8 @@ import { NotificationsModule } from './notifications/notifications.module';
     InstitucionModule,
     MessagingModule,
     NotificationsModule,
+    ParentsModule,
+    CommunicadosModule,
   ],
   providers: [
     { provide: APP_INTERCEPTOR, useClass: TransformInterceptor },
