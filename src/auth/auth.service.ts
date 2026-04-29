@@ -6,6 +6,7 @@ import { UsersService } from '../users/users.service';
 import { MailService } from '../mail/mail.service';
 import { Role } from '../users/schemas/user.schema';
 import { RoleConfigService } from '../role-config/role-config.service';
+import { JwtUser } from './interfaces/jwt-user.interface';
 
 const ROLE_PRIORITY: Record<Role, number> = {
   [Role.SuperAdmin]: 0,
@@ -102,7 +103,7 @@ export class AuthService {
     await this.usersService.resetPassword((user._id as unknown as string), newPassword);
   }
 
-  async getMe(user: { id: string; username: string; role: string; name: string }) {
+  async getMe(user: JwtUser): Promise<JwtUser & { sidebarPermissions: string[] }> {
     const sidebarPermissions = await this.roleConfigService.getSidebarPermissions(user.role);
     return { ...user, sidebarPermissions };
   }
