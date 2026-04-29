@@ -1,13 +1,11 @@
 import {
   IsBoolean,
   IsEmail,
-  IsEnum,
   IsNotEmpty,
   IsOptional,
   IsString,
   MinLength,
 } from 'class-validator';
-import { Role } from '../schemas/user.schema';
 
 export class CreateUserDto {
   @IsNotEmpty()
@@ -28,8 +26,8 @@ export class CreateUserDto {
   email: string;
 
   @IsNotEmpty()
-  @IsEnum(Role)
-  role: Role;
+  @IsString()
+  role: string;
 
   @IsOptional()
   @IsString()

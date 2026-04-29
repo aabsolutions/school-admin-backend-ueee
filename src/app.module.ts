@@ -27,6 +27,7 @@ import { MessagingModule } from './messaging/messaging.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { ParentsModule } from './parents/parents.module';
 import { CommunicadosModule } from './communicados/communicados.module';
+import { RoleConfigModule } from './role-config/role-config.module';
 
 @Module({
   imports: [
@@ -81,6 +82,7 @@ import { CommunicadosModule } from './communicados/communicados.module';
     NotificationsModule,
     ParentsModule,
     CommunicadosModule,
+    RoleConfigModule,
   ],
   providers: [
     { provide: APP_INTERCEPTOR, useClass: TransformInterceptor },

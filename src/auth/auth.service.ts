@@ -5,6 +5,7 @@ import * as crypto from 'crypto';
 import { UsersService } from '../users/users.service';
 import { MailService } from '../mail/mail.service';
 import { Role } from '../users/schemas/user.schema';
+import { RoleConfigService } from '../role-config/role-config.service';
 
 const ROLE_PRIORITY: Record<Role, number> = {
   [Role.SuperAdmin]: 0,
@@ -21,6 +22,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly config: ConfigService,
     private readonly mailService: MailService,
+    private readonly roleConfigService: RoleConfigService,
   ) {}
 
   async login(username: string, password: string) {
@@ -41,6 +43,8 @@ export class AuthService {
 
     const accessToken = this.jwtService.sign(payload);
 
+    const sidebarPermissions = await this.roleConfigService.getSidebarPermissions(user.role);
+
     // Shape matches Angular AuthService expectations exactly
     return {
       user: {
@@ -49,8 +53,9 @@ export class AuthService {
         firstName: user.name.split(' ')[0] ?? user.name,
         lastName: user.name.split(' ').slice(1).join(' ') ?? '',
         img: user.avatar,
-        roles: [{ name: user.role, priority: ROLE_PRIORITY[user.role] }],
+        roles: [{ name: user.role, priority: ROLE_PRIORITY[user.role as Role] ?? 10 }],
         permissions: user.permissions,
+        sidebarPermissions,
         token: accessToken,
       },
       token: accessToken,

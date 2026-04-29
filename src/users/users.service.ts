@@ -25,12 +25,12 @@ export class UsersService {
   private readonly RESERVED_ROLES = [Role.Student, Role.Teacher];
 
   async create(dto: CreateUserDto, callerRole: Role): Promise<UserDocument> {
-    if (this.RESERVED_ROLES.includes(dto.role)) {
+    if (this.RESERVED_ROLES.includes(dto.role as Role)) {
       throw new BadRequestException(
         'Los roles STUDENT y TEACHER se asignan automáticamente al dar de alta un estudiante o docente. No se pueden crear desde esta UI.',
       );
     }
-    this.assertCanManageRole(callerRole, dto.role);
+    this.assertCanManageRole(callerRole, dto.role as Role);
     const existing = await this.userModel.findOne({
       $or: [{ username: dto.username }, { email: dto.email }],
     });
@@ -67,13 +67,13 @@ export class UsersService {
     dto: UpdateUserDto,
     callerRole: Role,
   ): Promise<UserDocument> {
-    if (dto.role && this.RESERVED_ROLES.includes(dto.role as Role)) {
+    if (dto.role && this.RESERVED_ROLES.includes(dto.role as unknown as Role)) {
       throw new BadRequestException(
         'No se puede asignar el rol STUDENT o TEACHER manualmente.',
       );
     }
     const target = await this.findOne(id);
-    this.assertCanManageRole(callerRole, target.role);
+    this.assertCanManageRole(callerRole, target.role as Role);
 
     if (dto.password) {
       // Re-save to trigger pre-save hook
@@ -90,21 +90,21 @@ export class UsersService {
 
   async toggleStatus(id: string, callerRole: Role): Promise<UserDocument> {
     const target = await this.findOne(id);
-    this.assertCanManageRole(callerRole, target.role);
+    this.assertCanManageRole(callerRole, target.role as Role);
     target.isActive = !target.isActive;
     return target.save();
   }
 
   async remove(id: string, callerRole: Role): Promise<void> {
     const target = await this.findOne(id);
-    this.assertCanManageRole(callerRole, target.role);
+    this.assertCanManageRole(callerRole, target.role as Role);
     await this.userModel.findByIdAndDelete(id);
   }
 
   async resetPasswordToUsername(id: string, callerRole: Role): Promise<void> {
     const target = await this.userModel.findById(id).select('+password');
     if (!target) throw new NotFoundException('User not found');
-    this.assertCanManageRole(callerRole, target.role);
+    this.assertCanManageRole(callerRole, target.role as Role);
     target.password = target.username;
     await target.save();
   }

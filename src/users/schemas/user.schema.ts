@@ -29,8 +29,8 @@ export class User {
   @Prop({ default: 'assets/images/user/user1.jpg' })
   avatar: string;
 
-  @Prop({ required: true, enum: Role })
-  role: Role;
+  @Prop({ required: true, type: String })
+  role: string;
 
   @Prop({ type: [String], default: [] })
   permissions: string[];
