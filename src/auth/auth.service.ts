@@ -101,4 +101,9 @@ export class AuthService {
 
     await this.usersService.resetPassword((user._id as unknown as string), newPassword);
   }
+
+  async getMe(user: { id: string; username: string; role: string; name: string }) {
+    const sidebarPermissions = await this.roleConfigService.getSidebarPermissions(user.role);
+    return { ...user, sidebarPermissions };
+  }
 }

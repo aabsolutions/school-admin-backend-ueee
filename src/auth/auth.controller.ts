@@ -20,7 +20,7 @@ export class AuthController {
   @Get('me')
   @UseGuards(JwtAuthGuard)
   me(@Request() req) {
-    return req.user;
+    return this.authService.getMe(req.user);
   }
 
   // 3 intentos cada 15 minutos por IP — previene abuso
