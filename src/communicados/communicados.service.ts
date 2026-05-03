@@ -114,6 +114,45 @@ export class CommunicadosService {
     return communicado;
   }
 
+  async createFromAbsence(
+    studentId: string,
+    date: Date,
+    takenByUserId: string,
+  ): Promise<void> {
+    const [student, user] = await Promise.all([
+      this.studentModel.findById(studentId).select('name parentIds').lean(),
+      this.userModel.findById(takenByUserId).select('name').lean(),
+    ]);
+    if (!student || !user) return;
+
+    const parents = await this.parentModel
+      .find({ _id: { $in: student.parentIds ?? [] } })
+      .select('name userId')
+      .lean();
+    if (!parents.length) return;
+
+    const dateStr = date.toLocaleDateString('es-EC', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    });
+
+    await Promise.all(
+      parents.map((parent) =>
+        new this.communicadoModel({
+          teacherUserId: new Types.ObjectId(takenByUserId),
+          teacherName: user.name,
+          studentId: new Types.ObjectId(studentId),
+          studentName: student.name,
+          parentId: parent._id,
+          parentUserId: parent.userId,
+          subject: `Ausencia de ${student.name} — ${dateStr}`,
+          body: `Se comunica que ${student.name} estuvo ausente el día ${dateStr}.`,
+        }).save(),
+      ),
+    );
+  }
+
   async markReceived(id: string, parentUserId: string): Promise<CommunicadoDocument> {
     const communicado = await this.communicadoModel.findById(id);
     if (!communicado) throw new NotFoundException('Comunicado no encontrado');

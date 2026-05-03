@@ -7,7 +7,7 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { Role } from '../users/schemas/user.schema';
 import { ParseObjectIdPipe } from '../common/pipes/parse-object-id.pipe';
-import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
+import { EnrollmentQueryDto } from './dto/enrollment-query.dto';
 import { Types } from 'mongoose';
 
 @Controller('enrollments')
@@ -17,14 +17,7 @@ export class EnrollmentsController {
   constructor(private readonly enrollmentsService: EnrollmentsService) {}
 
   @Get()
-  findAll(
-    @Query()
-    query: PaginationQueryDto & {
-      studentId?: string;
-      cursoLectivoId?: string;
-      status?: string;
-    },
-  ) {
+  findAll(@Query() query: EnrollmentQueryDto) {
     return this.enrollmentsService.findAll(query);
   }
 

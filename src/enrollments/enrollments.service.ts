@@ -33,8 +33,11 @@ export class EnrollmentsService {
     } = query;
 
     const filter: any = {};
-    if (studentId) filter.studentId = studentId;
-    if (cursoLectivoId) filter.cursoLectivoId = cursoLectivoId;
+    if (studentId) filter.studentId = new Types.ObjectId(studentId);
+    if (cursoLectivoId) {
+      const oid = new Types.ObjectId(cursoLectivoId);
+      filter.$or = [{ cursoLectivoId: oid }, { cursoLectivoId: cursoLectivoId }];
+    }
     if (status) filter.status = status;
 
     const [data, total] = await Promise.all([
