@@ -326,6 +326,9 @@ let AsistenciasService = class AsistenciasService {
                     late: {
                         $sum: { $cond: [{ $eq: ['$records.status', 'late'] }, 1, 0] },
                     },
+                    excused: {
+                        $sum: { $cond: [{ $eq: ['$records.status', 'excused'] }, 1, 0] },
+                    },
                     recentRecords: {
                         $push: {
                             date: '$date',
@@ -352,6 +355,7 @@ let AsistenciasService = class AsistenciasService {
                     present: 1,
                     absent: 1,
                     late: 1,
+                    excused: 1,
                     recentRecords: { $slice: ['$recentRecords', -10] },
                 },
             },
