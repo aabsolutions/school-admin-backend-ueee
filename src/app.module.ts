@@ -29,6 +29,7 @@ import { ParentsModule } from './parents/parents.module';
 import { CommunicadosModule } from './communicados/communicados.module';
 import { RoleConfigModule } from './role-config/role-config.module';
 import { AsistenciasModule } from './asistencias/asistencias.module';
+import { TramitologiaModule } from './tramitologia/tramitologia.module';
 
 @Module({
   imports: [
@@ -85,6 +86,7 @@ import { AsistenciasModule } from './asistencias/asistencias.module';
     CommunicadosModule,
     RoleConfigModule,
     AsistenciasModule,
+    TramitologiaModule,
   ],
   providers: [
     { provide: APP_INTERCEPTOR, useClass: TransformInterceptor },

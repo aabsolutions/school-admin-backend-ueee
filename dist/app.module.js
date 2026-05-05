@@ -38,6 +38,7 @@ const parents_module_1 = require("./parents/parents.module");
 const communicados_module_1 = require("./communicados/communicados.module");
 const role_config_module_1 = require("./role-config/role-config.module");
 const asistencias_module_1 = require("./asistencias/asistencias.module");
+const tramitologia_module_1 = require("./tramitologia/tramitologia.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -97,6 +98,7 @@ exports.AppModule = AppModule = __decorate([
             communicados_module_1.CommunicadosModule,
             role_config_module_1.RoleConfigModule,
             asistencias_module_1.AsistenciasModule,
+            tramitologia_module_1.TramitologiaModule,
         ],
         providers: [
             { provide: core_1.APP_INTERCEPTOR, useClass: transform_interceptor_1.TransformInterceptor },

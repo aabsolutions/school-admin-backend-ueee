@@ -1,6 +1,6 @@
 import { Document, Types } from 'mongoose';
 export type NotificationDocument = Notification & Document;
-export type NotificationType = 'message' | 'system' | 'enrollment' | 'expediente' | 'dece' | 'communicado';
+export type NotificationType = 'message' | 'system' | 'enrollment' | 'expediente' | 'dece' | 'communicado' | 'tramitologia';
 export declare class Notification {
     recipient: Types.ObjectId;
     type: NotificationType;

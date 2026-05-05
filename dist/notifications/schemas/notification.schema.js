@@ -20,7 +20,7 @@ __decorate([
     __metadata("design:type", mongoose_2.Types.ObjectId)
 ], Notification.prototype, "recipient", void 0);
 __decorate([
-    (0, mongoose_1.Prop)({ type: String, required: true, enum: ['message', 'system', 'enrollment', 'expediente', 'dece', 'communicado'] }),
+    (0, mongoose_1.Prop)({ type: String, required: true, enum: ['message', 'system', 'enrollment', 'expediente', 'dece', 'communicado', 'tramitologia'] }),
     __metadata("design:type", String)
 ], Notification.prototype, "type", void 0);
 __decorate([
