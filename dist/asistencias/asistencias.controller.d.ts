@@ -24,7 +24,7 @@ export declare class AsistenciasController {
         totalPages: number;
     }>;
     getMyAssignment(user: any): Promise<{
-        students: Types.ObjectId[];
+        students: any[];
         userId: Types.ObjectId;
         cursoLectivoId: Types.ObjectId;
         cursoId: Types.ObjectId;

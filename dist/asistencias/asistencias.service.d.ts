@@ -35,7 +35,7 @@ export declare class AsistenciasService {
     }>;
     deleteAssignment(id: string): Promise<void>;
     getMyAssignment(userId: string): Promise<{
-        students: Types.ObjectId[];
+        students: any[];
         userId: Types.ObjectId;
         cursoLectivoId: Types.ObjectId;
         cursoId: Types.ObjectId;

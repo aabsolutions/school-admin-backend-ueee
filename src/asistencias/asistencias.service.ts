@@ -114,9 +114,13 @@ export class AsistenciasService {
       .populate('studentId', 'name dni')
       .lean();
 
+    const students = enrollments
+      .map((e) => e.studentId as any)
+      .sort((a, b) => (a?.name ?? '').localeCompare(b?.name ?? '', 'es', { sensitivity: 'base' }));
+
     return {
       ...assignment,
-      students: enrollments.map((e) => e.studentId),
+      students,
     };
   }
 

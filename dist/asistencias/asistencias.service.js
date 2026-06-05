@@ -88,9 +88,12 @@ let AsistenciasService = class AsistenciasService {
             .find({ cursoLectivoId: cursoLectivoOid, status: 'enrolled' })
             .populate('studentId', 'name dni')
             .lean();
+        const students = enrollments
+            .map((e) => e.studentId)
+            .sort((a, b) => (a?.name ?? '').localeCompare(b?.name ?? '', 'es', { sensitivity: 'base' }));
         return {
             ...assignment,
-            students: enrollments.map((e) => e.studentId),
+            students,
         };
     }
     async saveAttendance(dto, takenByUserId) {
