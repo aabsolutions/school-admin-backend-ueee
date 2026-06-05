@@ -18,17 +18,25 @@ const mongoose_1 = require("@nestjs/mongoose");
 const mongoose_2 = require("mongoose");
 const tramite_schema_1 = require("../schemas/tramite.schema");
 const tramite_history_schema_1 = require("../schemas/tramite-history.schema");
+const plantilla_schema_1 = require("../schemas/plantilla.schema");
+const institucion_schema_1 = require("../../institucion/schemas/institucion.schema");
 const notifications_service_1 = require("../../notifications/notifications.service");
 const state_machine_1 = require("../constants/state-machine");
+const template_renderer_service_1 = require("./template-renderer.service");
+const variable_resolver_service_1 = require("./variable-resolver.service");
 const TERMINAL_STATES = [tramite_schema_1.TramiteState.Rechazado, tramite_schema_1.TramiteState.Finalizado];
 const TRANSITION_ACTORS = new Set(['TRAMITE_ADMIN', 'TRAMITE_OPERATIVO', 'ADMIN', 'SUPERADMIN']);
 let TramiteWorkflowService = class TramiteWorkflowService {
-    constructor(tramiteModel, historyModel, notifications) {
+    constructor(tramiteModel, historyModel, plantillaModel, institucionModel, notifications, renderer, resolver) {
         this.tramiteModel = tramiteModel;
         this.historyModel = historyModel;
+        this.plantillaModel = plantillaModel;
+        this.institucionModel = institucionModel;
         this.notifications = notifications;
+        this.renderer = renderer;
+        this.resolver = resolver;
     }
-    async transitionState(tramiteId, newState, actor, observation) {
+    async transitionState(tramiteId, newState, actor, observation, respuestaValues, respuestaBodyOverride) {
         const tramite = await this.tramiteModel.findById(tramiteId).exec();
         if (!tramite)
             throw new common_1.NotFoundException(`Trámite ${tramiteId} no encontrado`);
@@ -46,11 +54,49 @@ let TramiteWorkflowService = class TramiteWorkflowService {
         }
         const fromState = tramite.state;
         const isTerminal = TERMINAL_STATES.includes(newState);
-        await this.tramiteModel.findByIdAndUpdate(tramiteId, {
+        const updateFields = {
             state: newState,
             ...(observation ? { lastObservation: observation } : {}),
             ...(isTerminal ? { closedAt: new Date() } : {}),
-        }).exec();
+        };
+        const isResolution = newState === tramite_schema_1.TramiteState.Aprobado || newState === tramite_schema_1.TramiteState.Finalizado;
+        if (isResolution && tramite.plantilla.plantillaRespuestaId) {
+            const plantillaRespuesta = await this.plantillaModel
+                .findById(tramite.plantilla.plantillaRespuestaId)
+                .lean()
+                .exec();
+            if (plantillaRespuesta) {
+                const extraSysVars = await this.resolver.resolve({
+                    estudianteId: tramite.estudianteId,
+                    datosRepresentante: tramite.datosRepresentante,
+                    codigo: tramite.codigo,
+                    cursoNombre: tramite.cursoNombre,
+                }, actor, observation);
+                const effectiveSnapshot = respuestaBodyOverride
+                    ? { ...plantillaRespuesta, bodyHtml: respuestaBodyOverride }
+                    : plantillaRespuesta;
+                const respuestaRenderedHtml = this.renderer.render(effectiveSnapshot, (respuestaValues ?? []), {
+                    fechaActual: extraSysVars['FECHA_ACTUAL'],
+                    usuarioLogueado: actor.name,
+                    idTramite: tramite.codigo,
+                    extraSysVars,
+                });
+                updateFields['respuestaRenderedHtml'] = respuestaRenderedHtml;
+                updateFields['respuestaValues'] = respuestaValues ?? [];
+                if (respuestaBodyOverride) {
+                    updateFields['respuestaBodyOverrideHtml'] = respuestaBodyOverride;
+                }
+                const institucion = await this.institucionModel.findOne().lean().exec();
+                if (institucion?.membrete) {
+                    updateFields['respuestaMembreteUrl'] = institucion.membrete;
+                    updateFields['membreteConfig'] = {
+                        topMm: institucion.membreteContentTopMm ?? 40,
+                        bottomMm: institucion.membreteContentBottomMm ?? 40,
+                    };
+                }
+            }
+        }
+        await this.tramiteModel.findByIdAndUpdate(tramiteId, updateFields).exec();
         await this.historyModel.create({
             tramiteId: new mongoose_2.Types.ObjectId(tramiteId),
             fromState,
@@ -151,8 +197,14 @@ exports.TramiteWorkflowService = TramiteWorkflowService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, mongoose_1.InjectModel)(tramite_schema_1.Tramite.name)),
     __param(1, (0, mongoose_1.InjectModel)(tramite_history_schema_1.TramiteHistory.name)),
+    __param(2, (0, mongoose_1.InjectModel)(plantilla_schema_1.Plantilla.name)),
+    __param(3, (0, mongoose_1.InjectModel)(institucion_schema_1.Institucion.name)),
     __metadata("design:paramtypes", [mongoose_2.Model,
         mongoose_2.Model,
-        notifications_service_1.NotificationsService])
+        mongoose_2.Model,
+        mongoose_2.Model,
+        notifications_service_1.NotificationsService,
+        template_renderer_service_1.TemplateRendererService,
+        variable_resolver_service_1.VariableResolverService])
 ], TramiteWorkflowService);
 //# sourceMappingURL=tramite-workflow.service.js.map

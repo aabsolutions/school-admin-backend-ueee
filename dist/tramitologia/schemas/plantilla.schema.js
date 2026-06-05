@@ -92,6 +92,10 @@ __decorate([
     __metadata("design:type", String)
 ], Plantilla.prototype, "categoria", void 0);
 __decorate([
+    (0, mongoose_1.Prop)({ type: String, enum: ['solicitud', 'respuesta'], default: 'solicitud' }),
+    __metadata("design:type", String)
+], Plantilla.prototype, "tipo", void 0);
+__decorate([
     (0, mongoose_1.Prop)({ type: [String], enum: ['STUDENT', 'TEACHER', 'PARENT'], default: ['STUDENT', 'TEACHER', 'PARENT'] }),
     __metadata("design:type", Array)
 ], Plantilla.prototype, "solicitanteRoles", void 0);
@@ -119,6 +123,10 @@ __decorate([
     (0, mongoose_1.Prop)({ type: mongoose_2.Types.ObjectId, ref: 'User', required: true }),
     __metadata("design:type", mongoose_2.Types.ObjectId)
 ], Plantilla.prototype, "createdBy", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ type: mongoose_2.Types.ObjectId, ref: 'Plantilla' }),
+    __metadata("design:type", mongoose_2.Types.ObjectId)
+], Plantilla.prototype, "plantillaRespuestaId", void 0);
 exports.Plantilla = Plantilla = __decorate([
     (0, mongoose_1.Schema)({ timestamps: true })
 ], Plantilla);

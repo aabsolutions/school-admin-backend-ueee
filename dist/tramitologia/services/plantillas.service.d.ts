@@ -9,7 +9,9 @@ export declare class PlantillasService {
     private readonly varParser;
     constructor(plantillaModel: Model<PlantillaDocument>, varParser: VariableParserService);
     create(dto: CreatePlantillaDto, userId: string): Promise<PlantillaDocument>;
-    findAll(query: PaginationQueryDto): Promise<{
+    findAll(query: PaginationQueryDto & {
+        tipo?: string;
+    }): Promise<{
         data: (Plantilla & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
             _id: Types.ObjectId;
         }> & {
@@ -22,5 +24,6 @@ export declare class PlantillasService {
     findAvailable(userRole: string): Promise<PlantillaDocument[]>;
     findOne(id: string): Promise<PlantillaDocument>;
     update(id: string, dto: UpdatePlantillaDto): Promise<PlantillaDocument>;
+    private validateRespuesta;
     softDelete(id: string): Promise<void>;
 }

@@ -9,4 +9,5 @@ export declare class InstitucionService {
     getInstitucion(): Promise<InstitucionDocument>;
     updateInstitucion(dto: UpdateInstitucionDto): Promise<InstitucionDocument>;
     uploadLogo(file: Express.Multer.File): Promise<InstitucionDocument>;
+    uploadMembrete(file: Express.Multer.File): Promise<InstitucionDocument>;
 }

@@ -3,10 +3,14 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { Tramite, TramiteDocument, TramiteState } from '../schemas/tramite.schema';
+import { Tramite, TramiteDocument, TramiteState, FilledValue } from '../schemas/tramite.schema';
 import { TramiteHistory, TramiteHistoryDocument } from '../schemas/tramite-history.schema';
+import { Plantilla, PlantillaDocument } from '../schemas/plantilla.schema';
+import { Institucion, InstitucionDocument } from '../../institucion/schemas/institucion.schema';
 import { NotificationsService } from '../../notifications/notifications.service';
 import { isValidTransition } from '../constants/state-machine';
+import { TemplateRendererService } from './template-renderer.service';
+import { VariableResolverService } from './variable-resolver.service';
 
 interface Actor {
   id: string;
@@ -22,7 +26,11 @@ export class TramiteWorkflowService {
   constructor(
     @InjectModel(Tramite.name) private readonly tramiteModel: Model<TramiteDocument>,
     @InjectModel(TramiteHistory.name) private readonly historyModel: Model<TramiteHistoryDocument>,
+    @InjectModel(Plantilla.name) private readonly plantillaModel: Model<PlantillaDocument>,
+    @InjectModel(Institucion.name) private readonly institucionModel: Model<InstitucionDocument>,
     private readonly notifications: NotificationsService,
+    private readonly renderer: TemplateRendererService,
+    private readonly resolver: VariableResolverService,
   ) {}
 
   async transitionState(
@@ -30,6 +38,8 @@ export class TramiteWorkflowService {
     newState: TramiteState,
     actor: Actor,
     observation?: string,
+    respuestaValues?: FilledValue[],
+    respuestaBodyOverride?: string,
   ): Promise<TramiteDocument> {
     const tramite = await this.tramiteModel.findById(tramiteId).exec();
     if (!tramite) throw new NotFoundException(`Trámite ${tramiteId} no encontrado`);
@@ -56,11 +66,66 @@ export class TramiteWorkflowService {
     const fromState = tramite.state;
     const isTerminal = TERMINAL_STATES.includes(newState);
 
-    await this.tramiteModel.findByIdAndUpdate(tramiteId, {
+    const updateFields: Record<string, unknown> = {
       state: newState,
       ...(observation ? { lastObservation: observation } : {}),
       ...(isTerminal ? { closedAt: new Date() } : {}),
-    }).exec();
+    };
+
+    const isResolution = newState === TramiteState.Aprobado || newState === TramiteState.Finalizado;
+    if (isResolution && tramite.plantilla.plantillaRespuestaId) {
+      const plantillaRespuesta = await this.plantillaModel
+        .findById(tramite.plantilla.plantillaRespuestaId)
+        .lean()
+        .exec();
+
+      if (plantillaRespuesta) {
+        const extraSysVars = await this.resolver.resolve(
+          {
+            estudianteId: tramite.estudianteId,
+            datosRepresentante: tramite.datosRepresentante as any,
+            codigo: tramite.codigo,
+            cursoNombre: tramite.cursoNombre,
+          },
+          actor,
+          observation,
+        );
+
+        const effectiveSnapshot = respuestaBodyOverride
+          ? { ...plantillaRespuesta, bodyHtml: respuestaBodyOverride }
+          : plantillaRespuesta;
+
+        const respuestaRenderedHtml = this.renderer.render(
+          effectiveSnapshot as any,
+          (respuestaValues ?? []) as any,
+          {
+            fechaActual: extraSysVars['FECHA_ACTUAL'],
+            usuarioLogueado: actor.name,
+            idTramite: tramite.codigo,
+            extraSysVars,
+          },
+        );
+
+        updateFields['respuestaRenderedHtml'] = respuestaRenderedHtml;
+        updateFields['respuestaValues'] = respuestaValues ?? [];
+
+        if (respuestaBodyOverride) {
+          updateFields['respuestaBodyOverrideHtml'] = respuestaBodyOverride;
+        }
+
+        // Snapshot membrete from current institution config
+        const institucion = await this.institucionModel.findOne().lean().exec();
+        if (institucion?.membrete) {
+          updateFields['respuestaMembreteUrl'] = (institucion as any).membrete;
+          updateFields['membreteConfig'] = {
+            topMm: (institucion as any).membreteContentTopMm ?? 40,
+            bottomMm: (institucion as any).membreteContentBottomMm ?? 40,
+          };
+        }
+      }
+    }
+
+    await this.tramiteModel.findByIdAndUpdate(tramiteId, updateFields).exec();
 
     await this.historyModel.create({
       tramiteId: new Types.ObjectId(tramiteId),

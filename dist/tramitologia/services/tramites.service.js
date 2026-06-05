@@ -22,15 +22,17 @@ const plantilla_schema_1 = require("../schemas/plantilla.schema");
 const tramite_workflow_service_1 = require("./tramite-workflow.service");
 const tramite_codigo_service_1 = require("./tramite-codigo.service");
 const template_renderer_service_1 = require("./template-renderer.service");
+const variable_resolver_service_1 = require("./variable-resolver.service");
 const cloudinary_service_1 = require("../../cloudinary/cloudinary.service");
 let TramitesService = class TramitesService {
-    constructor(tramiteModel, historyModel, plantillaModel, workflow, codigoService, renderer, cloudinary) {
+    constructor(tramiteModel, historyModel, plantillaModel, workflow, codigoService, renderer, resolver, cloudinary) {
         this.tramiteModel = tramiteModel;
         this.historyModel = historyModel;
         this.plantillaModel = plantillaModel;
         this.workflow = workflow;
         this.codigoService = codigoService;
         this.renderer = renderer;
+        this.resolver = resolver;
         this.cloudinary = cloudinary;
     }
     async create(dto, user) {
@@ -49,12 +51,20 @@ let TramitesService = class TramitesService {
             bodyHtml: plantilla.bodyHtml,
             variables: plantilla.variables,
             requiredAttachments: plantilla.requiredAttachments,
+            ...(plantilla.plantillaRespuestaId ? { plantillaRespuestaId: plantilla.plantillaRespuestaId } : {}),
         };
         const values = dto.values ?? [];
+        const extraSysVars = await this.resolver.resolve({
+            estudianteId: dto.estudianteId,
+            datosRepresentante: dto.datosRepresentante,
+            codigo,
+            cursoNombre: dto.cursoNombre,
+        }, { name: user.name });
         const renderedHtml = this.renderer.render(snapshot, values, {
-            fechaActual: new Date().toLocaleDateString('es-EC'),
+            fechaActual: extraSysVars['FECHA_ACTUAL'],
             usuarioLogueado: user.name,
             idTramite: codigo,
+            extraSysVars,
         });
         const tramite = await new this.tramiteModel({
             codigo,
@@ -65,6 +75,9 @@ let TramitesService = class TramitesService {
             values,
             renderedHtml,
             state: tramite_schema_1.TramiteState.Pendiente,
+            ...(dto.datosRepresentante ? { datosRepresentante: dto.datosRepresentante } : {}),
+            ...(dto.estudianteId ? { estudianteId: new mongoose_2.Types.ObjectId(dto.estudianteId) } : {}),
+            ...(dto.cursoNombre ? { cursoNombre: dto.cursoNombre } : {}),
         }).save();
         await this.workflow.writeInitialHistory(tramite, { id: user.id, role: user.role, name: user.name });
         await this.workflow.emitCreationNotifications(tramite, dto.operativoUserId);
@@ -161,6 +174,7 @@ exports.TramitesService = TramitesService = __decorate([
         tramite_workflow_service_1.TramiteWorkflowService,
         tramite_codigo_service_1.TramiteCodigoService,
         template_renderer_service_1.TemplateRendererService,
+        variable_resolver_service_1.VariableResolverService,
         cloudinary_service_1.CloudinaryService])
 ], TramitesService);
 //# sourceMappingURL=tramites.service.js.map

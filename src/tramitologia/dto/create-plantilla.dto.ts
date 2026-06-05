@@ -1,6 +1,6 @@
 import {
   IsString, IsOptional, IsBoolean, IsArray, IsIn, ValidateNested, IsEnum,
-  IsNumber, IsNotEmpty, Min, ArrayNotEmpty,
+  IsNumber, IsNotEmpty, Min, ArrayNotEmpty, IsMongoId, ValidateIf,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -27,7 +27,9 @@ export class CreatePlantillaDto {
   @IsString() @IsNotEmpty() nombre: string;
   @IsOptional() @IsString() descripcion?: string;
   @IsString() @IsNotEmpty() categoria: string;
+  @IsOptional() @IsEnum(['solicitud', 'respuesta']) tipo?: string;
 
+  @ValidateIf((o) => o.tipo !== 'respuesta')
   @IsOptional()
   @IsArray()
   @ArrayNotEmpty()
@@ -47,4 +49,8 @@ export class CreatePlantillaDto {
   @ValidateNested({ each: true })
   @Type(() => RequiredAttachmentDto)
   requiredAttachments?: RequiredAttachmentDto[];
+
+  @IsOptional()
+  @IsMongoId()
+  plantillaRespuestaId?: string | null;
 }

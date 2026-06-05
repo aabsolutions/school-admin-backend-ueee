@@ -19,8 +19,10 @@ export declare class CreatePlantillaDto {
     nombre: string;
     descripcion?: string;
     categoria: string;
+    tipo?: string;
     solicitanteRoles?: string[];
     bodyHtml: string;
     variables?: VariableConfigDto[];
     requiredAttachments?: RequiredAttachmentDto[];
+    plantillaRespuestaId?: string | null;
 }

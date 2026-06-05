@@ -34,6 +34,9 @@ let InstitucionController = class InstitucionController {
     uploadLogo(file) {
         return this.service.uploadLogo(file);
     }
+    uploadMembrete(file) {
+        return this.service.uploadMembrete(file);
+    }
 };
 exports.InstitucionController = InstitucionController;
 __decorate([
@@ -66,6 +69,21 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], InstitucionController.prototype, "uploadLogo", null);
+__decorate([
+    (0, common_1.Post)('membrete'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)(user_schema_1.Role.SuperAdmin),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file', { limits: { fileSize: 8 * 1024 * 1024 } })),
+    __param(0, (0, common_1.UploadedFile)(new common_1.ParseFilePipe({
+        validators: [
+            new common_1.MaxFileSizeValidator({ maxSize: 8 * 1024 * 1024 }),
+            new common_1.FileTypeValidator({ fileType: /^image\/(jpeg|png)$/ }),
+        ],
+    }))),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], InstitucionController.prototype, "uploadMembrete", null);
 exports.InstitucionController = InstitucionController = __decorate([
     (0, common_1.Controller)('institucion'),
     __metadata("design:paramtypes", [institucion_service_1.InstitucionService])

@@ -8,6 +8,7 @@ import { Model, Types } from 'mongoose';
 import { Parent, ParentDocument } from './schemas/parent.schema';
 import { Student, StudentDocument } from '../students/schemas/student.schema';
 import { User, UserDocument, Role } from '../users/schemas/user.schema';
+import { Enrollment, EnrollmentDocument } from '../enrollments/schemas/enrollment.schema';
 import { CreateParentDto } from './dto/create-parent.dto';
 import { UpdateParentDto } from './dto/update-parent.dto';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
@@ -21,6 +22,8 @@ export class ParentsService {
     private readonly studentModel: Model<StudentDocument>,
     @InjectModel(User.name)
     private readonly userModel: Model<UserDocument>,
+    @InjectModel(Enrollment.name)
+    private readonly enrollmentModel: Model<EnrollmentDocument>,
   ) {}
 
   async create(dto: CreateParentDto): Promise<ParentDocument> {
@@ -165,6 +168,75 @@ export class ParentsService {
     }
 
     return students;
+  }
+
+  async getHijosActivos(parentUserId: string): Promise<Array<{ student: any; cursoNombre: string; academicYear: string }>> {
+    const parent = await this.parentModel
+      .findOne({ userId: new Types.ObjectId(parentUserId) })
+      .lean();
+    if (!parent) throw new NotFoundException('Perfil de padre no encontrado');
+
+    const parentOid = parent._id as Types.ObjectId;
+    const students = await this.studentModel
+      .find({
+        $or: [
+          { _id: { $in: parent.studentIds ?? [] } },
+          { fatherId: parentOid },
+          { motherId: parentOid },
+          { guardianId: parentOid },
+        ],
+      })
+      .select('name email dni img gender status')
+      .lean();
+
+    if (!students.length) return [];
+
+    const studentIds = students.map((s) => s._id as Types.ObjectId);
+
+    const enrollments = await this.enrollmentModel.aggregate([
+      { $match: { studentId: { $in: studentIds }, status: 'enrolled' } },
+      {
+        $lookup: {
+          from: 'cursolectivos',
+          localField: 'cursoLectivoId',
+          foreignField: '_id',
+          as: 'cursoLectivo',
+        },
+      },
+      { $unwind: '$cursoLectivo' },
+      { $match: { 'cursoLectivo.status': 'active' } },
+      {
+        $lookup: {
+          from: 'cursos',
+          localField: 'cursoLectivo.cursoId',
+          foreignField: '_id',
+          as: 'curso',
+        },
+      },
+      { $unwind: '$curso' },
+      {
+        $project: {
+          studentId: 1,
+          academicYear: '$cursoLectivo.academicYear',
+          cursoNombre: {
+            $concat: ['$curso.nivel', ' ', '$curso.paralelo', ' ', '$curso.jornada'],
+          },
+        },
+      },
+    ]);
+
+    const enrollmentMap = new Map(
+      enrollments.map((e) => [e.studentId.toString(), { cursoNombre: e.cursoNombre, academicYear: e.academicYear }]),
+    );
+
+    return students.map((student) => {
+      const enrollment = enrollmentMap.get((student._id as Types.ObjectId).toString());
+      return {
+        student,
+        cursoNombre: enrollment?.cursoNombre ?? '',
+        academicYear: enrollment?.academicYear ?? '',
+      };
+    });
   }
 
   async update(id: string, dto: UpdateParentDto): Promise<ParentDocument> {

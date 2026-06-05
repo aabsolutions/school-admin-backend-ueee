@@ -17,6 +17,7 @@ const common_1 = require("@nestjs/common");
 const platform_express_1 = require("@nestjs/platform-express");
 const students_service_1 = require("./students.service");
 const create_student_dto_1 = require("./dto/create-student.dto");
+const bulk_create_student_dto_1 = require("./dto/bulk-create-student.dto");
 const update_student_dto_1 = require("./dto/update-student.dto");
 const update_medical_info_dto_1 = require("./dto/update-medical-info.dto");
 const update_family_info_dto_1 = require("./dto/update-family-info.dto");
@@ -50,6 +51,9 @@ let StudentsController = class StudentsController {
     }
     findAll(query) {
         return this.studentsService.findAll(query);
+    }
+    bulkCreate(dto) {
+        return this.studentsService.bulkCreate(dto.records);
     }
     findOne(id) {
         return this.studentsService.findOne(id.toString());
@@ -128,6 +132,13 @@ __decorate([
     __metadata("design:paramtypes", [pagination_query_dto_1.PaginationQueryDto]),
     __metadata("design:returntype", void 0)
 ], StudentsController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Post)('bulk'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [bulk_create_student_dto_1.BulkCreateStudentDto]),
+    __metadata("design:returntype", void 0)
+], StudentsController.prototype, "bulkCreate", null);
 __decorate([
     (0, common_1.Get)(':id'),
     __param(0, (0, common_1.Param)('id', parse_object_id_pipe_1.ParseObjectIdPipe)),

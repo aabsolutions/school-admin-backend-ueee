@@ -1,4 +1,4 @@
-import { IsEmail, IsMongoId, IsOptional, IsString, Matches } from 'class-validator';
+import { IsEmail, IsMongoId, IsNumber, IsOptional, IsString, Matches, Max, Min } from 'class-validator';
 
 export class UpdateInstitucionDto {
   @IsOptional() @IsString() nombre?: string;
@@ -12,4 +12,7 @@ export class UpdateInstitucionDto {
   @IsOptional() @IsMongoId() autoridad?: string;
   @IsOptional() @IsString() @Matches(/^\d{4}-\d{4}$/, { message: 'periodoLectivoFuncional debe tener el formato YYYY-YYYY' })
   periodoLectivoFuncional?: string;
+  @IsOptional() @IsString() membrete?: string;
+  @IsOptional() @IsNumber() @Min(0) @Max(120) membreteContentTopMm?: number;
+  @IsOptional() @IsNumber() @Min(0) @Max(120) membreteContentBottomMm?: number;
 }

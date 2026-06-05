@@ -2,6 +2,7 @@ import { Model, Types } from 'mongoose';
 import { Teacher, TeacherDocument } from './schemas/teacher.schema';
 import { UserDocument } from '../users/schemas/user.schema';
 import { CreateTeacherDto } from './dto/create-teacher.dto';
+import { BulkTeacherItemDto } from './dto/bulk-create-teacher.dto';
 import { UpdateTeacherDto } from './dto/update-teacher.dto';
 import { UpdateTeacherMedicalInfoDto } from './dto/update-medical-info.dto';
 import { UpdateTeacherFamilyInfoDto } from './dto/update-family-info.dto';
@@ -49,5 +50,6 @@ export declare class TeachersService {
     } & {
         id: string;
     })[]>;
+    bulkCreate(records: BulkTeacherItemDto[]): Promise<any>;
     uploadPhoto(id: string, file: Express.Multer.File, type: 'credencial' | 'cuerpo', peso?: number, talla?: number): Promise<TeacherDocument>;
 }

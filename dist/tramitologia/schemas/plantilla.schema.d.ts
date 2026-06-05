@@ -22,6 +22,7 @@ export declare class Plantilla {
     nombre: string;
     descripcion: string;
     categoria: string;
+    tipo: string;
     solicitanteRoles: string[];
     bodyHtml: string;
     variables: VariableConfig[];
@@ -29,6 +30,7 @@ export declare class Plantilla {
     isActive: boolean;
     version: number;
     createdBy: Types.ObjectId;
+    plantillaRespuestaId?: Types.ObjectId;
 }
 export declare const VariableConfigSchema: import("mongoose").Schema<VariableConfig, import("mongoose").Model<VariableConfig, any, any, any, any, any, VariableConfig>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, VariableConfig, Document<unknown, {}, VariableConfig, {
     id: string;
@@ -203,6 +205,15 @@ export declare const PlantillaSchema: import("mongoose").Schema<Plantilla, impor
     }, "id"> & {
         id: string;
     }>;
+    tipo?: import("mongoose").SchemaDefinitionProperty<string, Plantilla, Document<unknown, {}, Plantilla, {
+        id: string;
+    }, import("mongoose").DefaultSchemaOptions> & Omit<Plantilla & {
+        _id: Types.ObjectId;
+    } & {
+        __v: number;
+    }, "id"> & {
+        id: string;
+    }>;
     solicitanteRoles?: import("mongoose").SchemaDefinitionProperty<string[], Plantilla, Document<unknown, {}, Plantilla, {
         id: string;
     }, import("mongoose").DefaultSchemaOptions> & Omit<Plantilla & {
@@ -258,6 +269,15 @@ export declare const PlantillaSchema: import("mongoose").Schema<Plantilla, impor
         id: string;
     }>;
     createdBy?: import("mongoose").SchemaDefinitionProperty<Types.ObjectId, Plantilla, Document<unknown, {}, Plantilla, {
+        id: string;
+    }, import("mongoose").DefaultSchemaOptions> & Omit<Plantilla & {
+        _id: Types.ObjectId;
+    } & {
+        __v: number;
+    }, "id"> & {
+        id: string;
+    }>;
+    plantillaRespuestaId?: import("mongoose").SchemaDefinitionProperty<Types.ObjectId, Plantilla, Document<unknown, {}, Plantilla, {
         id: string;
     }, import("mongoose").DefaultSchemaOptions> & Omit<Plantilla & {
         _id: Types.ObjectId;

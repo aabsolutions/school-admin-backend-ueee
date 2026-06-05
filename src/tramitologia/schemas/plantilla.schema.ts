@@ -61,6 +61,9 @@ export class Plantilla {
   @Prop({ required: true, trim: true })
   categoria: string;
 
+  @Prop({ type: String, enum: ['solicitud', 'respuesta'], default: 'solicitud' })
+  tipo: string;
+
   @Prop({ type: [String], enum: ['STUDENT', 'TEACHER', 'PARENT'], default: ['STUDENT', 'TEACHER', 'PARENT'] })
   solicitanteRoles: string[];
 
@@ -81,6 +84,9 @@ export class Plantilla {
 
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   createdBy: Types.ObjectId;
+
+  @Prop({ type: Types.ObjectId, ref: 'Plantilla' })
+  plantillaRespuestaId?: Types.ObjectId;
 }
 
 export const VariableConfigSchema = SchemaFactory.createForClass(VariableConfig);

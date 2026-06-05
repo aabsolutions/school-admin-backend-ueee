@@ -11,6 +11,7 @@ import { TramiteQueryDto } from '../dto/tramite-query.dto';
 import { TramiteWorkflowService } from './tramite-workflow.service';
 import { TramiteCodigoService } from './tramite-codigo.service';
 import { TemplateRendererService } from './template-renderer.service';
+import { VariableResolverService } from './variable-resolver.service';
 import { CloudinaryService } from '../../cloudinary/cloudinary.service';
 
 interface UserContext {
@@ -29,6 +30,7 @@ export class TramitesService {
     private readonly workflow: TramiteWorkflowService,
     private readonly codigoService: TramiteCodigoService,
     private readonly renderer: TemplateRendererService,
+    private readonly resolver: VariableResolverService,
     private readonly cloudinary: CloudinaryService,
   ) {}
 
@@ -51,13 +53,24 @@ export class TramitesService {
       bodyHtml: plantilla.bodyHtml,
       variables: plantilla.variables,
       requiredAttachments: plantilla.requiredAttachments,
+      ...(plantilla.plantillaRespuestaId ? { plantillaRespuestaId: plantilla.plantillaRespuestaId } : {}),
     };
 
     const values = dto.values ?? [];
+    const extraSysVars = await this.resolver.resolve(
+      {
+        estudianteId: dto.estudianteId,
+        datosRepresentante: dto.datosRepresentante as any,
+        codigo,
+        cursoNombre: dto.cursoNombre,
+      },
+      { name: user.name },
+    );
     const renderedHtml = this.renderer.render(snapshot as any, values as any, {
-      fechaActual: new Date().toLocaleDateString('es-EC'),
+      fechaActual: extraSysVars['FECHA_ACTUAL'],
       usuarioLogueado: user.name,
       idTramite: codigo,
+      extraSysVars,
     });
 
     const tramite = await new this.tramiteModel({
@@ -69,6 +82,9 @@ export class TramitesService {
       values,
       renderedHtml,
       state: TramiteState.Pendiente,
+      ...(dto.datosRepresentante ? { datosRepresentante: dto.datosRepresentante } : {}),
+      ...(dto.estudianteId ? { estudianteId: new Types.ObjectId(dto.estudianteId) } : {}),
+      ...(dto.cursoNombre ? { cursoNombre: dto.cursoNombre } : {}),
     }).save();
 
     await this.workflow.writeInitialHistory(tramite, { id: user.id, role: user.role, name: user.name });

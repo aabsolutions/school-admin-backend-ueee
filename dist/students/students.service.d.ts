@@ -3,6 +3,7 @@ import { Student, StudentDocument } from './schemas/student.schema';
 import { UserDocument } from '../users/schemas/user.schema';
 import { ParentDocument } from '../parents/schemas/parent.schema';
 import { CreateStudentDto } from './dto/create-student.dto';
+import { BulkStudentItemDto, BulkImportResult } from './dto/bulk-create-student.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
 import { UpdateStudentMedicalInfoDto } from './dto/update-medical-info.dto';
 import { UpdateStudentFamilyInfoDto } from './dto/update-family-info.dto';
@@ -56,5 +57,6 @@ export declare class StudentsService {
     } & {
         id: string;
     })[]>;
+    bulkCreate(records: BulkStudentItemDto[]): Promise<BulkImportResult>;
     uploadPhoto(id: string, file: Express.Multer.File, type: 'credencial' | 'cuerpo', peso?: number, talla?: number): Promise<StudentDocument>;
 }

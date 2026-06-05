@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.TramiteSchema = exports.Tramite = exports.TramiteAttachment = exports.FilledValue = exports.PlantillaSnapshot = exports.TramiteState = void 0;
+exports.TramiteSchema = exports.DatosRepresentanteSchema = exports.Tramite = exports.TramiteAttachment = exports.FilledValue = exports.DatosRepresentante = exports.PlantillaSnapshot = exports.TramiteState = void 0;
 const mongoose_1 = require("@nestjs/mongoose");
 const mongoose_2 = require("mongoose");
 const plantilla_schema_1 = require("./plantilla.schema");
@@ -48,9 +48,31 @@ __decorate([
     (0, mongoose_1.Prop)({ type: [plantilla_schema_1.RequiredAttachment], default: [] }),
     __metadata("design:type", Array)
 ], PlantillaSnapshot.prototype, "requiredAttachments", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ type: mongoose_2.Types.ObjectId }),
+    __metadata("design:type", mongoose_2.Types.ObjectId)
+], PlantillaSnapshot.prototype, "plantillaRespuestaId", void 0);
 exports.PlantillaSnapshot = PlantillaSnapshot = __decorate([
     (0, mongoose_1.Schema)({ _id: false })
 ], PlantillaSnapshot);
+let DatosRepresentante = class DatosRepresentante {
+};
+exports.DatosRepresentante = DatosRepresentante;
+__decorate([
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", String)
+], DatosRepresentante.prototype, "nombre", void 0);
+__decorate([
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", String)
+], DatosRepresentante.prototype, "dni", void 0);
+__decorate([
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", String)
+], DatosRepresentante.prototype, "contacto", void 0);
+exports.DatosRepresentante = DatosRepresentante = __decorate([
+    (0, mongoose_1.Schema)({ _id: false })
+], DatosRepresentante);
 let FilledValue = class FilledValue {
 };
 exports.FilledValue = FilledValue;
@@ -146,9 +168,46 @@ __decorate([
     (0, mongoose_1.Prop)({ type: Date }),
     __metadata("design:type", Date)
 ], Tramite.prototype, "closedAt", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ type: DatosRepresentante }),
+    __metadata("design:type", DatosRepresentante)
+], Tramite.prototype, "datosRepresentante", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ type: mongoose_2.Types.ObjectId, ref: 'Student' }),
+    __metadata("design:type", mongoose_2.Types.ObjectId)
+], Tramite.prototype, "estudianteId", void 0);
+__decorate([
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", String)
+], Tramite.prototype, "cursoNombre", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ type: [FilledValue], default: [] }),
+    __metadata("design:type", Array)
+], Tramite.prototype, "respuestaValues", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ default: '' }),
+    __metadata("design:type", String)
+], Tramite.prototype, "respuestaRenderedHtml", void 0);
+__decorate([
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", String)
+], Tramite.prototype, "solicitudMembreteUrl", void 0);
+__decorate([
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", String)
+], Tramite.prototype, "respuestaMembreteUrl", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ type: Object }),
+    __metadata("design:type", Object)
+], Tramite.prototype, "membreteConfig", void 0);
+__decorate([
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", String)
+], Tramite.prototype, "respuestaBodyOverrideHtml", void 0);
 exports.Tramite = Tramite = __decorate([
     (0, mongoose_1.Schema)({ timestamps: true })
 ], Tramite);
+exports.DatosRepresentanteSchema = mongoose_1.SchemaFactory.createForClass(DatosRepresentante);
 exports.TramiteSchema = mongoose_1.SchemaFactory.createForClass(Tramite);
 exports.TramiteSchema.index({ state: 1, createdAt: -1 });
 exports.TramiteSchema.index({ operativoUserId: 1, state: 1 });

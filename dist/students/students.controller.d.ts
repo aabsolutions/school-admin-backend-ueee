@@ -1,5 +1,6 @@
 import { StudentsService } from './students.service';
 import { CreateStudentDto } from './dto/create-student.dto';
+import { BulkCreateStudentDto } from './dto/bulk-create-student.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
 import { UpdateStudentMedicalInfoDto } from './dto/update-medical-info.dto';
 import { UpdateStudentFamilyInfoDto } from './dto/update-family-info.dto';
@@ -33,6 +34,7 @@ export declare class StudentsController {
         limit: number;
         totalPages: number;
     }>;
+    bulkCreate(dto: BulkCreateStudentDto): Promise<import("./dto/bulk-create-student.dto").BulkImportResult>;
     findOne(id: Types.ObjectId): Promise<import("./schemas/student.schema").StudentDocument>;
     create(dto: CreateStudentDto): Promise<import("./schemas/student.schema").StudentDocument>;
     update(id: Types.ObjectId, dto: UpdateStudentDto): Promise<import("./schemas/student.schema").StudentDocument>;

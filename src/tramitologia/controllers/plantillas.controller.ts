@@ -13,7 +13,7 @@ import { VariableParserService } from '../services/variable-parser.service';
 import { CreatePlantillaDto } from '../dto/create-plantilla.dto';
 import { UpdatePlantillaDto } from '../dto/update-plantilla.dto';
 import { ParseVariablesDto } from '../dto/parse-variables.dto';
-import { PaginationQueryDto } from '../../common/dto/pagination-query.dto';
+import { PlantillaQueryDto } from '../dto/plantilla-query.dto';
 
 @Controller('plantillas')
 @UseGuards(JwtAuthGuard, RolesGuard, TramiteRoleGuard)
@@ -32,7 +32,7 @@ export class PlantillasController {
 
   @Get()
   @RequireTramiteRole('TRAMITE_ADMIN', 'TRAMITE_VERIFICADOR')
-  findAll(@Query() query: PaginationQueryDto) {
+  findAll(@Query() query: PlantillaQueryDto) {
     return this.plantillasService.findAll(query);
   }
 

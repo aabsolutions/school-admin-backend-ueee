@@ -46,6 +46,13 @@ let InstitucionService = class InstitucionService {
             .populate('autoridad', 'name email')
             .exec();
     }
+    async uploadMembrete(file) {
+        const url = await this.cloudinaryService.uploadBuffer(file.buffer, 'institucion/membrete');
+        return this.model
+            .findOneAndUpdate({}, { $set: { membrete: url } }, { upsert: true, new: true })
+            .populate('autoridad', 'name email')
+            .exec();
+    }
 };
 exports.InstitucionService = InstitucionService;
 exports.InstitucionService = InstitucionService = __decorate([

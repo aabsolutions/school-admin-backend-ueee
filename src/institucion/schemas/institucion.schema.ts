@@ -16,6 +16,9 @@ export class Institucion {
   @Prop({ type: Types.ObjectId, ref: 'Teacher' }) autoridad: Types.ObjectId;
   @Prop() logotipo: string;
   @Prop({ trim: true }) periodoLectivoFuncional: string;
+  @Prop() membrete: string;
+  @Prop({ type: Number, default: 40 }) membreteContentTopMm: number;
+  @Prop({ type: Number, default: 40 }) membreteContentBottomMm: number;
 }
 
 export const InstitucionSchema = SchemaFactory.createForClass(Institucion);

@@ -1,5 +1,6 @@
 import { TeachersService } from './teachers.service';
 import { CreateTeacherDto } from './dto/create-teacher.dto';
+import { BulkCreateTeacherDto } from './dto/bulk-create-teacher.dto';
 import { UpdateTeacherDto } from './dto/update-teacher.dto';
 import { UpdateTeacherMedicalInfoDto } from './dto/update-medical-info.dto';
 import { UpdateTeacherFamilyInfoDto } from './dto/update-family-info.dto';
@@ -33,6 +34,7 @@ export declare class TeachersController {
         limit: number;
         totalPages: number;
     }>;
+    bulkCreate(dto: BulkCreateTeacherDto): Promise<any>;
     findOne(id: Types.ObjectId): Promise<import("./schemas/teacher.schema").TeacherDocument>;
     create(dto: CreateTeacherDto): Promise<import("./schemas/teacher.schema").TeacherDocument>;
     update(id: Types.ObjectId, dto: UpdateTeacherDto): Promise<import("./schemas/teacher.schema").TeacherDocument>;

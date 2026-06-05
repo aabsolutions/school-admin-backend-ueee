@@ -213,6 +213,22 @@ let StudentsService = StudentsService_1 = class StudentsService {
             match['familyInfo.numberOfSiblings'] = Number(filters.numberOfSiblings);
         return this.studentModel.find(match).select('name dni mobile address gender birthdate status medicalInfo familyInfo parentGuardianName parentGuardianMobile').sort({ name: 1 }).exec();
     }
+    async bulkCreate(records) {
+        const created = [];
+        const failed = [];
+        for (let i = 0; i < records.length; i++) {
+            try {
+                const record = records[i];
+                const email = record.email?.trim() || `${record.dni.replace(/\s/g, '')}@escuela.local`;
+                const student = await this.create({ ...record, email });
+                created.push(student);
+            }
+            catch (e) {
+                failed.push({ row: i + 2, data: records[i], error: e.message ?? 'Error desconocido' });
+            }
+        }
+        return { total: records.length, successCount: created.length, failureCount: failed.length, created, failed };
+    }
     async uploadPhoto(id, file, type, peso, talla) {
         const folder = type === 'credencial' ? 'students/credencial' : 'students/cuerpo';
         const url = await this.cloudinaryService.uploadBuffer(file.buffer, folder);

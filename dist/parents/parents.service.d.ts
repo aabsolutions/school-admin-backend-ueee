@@ -2,6 +2,7 @@ import { Model, Types } from 'mongoose';
 import { Parent, ParentDocument } from './schemas/parent.schema';
 import { Student, StudentDocument } from '../students/schemas/student.schema';
 import { UserDocument } from '../users/schemas/user.schema';
+import { EnrollmentDocument } from '../enrollments/schemas/enrollment.schema';
 import { CreateParentDto } from './dto/create-parent.dto';
 import { UpdateParentDto } from './dto/update-parent.dto';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
@@ -9,7 +10,8 @@ export declare class ParentsService {
     private readonly parentModel;
     private readonly studentModel;
     private readonly userModel;
-    constructor(parentModel: Model<ParentDocument>, studentModel: Model<StudentDocument>, userModel: Model<UserDocument>);
+    private readonly enrollmentModel;
+    constructor(parentModel: Model<ParentDocument>, studentModel: Model<StudentDocument>, userModel: Model<UserDocument>, enrollmentModel: Model<EnrollmentDocument>);
     create(dto: CreateParentDto): Promise<ParentDocument>;
     findAll(query: PaginationQueryDto): Promise<{
         data: (import("mongoose").Document<unknown, {}, ParentDocument, {}, import("mongoose").DefaultSchemaOptions> & Parent & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
@@ -36,6 +38,11 @@ export declare class ParentsService {
     }> & {
         __v: number;
     })[]>;
+    getHijosActivos(parentUserId: string): Promise<Array<{
+        student: any;
+        cursoNombre: string;
+        academicYear: string;
+    }>>;
     update(id: string, dto: UpdateParentDto): Promise<ParentDocument>;
     linkStudents(parentId: string, studentIds: string[]): Promise<ParentDocument>;
     unlinkStudent(parentId: string, studentId: string): Promise<ParentDocument>;

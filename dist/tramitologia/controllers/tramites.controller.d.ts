@@ -51,5 +51,6 @@ export declare class TramitesController {
         __v: number;
     })[]>;
     getPdf(id: string, req: any, res: ExpressResponse): Promise<void>;
+    getPdfRespuesta(id: string, req: any, res: ExpressResponse): Promise<void>;
     transition(id: string, dto: TransitionTramiteDto, req: any): Promise<import("../schemas/tramite.schema").TramiteDocument>;
 }

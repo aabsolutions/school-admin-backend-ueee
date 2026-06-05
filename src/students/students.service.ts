@@ -6,6 +6,7 @@ import { User, UserDocument } from '../users/schemas/user.schema';
 import { Role } from '../users/schemas/user.schema';
 import { Parent, ParentDocument } from '../parents/schemas/parent.schema';
 import { CreateStudentDto } from './dto/create-student.dto';
+import { BulkStudentItemDto, BulkImportResult } from './dto/bulk-create-student.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
 import { UpdateStudentMedicalInfoDto } from './dto/update-medical-info.dto';
 import { UpdateStudentFamilyInfoDto } from './dto/update-family-info.dto';
@@ -250,6 +251,22 @@ export class StudentsService {
     return this.studentModel.find(match).select(
       'name dni mobile address gender birthdate status medicalInfo familyInfo parentGuardianName parentGuardianMobile'
     ).sort({ name: 1 }).exec();
+  }
+
+  async bulkCreate(records: BulkStudentItemDto[]): Promise<BulkImportResult> {
+    const created: any[] = [];
+    const failed: { row: number; data: any; error: string }[] = [];
+    for (let i = 0; i < records.length; i++) {
+      try {
+        const record = records[i];
+        const email = record.email?.trim() || `${record.dni.replace(/\s/g, '')}@escuela.local`;
+        const student = await this.create({ ...record, email } as CreateStudentDto);
+        created.push(student);
+      } catch (e: any) {
+        failed.push({ row: i + 2, data: records[i], error: e.message ?? 'Error desconocido' });
+      }
+    }
+    return { total: records.length, successCount: created.length, failureCount: failed.length, created, failed };
   }
 
   async uploadPhoto(

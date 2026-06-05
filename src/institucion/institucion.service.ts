@@ -38,4 +38,12 @@ export class InstitucionService {
       .populate('autoridad', 'name email')
       .exec();
   }
+
+  async uploadMembrete(file: Express.Multer.File): Promise<InstitucionDocument> {
+    const url = await this.cloudinaryService.uploadBuffer(file.buffer, 'institucion/membrete');
+    return this.model
+      .findOneAndUpdate({}, { $set: { membrete: url } }, { upsert: true, new: true })
+      .populate('autoridad', 'name email')
+      .exec();
+  }
 }

@@ -10,7 +10,8 @@ exports.TemplateRendererService = void 0;
 const common_1 = require("@nestjs/common");
 const sanitizeHtml = require("sanitize-html");
 const ALLOWED_TAGS = [
-    'p', 'br', 'strong', 'em', 'u', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+    'p', 'br', 'strong', 'em', 'u', 's', 'sub', 'sup', 'hr',
+    'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
     'ul', 'ol', 'li', 'table', 'thead', 'tbody', 'tr', 'td', 'th',
     'blockquote', 'pre', 'code', 'a', 'img', 'span', 'div',
 ];
@@ -22,8 +23,9 @@ const ALLOWED_ATTRIBUTES = {
 const ALLOWED_STYLES = {
     '*': {
         'text-align': [/^(left|right|center|justify)$/],
-        color: [/^#[0-9a-fA-F]{3,6}$/, /^rgb\(/],
-        'background-color': [/^#[0-9a-fA-F]{3,6}$/, /^rgb\(/],
+        color: [/^#[0-9a-fA-F]{3,6}$/, /^rgb\(/, /^rgba\(/],
+        'background-color': [/^#[0-9a-fA-F]{3,6}$/, /^rgb\(/, /^rgba\(/],
+        'padding-left': [/^\d+(\.\d+)?(px|em|rem)$/],
     },
 };
 let TemplateRendererService = class TemplateRendererService {
@@ -33,6 +35,7 @@ let TemplateRendererService = class TemplateRendererService {
             FECHA_ACTUAL: ctx.fechaActual,
             USUARIO_LOGUEADO: ctx.usuarioLogueado,
             ID_TRAMITE: ctx.idTramite,
+            ...ctx.extraSysVars,
         };
         let html = snapshot.bodyHtml;
         html = html.replace(/\[([A-Z][A-Z0-9_]{0,49})\]/g, (_match, key) => {
@@ -46,6 +49,8 @@ let TemplateRendererService = class TemplateRendererService {
             allowedTags: ALLOWED_TAGS,
             allowedAttributes: ALLOWED_ATTRIBUTES,
             allowedStyles: ALLOWED_STYLES,
+            allowedSchemes: ['http', 'https', 'data'],
+            nonTextTags: ['style', 'script', 'textarea', 'option', 'noscript'],
         });
     }
 };

@@ -112,9 +112,38 @@ export class TramitesController {
     if (!this.tramitesService.canAccess(tramite, user)) {
       throw new BadRequestException('Sin acceso a este trámite');
     }
-    const buffer = await this.pdfService.generatePdf(tramite.renderedHtml);
+    const buffer = await this.pdfService.generatePdf(tramite.renderedHtml, {
+      membreteUrl: tramite.solicitudMembreteUrl,
+      topMm: tramite.membreteConfig?.topMm,
+      bottomMm: tramite.membreteConfig?.bottomMm,
+    });
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="${tramite.codigo}.pdf"`);
+    res.send(buffer);
+  }
+
+  @Get(':id/pdf-respuesta')
+  @SkipTransform()
+  async getPdfRespuesta(
+    @Param('id') id: string,
+    @Request() req: any,
+    @Response() res: ExpressResponse,
+  ) {
+    const tramite = await this.tramitesService.findById(id);
+    const user = { id: req.user.id, role: req.user.role, name: req.user.name, username: req.user.username };
+    if (!this.tramitesService.canAccess(tramite, user)) {
+      throw new BadRequestException('Sin acceso a este trámite');
+    }
+    if (!tramite.respuestaRenderedHtml) {
+      throw new BadRequestException('Este trámite aún no tiene respuesta generada');
+    }
+    const buffer = await this.pdfService.generatePdf(tramite.respuestaRenderedHtml, {
+      membreteUrl: tramite.respuestaMembreteUrl,
+      topMm: tramite.membreteConfig?.topMm,
+      bottomMm: tramite.membreteConfig?.bottomMm,
+    });
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="respuesta-${tramite.codigo}.pdf"`);
     res.send(buffer);
   }
 
@@ -125,10 +154,13 @@ export class TramitesController {
     @Body() dto: TransitionTramiteDto,
     @Request() req: any,
   ) {
-    return this.workflowService.transitionState(id, dto.newState, {
-      id: req.user.id,
-      role: req.user.role,
-      name: req.user.name,
-    }, dto.observation);
+    return this.workflowService.transitionState(
+      id,
+      dto.newState,
+      { id: req.user.id, role: req.user.role, name: req.user.name },
+      dto.observation,
+      dto.respuestaValues as any,
+      dto.respuestaBodyOverride,
+    );
   }
 }

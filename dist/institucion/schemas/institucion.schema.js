@@ -59,6 +59,18 @@ __decorate([
     (0, mongoose_1.Prop)({ trim: true }),
     __metadata("design:type", String)
 ], Institucion.prototype, "periodoLectivoFuncional", void 0);
+__decorate([
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", String)
+], Institucion.prototype, "membrete", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ type: Number, default: 40 }),
+    __metadata("design:type", Number)
+], Institucion.prototype, "membreteContentTopMm", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ type: Number, default: 40 }),
+    __metadata("design:type", Number)
+], Institucion.prototype, "membreteContentBottomMm", void 0);
 exports.Institucion = Institucion = __decorate([
     (0, mongoose_1.Schema)({ timestamps: true })
 ], Institucion);

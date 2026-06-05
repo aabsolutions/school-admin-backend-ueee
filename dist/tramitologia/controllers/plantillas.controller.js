@@ -25,7 +25,7 @@ const variable_parser_service_1 = require("../services/variable-parser.service")
 const create_plantilla_dto_1 = require("../dto/create-plantilla.dto");
 const update_plantilla_dto_1 = require("../dto/update-plantilla.dto");
 const parse_variables_dto_1 = require("../dto/parse-variables.dto");
-const pagination_query_dto_1 = require("../../common/dto/pagination-query.dto");
+const plantilla_query_dto_1 = require("../dto/plantilla-query.dto");
 let PlantillasController = class PlantillasController {
     constructor(plantillasService, varParser) {
         this.plantillasService = plantillasService;
@@ -69,7 +69,7 @@ __decorate([
     (0, tramite_role_decorator_1.RequireTramiteRole)('TRAMITE_ADMIN', 'TRAMITE_VERIFICADOR'),
     __param(0, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [pagination_query_dto_1.PaginationQueryDto]),
+    __metadata("design:paramtypes", [plantilla_query_dto_1.PlantillaQueryDto]),
     __metadata("design:returntype", void 0)
 ], PlantillasController.prototype, "findAll", null);
 __decorate([

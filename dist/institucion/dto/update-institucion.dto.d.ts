@@ -9,4 +9,7 @@ export declare class UpdateInstitucionDto {
     direccion?: string;
     autoridad?: string;
     periodoLectivoFuncional?: string;
+    membrete?: string;
+    membreteContentTopMm?: number;
+    membreteContentBottomMm?: number;
 }

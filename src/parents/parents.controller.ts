@@ -54,6 +54,12 @@ export class ParentsController {
     return this.svc.getHijos(user.id);
   }
 
+  @Get('me/hijos-activos')
+  @Roles(Role.Parent)
+  getHijosActivos(@CurrentUser() user: any) {
+    return this.svc.getHijosActivos(user.id);
+  }
+
   // ── Admin by-id endpoints ─────────────────────────────────────────────────
 
   @Get(':id')

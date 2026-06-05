@@ -5,6 +5,7 @@ import { Teacher, TeacherDocument } from './schemas/teacher.schema';
 import { User, UserDocument } from '../users/schemas/user.schema';
 import { Role } from '../users/schemas/user.schema';
 import { CreateTeacherDto } from './dto/create-teacher.dto';
+import { BulkTeacherItemDto } from './dto/bulk-create-teacher.dto';
 import { UpdateTeacherDto } from './dto/update-teacher.dto';
 import { UpdateTeacherMedicalInfoDto } from './dto/update-medical-info.dto';
 import { UpdateTeacherFamilyInfoDto } from './dto/update-family-info.dto';
@@ -191,6 +192,22 @@ export class TeachersService {
       .populate('areaEstudioId', 'nombre')
       .sort({ name: 1 })
       .exec();
+  }
+
+  async bulkCreate(records: BulkTeacherItemDto[]): Promise<any> {
+    const created: any[] = [];
+    const failed: { row: number; data: any; error: string }[] = [];
+    for (let i = 0; i < records.length; i++) {
+      try {
+        const record = records[i];
+        const email = record.email?.trim() || `${record.dni.replace(/\s/g, '')}@escuela.local`;
+        const teacher = await this.create({ ...record, email } as CreateTeacherDto);
+        created.push(teacher);
+      } catch (e: any) {
+        failed.push({ row: i + 2, data: records[i], error: e.message ?? 'Error desconocido' });
+      }
+    }
+    return { total: records.length, successCount: created.length, failureCount: failed.length, created, failed };
   }
 
   async uploadPhoto(

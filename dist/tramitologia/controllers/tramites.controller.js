@@ -83,17 +83,35 @@ let TramitesController = class TramitesController {
         if (!this.tramitesService.canAccess(tramite, user)) {
             throw new common_1.BadRequestException('Sin acceso a este trámite');
         }
-        const buffer = await this.pdfService.generatePdf(tramite.renderedHtml);
+        const buffer = await this.pdfService.generatePdf(tramite.renderedHtml, {
+            membreteUrl: tramite.solicitudMembreteUrl,
+            topMm: tramite.membreteConfig?.topMm,
+            bottomMm: tramite.membreteConfig?.bottomMm,
+        });
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', `attachment; filename="${tramite.codigo}.pdf"`);
         res.send(buffer);
     }
+    async getPdfRespuesta(id, req, res) {
+        const tramite = await this.tramitesService.findById(id);
+        const user = { id: req.user.id, role: req.user.role, name: req.user.name, username: req.user.username };
+        if (!this.tramitesService.canAccess(tramite, user)) {
+            throw new common_1.BadRequestException('Sin acceso a este trámite');
+        }
+        if (!tramite.respuestaRenderedHtml) {
+            throw new common_1.BadRequestException('Este trámite aún no tiene respuesta generada');
+        }
+        const buffer = await this.pdfService.generatePdf(tramite.respuestaRenderedHtml, {
+            membreteUrl: tramite.respuestaMembreteUrl,
+            topMm: tramite.membreteConfig?.topMm,
+            bottomMm: tramite.membreteConfig?.bottomMm,
+        });
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="respuesta-${tramite.codigo}.pdf"`);
+        res.send(buffer);
+    }
     transition(id, dto, req) {
-        return this.workflowService.transitionState(id, dto.newState, {
-            id: req.user.id,
-            role: req.user.role,
-            name: req.user.name,
-        }, dto.observation);
+        return this.workflowService.transitionState(id, dto.newState, { id: req.user.id, role: req.user.role, name: req.user.name }, dto.observation, dto.respuestaValues, dto.respuestaBodyOverride);
     }
 };
 exports.TramitesController = TramitesController;
@@ -178,6 +196,16 @@ __decorate([
     __metadata("design:paramtypes", [String, Object, Object]),
     __metadata("design:returntype", Promise)
 ], TramitesController.prototype, "getPdf", null);
+__decorate([
+    (0, common_1.Get)(':id/pdf-respuesta'),
+    (0, skip_transform_decorator_1.SkipTransform)(),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Request)()),
+    __param(2, (0, common_1.Response)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object, Object]),
+    __metadata("design:returntype", Promise)
+], TramitesController.prototype, "getPdfRespuesta", null);
 __decorate([
     (0, common_1.Patch)(':id/transition'),
     (0, tramite_role_decorator_1.RequireTramiteRole)('TRAMITE_ADMIN', 'TRAMITE_OPERATIVO'),

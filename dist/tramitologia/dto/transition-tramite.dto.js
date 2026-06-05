@@ -11,7 +11,9 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TransitionTramiteDto = void 0;
 const class_validator_1 = require("class-validator");
+const class_transformer_1 = require("class-transformer");
 const tramite_schema_1 = require("../schemas/tramite.schema");
+const create_tramite_dto_1 = require("./create-tramite.dto");
 class TransitionTramiteDto {
 }
 exports.TransitionTramiteDto = TransitionTramiteDto;
@@ -24,4 +26,16 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], TransitionTramiteDto.prototype, "observation", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    (0, class_transformer_1.Type)(() => create_tramite_dto_1.FilledValueDto),
+    __metadata("design:type", Array)
+], TransitionTramiteDto.prototype, "respuestaValues", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], TransitionTramiteDto.prototype, "respuestaBodyOverride", void 0);
 //# sourceMappingURL=transition-tramite.dto.js.map

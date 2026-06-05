@@ -32,6 +32,11 @@ export declare class ParentsController {
     }> & {
         __v: number;
     })[]>;
+    getHijosActivos(user: any): Promise<{
+        student: any;
+        cursoNombre: string;
+        academicYear: string;
+    }[]>;
     findOne(id: Types.ObjectId): Promise<import("./schemas/parent.schema").ParentDocument>;
     update(id: Types.ObjectId, dto: UpdateParentDto): Promise<import("./schemas/parent.schema").ParentDocument>;
     linkStudents(id: Types.ObjectId, dto: LinkStudentsDto): Promise<import("./schemas/parent.schema").ParentDocument>;

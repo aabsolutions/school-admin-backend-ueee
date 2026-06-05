@@ -109,6 +109,12 @@ __decorate([
 ], CreatePlantillaDto.prototype, "categoria", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsEnum)(['solicitud', 'respuesta']),
+    __metadata("design:type", String)
+], CreatePlantillaDto.prototype, "tipo", void 0);
+__decorate([
+    (0, class_validator_1.ValidateIf)((o) => o.tipo !== 'respuesta'),
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsArray)(),
     (0, class_validator_1.ArrayNotEmpty)(),
     (0, class_validator_1.IsIn)(['STUDENT', 'TEACHER', 'PARENT'], { each: true }),
@@ -133,4 +139,9 @@ __decorate([
     (0, class_transformer_1.Type)(() => RequiredAttachmentDto),
     __metadata("design:type", Array)
 ], CreatePlantillaDto.prototype, "requiredAttachments", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsMongoId)(),
+    __metadata("design:type", String)
+], CreatePlantillaDto.prototype, "plantillaRespuestaId", void 0);
 //# sourceMappingURL=create-plantilla.dto.js.map

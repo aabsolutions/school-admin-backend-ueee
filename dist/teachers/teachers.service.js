@@ -177,6 +177,22 @@ let TeachersService = class TeachersService {
             .sort({ name: 1 })
             .exec();
     }
+    async bulkCreate(records) {
+        const created = [];
+        const failed = [];
+        for (let i = 0; i < records.length; i++) {
+            try {
+                const record = records[i];
+                const email = record.email?.trim() || `${record.dni.replace(/\s/g, '')}@escuela.local`;
+                const teacher = await this.create({ ...record, email });
+                created.push(teacher);
+            }
+            catch (e) {
+                failed.push({ row: i + 2, data: records[i], error: e.message ?? 'Error desconocido' });
+            }
+        }
+        return { total: records.length, successCount: created.length, failureCount: failed.length, created, failed };
+    }
     async uploadPhoto(id, file, type, peso, talla) {
         const folder = type === 'credencial' ? 'teachers/credencial' : 'teachers/cuerpo';
         const url = await this.cloudinaryService.uploadBuffer(file.buffer, folder);

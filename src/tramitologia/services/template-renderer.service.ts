@@ -6,10 +6,12 @@ export interface RenderContext {
   fechaActual: string;
   usuarioLogueado: string;
   idTramite: string;
+  extraSysVars?: Record<string, string>;
 }
 
 const ALLOWED_TAGS = [
-  'p', 'br', 'strong', 'em', 'u', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+  'p', 'br', 'strong', 'em', 'u', 's', 'sub', 'sup', 'hr',
+  'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
   'ul', 'ol', 'li', 'table', 'thead', 'tbody', 'tr', 'td', 'th',
   'blockquote', 'pre', 'code', 'a', 'img', 'span', 'div',
 ];
@@ -23,8 +25,9 @@ const ALLOWED_ATTRIBUTES: sanitizeHtml.IOptions['allowedAttributes'] = {
 const ALLOWED_STYLES: sanitizeHtml.IOptions['allowedStyles'] = {
   '*': {
     'text-align': [/^(left|right|center|justify)$/],
-    color: [/^#[0-9a-fA-F]{3,6}$/, /^rgb\(/],
-    'background-color': [/^#[0-9a-fA-F]{3,6}$/, /^rgb\(/],
+    color: [/^#[0-9a-fA-F]{3,6}$/, /^rgb\(/, /^rgba\(/],
+    'background-color': [/^#[0-9a-fA-F]{3,6}$/, /^rgb\(/, /^rgba\(/],
+    'padding-left': [/^\d+(\.\d+)?(px|em|rem)$/],
   },
 };
 
@@ -37,6 +40,7 @@ export class TemplateRendererService {
       FECHA_ACTUAL: ctx.fechaActual,
       USUARIO_LOGUEADO: ctx.usuarioLogueado,
       ID_TRAMITE: ctx.idTramite,
+      ...ctx.extraSysVars,
     };
 
     let html = snapshot.bodyHtml;
@@ -51,6 +55,8 @@ export class TemplateRendererService {
       allowedTags: ALLOWED_TAGS,
       allowedAttributes: ALLOWED_ATTRIBUTES,
       allowedStyles: ALLOWED_STYLES,
+      allowedSchemes: ['http', 'https', 'data'],
+      nonTextTags: ['style', 'script', 'textarea', 'option', 'noscript'],
     });
   }
 }

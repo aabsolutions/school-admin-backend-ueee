@@ -17,6 +17,7 @@ const common_1 = require("@nestjs/common");
 const platform_express_1 = require("@nestjs/platform-express");
 const teachers_service_1 = require("./teachers.service");
 const create_teacher_dto_1 = require("./dto/create-teacher.dto");
+const bulk_create_teacher_dto_1 = require("./dto/bulk-create-teacher.dto");
 const update_teacher_dto_1 = require("./dto/update-teacher.dto");
 const update_medical_info_dto_1 = require("./dto/update-medical-info.dto");
 const update_family_info_dto_1 = require("./dto/update-family-info.dto");
@@ -50,6 +51,9 @@ let TeachersController = class TeachersController {
     }
     findAll(query) {
         return this.teachersService.findAll(query);
+    }
+    bulkCreate(dto) {
+        return this.teachersService.bulkCreate(dto.records);
     }
     findOne(id) {
         return this.teachersService.findOne(id.toString());
@@ -124,6 +128,13 @@ __decorate([
     __metadata("design:paramtypes", [pagination_query_dto_1.PaginationQueryDto]),
     __metadata("design:returntype", void 0)
 ], TeachersController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Post)('bulk'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [bulk_create_teacher_dto_1.BulkCreateTeacherDto]),
+    __metadata("design:returntype", void 0)
+], TeachersController.prototype, "bulkCreate", null);
 __decorate([
     (0, common_1.Get)(':id'),
     __param(0, (0, common_1.Param)('id', parse_object_id_pipe_1.ParseObjectIdPipe)),

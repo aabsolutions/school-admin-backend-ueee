@@ -12,6 +12,9 @@ export declare class Institucion {
     autoridad: Types.ObjectId;
     logotipo: string;
     periodoLectivoFuncional: string;
+    membrete: string;
+    membreteContentTopMm: number;
+    membreteContentBottomMm: number;
 }
 export declare const InstitucionSchema: import("mongoose").Schema<Institucion, import("mongoose").Model<Institucion, any, any, any, any, any, Institucion>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, Institucion, Document<unknown, {}, Institucion, {
     id: string;
@@ -113,6 +116,33 @@ export declare const InstitucionSchema: import("mongoose").Schema<Institucion, i
         id: string;
     }>;
     periodoLectivoFuncional?: import("mongoose").SchemaDefinitionProperty<string, Institucion, Document<unknown, {}, Institucion, {
+        id: string;
+    }, import("mongoose").DefaultSchemaOptions> & Omit<Institucion & {
+        _id: Types.ObjectId;
+    } & {
+        __v: number;
+    }, "id"> & {
+        id: string;
+    }>;
+    membrete?: import("mongoose").SchemaDefinitionProperty<string, Institucion, Document<unknown, {}, Institucion, {
+        id: string;
+    }, import("mongoose").DefaultSchemaOptions> & Omit<Institucion & {
+        _id: Types.ObjectId;
+    } & {
+        __v: number;
+    }, "id"> & {
+        id: string;
+    }>;
+    membreteContentTopMm?: import("mongoose").SchemaDefinitionProperty<number, Institucion, Document<unknown, {}, Institucion, {
+        id: string;
+    }, import("mongoose").DefaultSchemaOptions> & Omit<Institucion & {
+        _id: Types.ObjectId;
+    } & {
+        __v: number;
+    }, "id"> & {
+        id: string;
+    }>;
+    membreteContentBottomMm?: import("mongoose").SchemaDefinitionProperty<number, Institucion, Document<unknown, {}, Institucion, {
         id: string;
     }, import("mongoose").DefaultSchemaOptions> & Omit<Institucion & {
         _id: Types.ObjectId;

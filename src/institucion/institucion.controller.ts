@@ -52,4 +52,25 @@ export class InstitucionController {
   ) {
     return this.service.uploadLogo(file);
   }
+
+  /**
+   * POST /institucion/membrete — Solo SuperAdmin, sube membrete institucional (A4 PNG/JPG)
+   */
+  @Post('membrete')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.SuperAdmin)
+  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: 8 * 1024 * 1024 } }))
+  uploadMembrete(
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 8 * 1024 * 1024 }),
+          new FileTypeValidator({ fileType: /^image\/(jpeg|png)$/ }),
+        ],
+      }),
+    )
+    file: Express.Multer.File,
+  ) {
+    return this.service.uploadMembrete(file);
+  }
 }

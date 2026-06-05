@@ -6,6 +6,7 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { StudentsService } from './students.service';
 import { CreateStudentDto } from './dto/create-student.dto';
+import { BulkCreateStudentDto } from './dto/bulk-create-student.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
 import { UpdateStudentMedicalInfoDto } from './dto/update-medical-info.dto';
 import { UpdateStudentFamilyInfoDto } from './dto/update-family-info.dto';
@@ -71,6 +72,11 @@ export class StudentsController {
   @Roles(Role.SuperAdmin, Role.Admin, Role.Teacher)
   findAll(@Query() query: PaginationQueryDto) {
     return this.studentsService.findAll(query);
+  }
+
+  @Post('bulk')
+  bulkCreate(@Body() dto: BulkCreateStudentDto) {
+    return this.studentsService.bulkCreate(dto.records);
   }
 
   @Get(':id')

@@ -7,6 +7,7 @@ import { TramiteQueryDto } from '../dto/tramite-query.dto';
 import { TramiteWorkflowService } from './tramite-workflow.service';
 import { TramiteCodigoService } from './tramite-codigo.service';
 import { TemplateRendererService } from './template-renderer.service';
+import { VariableResolverService } from './variable-resolver.service';
 import { CloudinaryService } from '../../cloudinary/cloudinary.service';
 interface UserContext {
     id: string;
@@ -21,8 +22,9 @@ export declare class TramitesService {
     private readonly workflow;
     private readonly codigoService;
     private readonly renderer;
+    private readonly resolver;
     private readonly cloudinary;
-    constructor(tramiteModel: Model<TramiteDocument>, historyModel: Model<TramiteHistoryDocument>, plantillaModel: Model<PlantillaDocument>, workflow: TramiteWorkflowService, codigoService: TramiteCodigoService, renderer: TemplateRendererService, cloudinary: CloudinaryService);
+    constructor(tramiteModel: Model<TramiteDocument>, historyModel: Model<TramiteHistoryDocument>, plantillaModel: Model<PlantillaDocument>, workflow: TramiteWorkflowService, codigoService: TramiteCodigoService, renderer: TemplateRendererService, resolver: VariableResolverService, cloudinary: CloudinaryService);
     create(dto: CreateTramiteDto, user: UserContext): Promise<TramiteDocument>;
     addAttachment(tramiteId: string, file: Express.Multer.File, name: string, uploadedBy: string): Promise<TramiteDocument>;
     findMine(userId: string, query: TramiteQueryDto): Promise<{

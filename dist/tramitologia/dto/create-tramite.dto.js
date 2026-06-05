@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CreateTramiteDto = exports.FilledValueDto = void 0;
+exports.CreateTramiteDto = exports.DatosRepresentanteDto = exports.FilledValueDto = void 0;
 const class_validator_1 = require("class-validator");
 const class_transformer_1 = require("class-transformer");
 class FilledValueDto {
@@ -24,6 +24,24 @@ __decorate([
     (0, class_validator_1.Allow)(),
     __metadata("design:type", Object)
 ], FilledValueDto.prototype, "value", void 0);
+class DatosRepresentanteDto {
+}
+exports.DatosRepresentanteDto = DatosRepresentanteDto;
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], DatosRepresentanteDto.prototype, "nombre", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], DatosRepresentanteDto.prototype, "dni", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], DatosRepresentanteDto.prototype, "contacto", void 0);
 class CreateTramiteDto {
 }
 exports.CreateTramiteDto = CreateTramiteDto;
@@ -44,4 +62,20 @@ __decorate([
     (0, class_transformer_1.Type)(() => FilledValueDto),
     __metadata("design:type", Array)
 ], CreateTramiteDto.prototype, "values", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.ValidateNested)(),
+    (0, class_transformer_1.Type)(() => DatosRepresentanteDto),
+    __metadata("design:type", DatosRepresentanteDto)
+], CreateTramiteDto.prototype, "datosRepresentante", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsMongoId)(),
+    __metadata("design:type", String)
+], CreateTramiteDto.prototype, "estudianteId", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateTramiteDto.prototype, "cursoNombre", void 0);
 //# sourceMappingURL=create-tramite.dto.js.map

@@ -31,6 +31,16 @@ export class PlantillaSnapshot {
 
   @Prop({ type: [RequiredAttachment], default: [] })
   requiredAttachments: RequiredAttachment[];
+
+  @Prop({ type: Types.ObjectId })
+  plantillaRespuestaId?: Types.ObjectId;
+}
+
+@Schema({ _id: false })
+export class DatosRepresentante {
+  @Prop() nombre: string;
+  @Prop() dni: string;
+  @Prop() contacto: string;
 }
 
 @Schema({ _id: false })
@@ -101,8 +111,29 @@ export class Tramite {
 
   @Prop({ type: Date })
   closedAt?: Date;
+
+  @Prop({ type: DatosRepresentante })
+  datosRepresentante?: DatosRepresentante;
+
+  @Prop({ type: Types.ObjectId, ref: 'Student' })
+  estudianteId?: Types.ObjectId;
+
+  @Prop()
+  cursoNombre?: string;
+
+  @Prop({ type: [FilledValue], default: [] })
+  respuestaValues: FilledValue[];
+
+  @Prop({ default: '' })
+  respuestaRenderedHtml: string;
+
+  @Prop() solicitudMembreteUrl?: string;
+  @Prop() respuestaMembreteUrl?: string;
+  @Prop({ type: Object }) membreteConfig?: { topMm: number; bottomMm: number };
+  @Prop() respuestaBodyOverrideHtml?: string;
 }
 
+export const DatosRepresentanteSchema = SchemaFactory.createForClass(DatosRepresentante);
 export const TramiteSchema = SchemaFactory.createForClass(Tramite);
 
 TramiteSchema.index({ state: 1, createdAt: -1 });

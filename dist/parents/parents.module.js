@@ -14,6 +14,7 @@ const parents_controller_1 = require("./parents.controller");
 const parent_schema_1 = require("./schemas/parent.schema");
 const student_schema_1 = require("../students/schemas/student.schema");
 const user_schema_1 = require("../users/schemas/user.schema");
+const enrollment_schema_1 = require("../enrollments/schemas/enrollment.schema");
 let ParentsModule = class ParentsModule {
 };
 exports.ParentsModule = ParentsModule;
@@ -24,6 +25,7 @@ exports.ParentsModule = ParentsModule = __decorate([
                 { name: parent_schema_1.Parent.name, schema: parent_schema_1.ParentSchema },
                 { name: student_schema_1.Student.name, schema: student_schema_1.StudentSchema },
                 { name: user_schema_1.User.name, schema: user_schema_1.UserSchema },
+                { name: enrollment_schema_1.Enrollment.name, schema: enrollment_schema_1.EnrollmentSchema },
             ]),
         ],
         controllers: [parents_controller_1.ParentsController],

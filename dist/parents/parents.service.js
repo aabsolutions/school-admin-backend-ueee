@@ -19,11 +19,13 @@ const mongoose_2 = require("mongoose");
 const parent_schema_1 = require("./schemas/parent.schema");
 const student_schema_1 = require("../students/schemas/student.schema");
 const user_schema_1 = require("../users/schemas/user.schema");
+const enrollment_schema_1 = require("../enrollments/schemas/enrollment.schema");
 let ParentsService = class ParentsService {
-    constructor(parentModel, studentModel, userModel) {
+    constructor(parentModel, studentModel, userModel, enrollmentModel) {
         this.parentModel = parentModel;
         this.studentModel = studentModel;
         this.userModel = userModel;
+        this.enrollmentModel = enrollmentModel;
     }
     async create(dto) {
         const { username, password, studentIds, ...parentData } = dto;
@@ -155,6 +157,68 @@ let ParentsService = class ParentsService {
         }
         return students;
     }
+    async getHijosActivos(parentUserId) {
+        const parent = await this.parentModel
+            .findOne({ userId: new mongoose_2.Types.ObjectId(parentUserId) })
+            .lean();
+        if (!parent)
+            throw new common_1.NotFoundException('Perfil de padre no encontrado');
+        const parentOid = parent._id;
+        const students = await this.studentModel
+            .find({
+            $or: [
+                { _id: { $in: parent.studentIds ?? [] } },
+                { fatherId: parentOid },
+                { motherId: parentOid },
+                { guardianId: parentOid },
+            ],
+        })
+            .select('name email dni img gender status')
+            .lean();
+        if (!students.length)
+            return [];
+        const studentIds = students.map((s) => s._id);
+        const enrollments = await this.enrollmentModel.aggregate([
+            { $match: { studentId: { $in: studentIds }, status: 'enrolled' } },
+            {
+                $lookup: {
+                    from: 'cursolectivos',
+                    localField: 'cursoLectivoId',
+                    foreignField: '_id',
+                    as: 'cursoLectivo',
+                },
+            },
+            { $unwind: '$cursoLectivo' },
+            { $match: { 'cursoLectivo.status': 'active' } },
+            {
+                $lookup: {
+                    from: 'cursos',
+                    localField: 'cursoLectivo.cursoId',
+                    foreignField: '_id',
+                    as: 'curso',
+                },
+            },
+            { $unwind: '$curso' },
+            {
+                $project: {
+                    studentId: 1,
+                    academicYear: '$cursoLectivo.academicYear',
+                    cursoNombre: {
+                        $concat: ['$curso.nivel', ' ', '$curso.paralelo', ' ', '$curso.jornada'],
+                    },
+                },
+            },
+        ]);
+        const enrollmentMap = new Map(enrollments.map((e) => [e.studentId.toString(), { cursoNombre: e.cursoNombre, academicYear: e.academicYear }]));
+        return students.map((student) => {
+            const enrollment = enrollmentMap.get(student._id.toString());
+            return {
+                student,
+                cursoNombre: enrollment?.cursoNombre ?? '',
+                academicYear: enrollment?.academicYear ?? '',
+            };
+        });
+    }
     async update(id, dto) {
         const parent = await this.parentModel
             .findByIdAndUpdate(id, { $set: dto }, { new: true })
@@ -200,7 +264,9 @@ exports.ParentsService = ParentsService = __decorate([
     __param(0, (0, mongoose_1.InjectModel)(parent_schema_1.Parent.name)),
     __param(1, (0, mongoose_1.InjectModel)(student_schema_1.Student.name)),
     __param(2, (0, mongoose_1.InjectModel)(user_schema_1.User.name)),
+    __param(3, (0, mongoose_1.InjectModel)(enrollment_schema_1.Enrollment.name)),
     __metadata("design:paramtypes", [mongoose_2.Model,
+        mongoose_2.Model,
         mongoose_2.Model,
         mongoose_2.Model])
 ], ParentsService);
