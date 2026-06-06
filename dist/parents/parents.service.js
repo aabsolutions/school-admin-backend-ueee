@@ -28,16 +28,17 @@ let ParentsService = class ParentsService {
         this.enrollmentModel = enrollmentModel;
     }
     async create(dto) {
-        const { username, password, studentIds, ...parentData } = dto;
-        const resolvedUsername = username ?? dto.dni ?? dto.email;
-        const resolvedPassword = password ?? dto.dni ?? dto.email;
+        const { username, password, studentIds, email: rawEmail, ...parentData } = dto;
+        const email = rawEmail || `${dto.dni}@escuela.local`;
+        const resolvedUsername = username ?? dto.dni;
+        const resolvedPassword = password ?? dto.dni;
         let savedUser = null;
         try {
             const user = new this.userModel({
                 username: resolvedUsername,
                 password: resolvedPassword,
                 name: parentData.name,
-                email: parentData.email,
+                email,
                 role: user_schema_1.Role.Parent,
                 permissions: ['canRead'],
                 isActive: true,
@@ -45,6 +46,7 @@ let ParentsService = class ParentsService {
             savedUser = await user.save();
             const parent = await new this.parentModel({
                 ...parentData,
+                email,
                 userId: savedUser._id,
                 studentIds: [],
             }).save();

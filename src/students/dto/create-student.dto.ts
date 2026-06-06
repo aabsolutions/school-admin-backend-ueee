@@ -2,10 +2,12 @@ import {
   IsEmail, IsEnum, IsNotEmpty, IsNumber, IsOptional,
   IsString, IsDateString, Min, MinLength, IsMongoId,
 } from 'class-validator';
+import { Transform } from 'class-transformer';
 
 export class CreateStudentDto {
   @IsNotEmpty() @IsString() name: string;
-  @IsNotEmpty() @IsEmail() email: string;
+  @Transform(({ value }) => value === '' ? undefined : value)
+  @IsOptional() @IsEmail() email?: string;
 
   // Optional credentials — if provided, a User account will be created and linked
   @IsOptional() @IsString() username?: string;

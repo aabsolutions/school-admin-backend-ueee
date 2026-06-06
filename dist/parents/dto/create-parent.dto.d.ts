@@ -1,7 +1,7 @@
 export declare class CreateParentDto {
     name: string;
-    email: string;
-    dni?: string;
+    dni: string;
+    email?: string;
     mobile?: string;
     gender?: string;
     address?: string;

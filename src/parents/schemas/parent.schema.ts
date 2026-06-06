@@ -14,7 +14,7 @@ export class Parent {
   @Prop({ required: true, unique: true, lowercase: true, trim: true })
   email: string;
 
-  @Prop({ unique: true, sparse: true })
+  @Prop({ required: true, unique: true, sparse: true })
   dni: string;
 
   @Prop()

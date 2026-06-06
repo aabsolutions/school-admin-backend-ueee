@@ -28,7 +28,7 @@ __decorate([
     __metadata("design:type", String)
 ], Parent.prototype, "email", void 0);
 __decorate([
-    (0, mongoose_1.Prop)({ unique: true, sparse: true }),
+    (0, mongoose_1.Prop)({ required: true, unique: true, sparse: true }),
     __metadata("design:type", String)
 ], Parent.prototype, "dni", void 0);
 __decorate([

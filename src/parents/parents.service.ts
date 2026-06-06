@@ -28,10 +28,11 @@ export class ParentsService {
   ) {}
 
   async create(dto: CreateParentDto): Promise<ParentDocument> {
-    const { username, password, studentIds, ...parentData } = dto;
+    const { username, password, studentIds, email: rawEmail, ...parentData } = dto;
 
-    const resolvedUsername = username ?? dto.dni ?? dto.email;
-    const resolvedPassword = password ?? dto.dni ?? dto.email;
+    const email = rawEmail || `${dto.dni}@escuela.local`;
+    const resolvedUsername = username ?? dto.dni;
+    const resolvedPassword = password ?? dto.dni;
 
     let savedUser: UserDocument | null = null;
     try {
@@ -39,7 +40,7 @@ export class ParentsService {
         username: resolvedUsername,
         password: resolvedPassword,
         name: parentData.name,
-        email: parentData.email,
+        email,
         role: Role.Parent,
         permissions: ['canRead'],
         isActive: true,
@@ -48,6 +49,7 @@ export class ParentsService {
 
       const parent = await new this.parentModel({
         ...parentData,
+        email,
         userId: savedUser._id,
         studentIds: [],
       }).save();

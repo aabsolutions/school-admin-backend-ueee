@@ -1,6 +1,6 @@
 export declare class CreateStudentDto {
     name: string;
-    email: string;
+    email?: string;
     username?: string;
     password?: string;
     img?: string;

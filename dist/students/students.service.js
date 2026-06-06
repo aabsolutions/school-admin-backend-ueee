@@ -58,9 +58,10 @@ let StudentsService = StudentsService_1 = class StudentsService {
         return student;
     }
     async create(dto) {
-        const { username, password, fatherId, motherId, guardianId, ...studentData } = dto;
-        const resolvedUsername = username ?? studentData.dni ?? studentData.email;
-        const resolvedPassword = password ?? studentData.dni ?? studentData.email;
+        const { username, password, fatherId, motherId, guardianId, email: rawEmail, ...studentData } = dto;
+        const email = rawEmail || `${studentData.dni}@escuela.local`;
+        const resolvedUsername = username ?? studentData.dni;
+        const resolvedPassword = password ?? studentData.dni;
         const parentIds = this._deriveParentIds(fatherId, motherId, guardianId);
         let savedUser = null;
         try {
@@ -68,7 +69,7 @@ let StudentsService = StudentsService_1 = class StudentsService {
                 username: resolvedUsername,
                 password: resolvedPassword,
                 name: studentData.name,
-                email: studentData.email,
+                email,
                 role: user_schema_2.Role.Student,
                 permissions: ['canRead'],
                 isActive: true,
@@ -76,6 +77,7 @@ let StudentsService = StudentsService_1 = class StudentsService {
             savedUser = await user.save();
             const student = await new this.studentModel({
                 ...studentData,
+                email,
                 userId: savedUser._id,
                 fatherId: fatherId ? new mongoose_2.Types.ObjectId(fatherId) : null,
                 motherId: motherId ? new mongoose_2.Types.ObjectId(motherId) : null,

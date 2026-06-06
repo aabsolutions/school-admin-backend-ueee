@@ -57,10 +57,11 @@ export class StudentsService {
   }
 
   async create(dto: CreateStudentDto): Promise<StudentDocument> {
-    const { username, password, fatherId, motherId, guardianId, ...studentData } = dto;
+    const { username, password, fatherId, motherId, guardianId, email: rawEmail, ...studentData } = dto;
 
-    const resolvedUsername = username ?? studentData.dni ?? studentData.email;
-    const resolvedPassword = password ?? studentData.dni ?? studentData.email;
+    const email = rawEmail || `${studentData.dni}@escuela.local`;
+    const resolvedUsername = username ?? studentData.dni;
+    const resolvedPassword = password ?? studentData.dni;
 
     const parentIds = this._deriveParentIds(fatherId, motherId, guardianId);
 
@@ -70,7 +71,7 @@ export class StudentsService {
         username: resolvedUsername,
         password: resolvedPassword,
         name: studentData.name,
-        email: studentData.email,
+        email,
         role: Role.Student,
         permissions: ['canRead'],
         isActive: true,
@@ -78,6 +79,7 @@ export class StudentsService {
       savedUser = await user.save();
       const student = await new this.studentModel({
         ...studentData,
+        email,
         userId: savedUser._id,
         fatherId: fatherId ? new Types.ObjectId(fatherId) : null,
         motherId: motherId ? new Types.ObjectId(motherId) : null,
