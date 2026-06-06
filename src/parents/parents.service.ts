@@ -11,6 +11,7 @@ import { User, UserDocument, Role } from '../users/schemas/user.schema';
 import { Enrollment, EnrollmentDocument } from '../enrollments/schemas/enrollment.schema';
 import { CreateParentDto } from './dto/create-parent.dto';
 import { UpdateParentDto } from './dto/update-parent.dto';
+import { BulkParentItemDto, BulkParentImportResult } from './dto/bulk-create-parent.dto';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 
 @Injectable()
@@ -69,7 +70,7 @@ export class ParentsService {
 
   async findAll(query: PaginationQueryDto) {
     const { page = 1, limit = 10, search, sortBy = 'createdAt', sortOrder = 'desc' } = query;
-    const filter: any = {};
+    const filter: any = { isActive: true };
     if (search) {
       filter.$or = [
         { name: { $regex: search, $options: 'i' } },
@@ -272,10 +273,56 @@ export class ParentsService {
   async remove(id: string): Promise<void> {
     const parent = await this.parentModel.findById(id);
     if (!parent) throw new NotFoundException('Padre no encontrado');
+    const parentOid = parent._id as Types.ObjectId;
     await Promise.all([
       this.parentModel.findByIdAndUpdate(id, { isActive: false }),
       this.userModel.findByIdAndUpdate(parent.userId, { isActive: false }),
+      // Pull parent from studentIds array
+      this.studentModel.updateMany(
+        { _id: { $in: parent.studentIds } },
+        { $pull: { parentIds: parentOid } },
+      ),
+      // Null role-specific fields only where they point to this parent
+      this.studentModel.updateMany(
+        { fatherId: parentOid },
+        { $set: { fatherId: null } },
+      ),
+      this.studentModel.updateMany(
+        { motherId: parentOid },
+        { $set: { motherId: null } },
+      ),
+      this.studentModel.updateMany(
+        { guardianId: parentOid },
+        { $set: { guardianId: null } },
+      ),
     ]);
+  }
+
+  async checkBulkDuplicates(dnis: string[], emails: string[]): Promise<{ duplicateDnis: string[]; duplicateEmails: string[] }> {
+    const [byDni, byEmail] = await Promise.all([
+      dnis.length ? this.parentModel.find({ dni: { $in: dnis } }).select('dni').lean() : [],
+      emails.length ? this.parentModel.find({ email: { $in: emails.map((e) => e.toLowerCase()) } }).select('email').lean() : [],
+    ]);
+    return {
+      duplicateDnis: byDni.map((p: any) => p.dni),
+      duplicateEmails: byEmail.map((p: any) => p.email),
+    };
+  }
+
+  async bulkCreate(records: BulkParentItemDto[]): Promise<BulkParentImportResult> {
+    const created: any[] = [];
+    const failed: { row: number; data: any; error: string }[] = [];
+    for (let i = 0; i < records.length; i++) {
+      try {
+        const record = records[i];
+        const email = record.email?.trim() || `${(record.dni ?? '').replace(/\s/g, '')}@escuela.local`;
+        const parent = await this.create({ ...record, email } as CreateParentDto);
+        created.push(parent);
+      } catch (e: any) {
+        failed.push({ row: i + 2, data: records[i], error: e.message ?? 'Error desconocido' });
+      }
+    }
+    return { total: records.length, successCount: created.length, failureCount: failed.length, created, failed };
   }
 
   private async _linkStudents(parentId: string, studentIds: string[]): Promise<void> {

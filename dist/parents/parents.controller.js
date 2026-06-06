@@ -18,6 +18,7 @@ const parents_service_1 = require("./parents.service");
 const create_parent_dto_1 = require("./dto/create-parent.dto");
 const update_parent_dto_1 = require("./dto/update-parent.dto");
 const link_students_dto_1 = require("./dto/link-students.dto");
+const bulk_create_parent_dto_1 = require("./dto/bulk-create-parent.dto");
 const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
 const roles_guard_1 = require("../auth/guards/roles.guard");
 const roles_decorator_1 = require("../auth/decorators/roles.decorator");
@@ -35,6 +36,12 @@ let ParentsController = class ParentsController {
     }
     create(dto) {
         return this.svc.create(dto);
+    }
+    bulkCreate(dto) {
+        return this.svc.bulkCreate(dto.records);
+    }
+    checkBulk(body) {
+        return this.svc.checkBulkDuplicates(body.dnis ?? [], body.emails ?? []);
     }
     search(q = '', studentId) {
         return this.svc.searchByName(q, studentId);
@@ -81,6 +88,22 @@ __decorate([
     __metadata("design:paramtypes", [create_parent_dto_1.CreateParentDto]),
     __metadata("design:returntype", void 0)
 ], ParentsController.prototype, "create", null);
+__decorate([
+    (0, common_1.Post)('bulk'),
+    (0, roles_decorator_1.Roles)(user_schema_1.Role.Admin, user_schema_1.Role.SuperAdmin),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [bulk_create_parent_dto_1.BulkCreateParentDto]),
+    __metadata("design:returntype", void 0)
+], ParentsController.prototype, "bulkCreate", null);
+__decorate([
+    (0, common_1.Post)('check-bulk'),
+    (0, roles_decorator_1.Roles)(user_schema_1.Role.Admin, user_schema_1.Role.SuperAdmin),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], ParentsController.prototype, "checkBulk", null);
 __decorate([
     (0, common_1.Get)('search'),
     (0, roles_decorator_1.Roles)(user_schema_1.Role.Admin, user_schema_1.Role.SuperAdmin, user_schema_1.Role.Teacher),

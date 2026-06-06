@@ -6,6 +6,7 @@ import { ParentsService } from './parents.service';
 import { CreateParentDto } from './dto/create-parent.dto';
 import { UpdateParentDto } from './dto/update-parent.dto';
 import { LinkStudentsDto } from './dto/link-students.dto';
+import { BulkCreateParentDto } from './dto/bulk-create-parent.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -32,6 +33,18 @@ export class ParentsController {
   @Roles(Role.Admin, Role.SuperAdmin)
   create(@Body() dto: CreateParentDto) {
     return this.svc.create(dto);
+  }
+
+  @Post('bulk')
+  @Roles(Role.Admin, Role.SuperAdmin)
+  bulkCreate(@Body() dto: BulkCreateParentDto) {
+    return this.svc.bulkCreate(dto.records);
+  }
+
+  @Post('check-bulk')
+  @Roles(Role.Admin, Role.SuperAdmin)
+  checkBulk(@Body() body: { dnis: string[]; emails: string[] }) {
+    return this.svc.checkBulkDuplicates(body.dnis ?? [], body.emails ?? []);
   }
 
   @Get('search')

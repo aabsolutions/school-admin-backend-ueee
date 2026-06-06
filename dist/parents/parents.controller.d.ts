@@ -2,6 +2,7 @@ import { ParentsService } from './parents.service';
 import { CreateParentDto } from './dto/create-parent.dto';
 import { UpdateParentDto } from './dto/update-parent.dto';
 import { LinkStudentsDto } from './dto/link-students.dto';
+import { BulkCreateParentDto } from './dto/bulk-create-parent.dto';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { Types } from 'mongoose';
 export declare class ParentsController {
@@ -21,6 +22,14 @@ export declare class ParentsController {
         totalPages: number;
     }>;
     create(dto: CreateParentDto): Promise<import("./schemas/parent.schema").ParentDocument>;
+    bulkCreate(dto: BulkCreateParentDto): Promise<import("./dto/bulk-create-parent.dto").BulkParentImportResult>;
+    checkBulk(body: {
+        dnis: string[];
+        emails: string[];
+    }): Promise<{
+        duplicateDnis: string[];
+        duplicateEmails: string[];
+    }>;
     search(q?: string, studentId?: string): Promise<(import("./schemas/parent.schema").Parent & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
         _id: Types.ObjectId;
     }> & {

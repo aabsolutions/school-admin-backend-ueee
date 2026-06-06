@@ -155,8 +155,17 @@ export class StudentsService {
   }
 
   async remove(id: string): Promise<void> {
-    const result = await this.studentModel.findByIdAndDelete(id);
-    if (!result) throw new NotFoundException('Student not found');
+    const student = await this.studentModel.findById(id).select('parentIds fatherId motherId guardianId').lean();
+    if (!student) throw new NotFoundException('Student not found');
+    const studentOid = new Types.ObjectId(id);
+    await Promise.all([
+      this.studentModel.findByIdAndDelete(id),
+      // Unlink from all parent records — do not delete parents
+      this.parentModel.updateMany(
+        { studentIds: studentOid },
+        { $pull: { studentIds: studentOid } },
+      ),
+    ]);
   }
 
   async toggleStatus(id: string, status: string): Promise<StudentDocument> {

@@ -5,6 +5,7 @@ import { UserDocument } from '../users/schemas/user.schema';
 import { EnrollmentDocument } from '../enrollments/schemas/enrollment.schema';
 import { CreateParentDto } from './dto/create-parent.dto';
 import { UpdateParentDto } from './dto/update-parent.dto';
+import { BulkParentItemDto, BulkParentImportResult } from './dto/bulk-create-parent.dto';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 export declare class ParentsService {
     private readonly parentModel;
@@ -47,5 +48,10 @@ export declare class ParentsService {
     linkStudents(parentId: string, studentIds: string[]): Promise<ParentDocument>;
     unlinkStudent(parentId: string, studentId: string): Promise<ParentDocument>;
     remove(id: string): Promise<void>;
+    checkBulkDuplicates(dnis: string[], emails: string[]): Promise<{
+        duplicateDnis: string[];
+        duplicateEmails: string[];
+    }>;
+    bulkCreate(records: BulkParentItemDto[]): Promise<BulkParentImportResult>;
     private _linkStudents;
 }

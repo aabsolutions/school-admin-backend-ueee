@@ -137,9 +137,14 @@ let StudentsService = StudentsService_1 = class StudentsService {
         return [...new Set([fatherId, motherId, guardianId].filter(Boolean))];
     }
     async remove(id) {
-        const result = await this.studentModel.findByIdAndDelete(id);
-        if (!result)
+        const student = await this.studentModel.findById(id).select('parentIds fatherId motherId guardianId').lean();
+        if (!student)
             throw new common_1.NotFoundException('Student not found');
+        const studentOid = new mongoose_2.Types.ObjectId(id);
+        await Promise.all([
+            this.studentModel.findByIdAndDelete(id),
+            this.parentModel.updateMany({ studentIds: studentOid }, { $pull: { studentIds: studentOid } }),
+        ]);
     }
     async toggleStatus(id, status) {
         const updated = await this.studentModel.findByIdAndUpdate(id, { status }, { new: true });

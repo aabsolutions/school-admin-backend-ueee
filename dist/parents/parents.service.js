@@ -66,7 +66,7 @@ let ParentsService = class ParentsService {
     }
     async findAll(query) {
         const { page = 1, limit = 10, search, sortBy = 'createdAt', sortOrder = 'desc' } = query;
-        const filter = {};
+        const filter = { isActive: true };
         if (search) {
             filter.$or = [
                 { name: { $regex: search, $options: 'i' } },
@@ -244,10 +244,41 @@ let ParentsService = class ParentsService {
         const parent = await this.parentModel.findById(id);
         if (!parent)
             throw new common_1.NotFoundException('Padre no encontrado');
+        const parentOid = parent._id;
         await Promise.all([
             this.parentModel.findByIdAndUpdate(id, { isActive: false }),
             this.userModel.findByIdAndUpdate(parent.userId, { isActive: false }),
+            this.studentModel.updateMany({ _id: { $in: parent.studentIds } }, { $pull: { parentIds: parentOid } }),
+            this.studentModel.updateMany({ fatherId: parentOid }, { $set: { fatherId: null } }),
+            this.studentModel.updateMany({ motherId: parentOid }, { $set: { motherId: null } }),
+            this.studentModel.updateMany({ guardianId: parentOid }, { $set: { guardianId: null } }),
         ]);
+    }
+    async checkBulkDuplicates(dnis, emails) {
+        const [byDni, byEmail] = await Promise.all([
+            dnis.length ? this.parentModel.find({ dni: { $in: dnis } }).select('dni').lean() : [],
+            emails.length ? this.parentModel.find({ email: { $in: emails.map((e) => e.toLowerCase()) } }).select('email').lean() : [],
+        ]);
+        return {
+            duplicateDnis: byDni.map((p) => p.dni),
+            duplicateEmails: byEmail.map((p) => p.email),
+        };
+    }
+    async bulkCreate(records) {
+        const created = [];
+        const failed = [];
+        for (let i = 0; i < records.length; i++) {
+            try {
+                const record = records[i];
+                const email = record.email?.trim() || `${(record.dni ?? '').replace(/\s/g, '')}@escuela.local`;
+                const parent = await this.create({ ...record, email });
+                created.push(parent);
+            }
+            catch (e) {
+                failed.push({ row: i + 2, data: records[i], error: e.message ?? 'Error desconocido' });
+            }
+        }
+        return { total: records.length, successCount: created.length, failureCount: failed.length, created, failed };
     }
     async _linkStudents(parentId, studentIds) {
         const parentOid = new mongoose_2.Types.ObjectId(parentId);
