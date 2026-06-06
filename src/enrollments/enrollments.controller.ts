@@ -2,6 +2,8 @@ import { Controller, Get, Post, Put, Delete, Patch, Body, Param, Query, UseGuard
 import { EnrollmentsService } from './enrollments.service';
 import { CreateEnrollmentDto } from './dto/create-enrollment.dto';
 import { UpdateEnrollmentDto } from './dto/update-enrollment.dto';
+import { BulkPreviewDto } from './dto/bulk-preview.dto';
+import { BulkEnrollDto } from './dto/bulk-enroll.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -25,6 +27,16 @@ export class EnrollmentsController {
   @Roles(Role.SuperAdmin, Role.Admin, Role.Teacher)
   getStats() {
     return this.enrollmentsService.getStats();
+  }
+
+  @Post('bulk-preview')
+  bulkPreview(@Body() dto: BulkPreviewDto) {
+    return this.enrollmentsService.bulkPreview(dto);
+  }
+
+  @Post('bulk')
+  bulkCreate(@Body() dto: BulkEnrollDto) {
+    return this.enrollmentsService.bulkCreate(dto);
   }
 
   @Get(':id')

@@ -12,6 +12,7 @@ const mongoose_1 = require("@nestjs/mongoose");
 const enrollments_service_1 = require("./enrollments.service");
 const enrollments_controller_1 = require("./enrollments.controller");
 const enrollment_schema_1 = require("./schemas/enrollment.schema");
+const student_schema_1 = require("../students/schemas/student.schema");
 const notifications_module_1 = require("../notifications/notifications.module");
 let EnrollmentsModule = class EnrollmentsModule {
 };
@@ -19,7 +20,10 @@ exports.EnrollmentsModule = EnrollmentsModule;
 exports.EnrollmentsModule = EnrollmentsModule = __decorate([
     (0, common_1.Module)({
         imports: [
-            mongoose_1.MongooseModule.forFeature([{ name: enrollment_schema_1.Enrollment.name, schema: enrollment_schema_1.EnrollmentSchema }]),
+            mongoose_1.MongooseModule.forFeature([
+                { name: enrollment_schema_1.Enrollment.name, schema: enrollment_schema_1.EnrollmentSchema },
+                { name: student_schema_1.Student.name, schema: student_schema_1.StudentSchema },
+            ]),
             notifications_module_1.NotificationsModule,
         ],
         controllers: [enrollments_controller_1.EnrollmentsController],

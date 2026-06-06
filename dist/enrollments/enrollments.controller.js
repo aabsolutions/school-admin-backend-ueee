@@ -17,6 +17,8 @@ const common_1 = require("@nestjs/common");
 const enrollments_service_1 = require("./enrollments.service");
 const create_enrollment_dto_1 = require("./dto/create-enrollment.dto");
 const update_enrollment_dto_1 = require("./dto/update-enrollment.dto");
+const bulk_preview_dto_1 = require("./dto/bulk-preview.dto");
+const bulk_enroll_dto_1 = require("./dto/bulk-enroll.dto");
 const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
 const roles_guard_1 = require("../auth/guards/roles.guard");
 const roles_decorator_1 = require("../auth/decorators/roles.decorator");
@@ -33,6 +35,12 @@ let EnrollmentsController = class EnrollmentsController {
     }
     getStats() {
         return this.enrollmentsService.getStats();
+    }
+    bulkPreview(dto) {
+        return this.enrollmentsService.bulkPreview(dto);
+    }
+    bulkCreate(dto) {
+        return this.enrollmentsService.bulkCreate(dto);
     }
     findOne(id) {
         return this.enrollmentsService.findOne(id.toString());
@@ -65,6 +73,20 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], EnrollmentsController.prototype, "getStats", null);
+__decorate([
+    (0, common_1.Post)('bulk-preview'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [bulk_preview_dto_1.BulkPreviewDto]),
+    __metadata("design:returntype", void 0)
+], EnrollmentsController.prototype, "bulkPreview", null);
+__decorate([
+    (0, common_1.Post)('bulk'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [bulk_enroll_dto_1.BulkEnrollDto]),
+    __metadata("design:returntype", void 0)
+], EnrollmentsController.prototype, "bulkCreate", null);
 __decorate([
     (0, common_1.Get)(':id'),
     __param(0, (0, common_1.Param)('id', parse_object_id_pipe_1.ParseObjectIdPipe)),

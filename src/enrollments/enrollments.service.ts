@@ -2,8 +2,11 @@ import { Injectable, NotFoundException, ConflictException } from '@nestjs/common
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Enrollment, EnrollmentDocument } from './schemas/enrollment.schema';
+import { Student, StudentDocument } from '../students/schemas/student.schema';
 import { CreateEnrollmentDto } from './dto/create-enrollment.dto';
 import { UpdateEnrollmentDto } from './dto/update-enrollment.dto';
+import { BulkPreviewDto } from './dto/bulk-preview.dto';
+import { BulkEnrollDto } from './dto/bulk-enroll.dto';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { NotificationsService } from '../notifications/notifications.service';
 
@@ -12,6 +15,8 @@ export class EnrollmentsService {
   constructor(
     @InjectModel(Enrollment.name)
     private readonly enrollmentModel: Model<EnrollmentDocument>,
+    @InjectModel(Student.name)
+    private readonly studentModel: Model<StudentDocument>,
     private readonly notificationsService: NotificationsService,
   ) {}
 
@@ -114,6 +119,67 @@ export class EnrollmentsService {
   async remove(id: string): Promise<void> {
     const result = await this.enrollmentModel.findByIdAndDelete(id);
     if (!result) throw new NotFoundException('Matrícula no encontrada');
+  }
+
+  async bulkPreview(dto: BulkPreviewDto) {
+    const cursoLectivoId = new Types.ObjectId(dto.cursoLectivoId);
+    const results: {
+      dni: string;
+      studentId?: string;
+      name?: string;
+      status: 'ready' | 'already_enrolled' | 'not_found';
+    }[] = [];
+
+    for (const raw of dto.dnis) {
+      const dni = raw.trim();
+      const student = await this.studentModel
+        .findOne({ dni })
+        .select('_id name dni')
+        .lean();
+
+      if (!student) {
+        results.push({ dni, status: 'not_found' });
+        continue;
+      }
+
+      const existing = await this.enrollmentModel
+        .findOne({ studentId: student._id, cursoLectivoId })
+        .lean();
+
+      results.push({
+        dni,
+        studentId: (student._id as Types.ObjectId).toString(),
+        name: student.name,
+        status: existing ? 'already_enrolled' : 'ready',
+      });
+    }
+
+    return results;
+  }
+
+  async bulkCreate(dto: BulkEnrollDto) {
+    const cursoLectivoId = new Types.ObjectId(dto.cursoLectivoId);
+    let created = 0;
+    let skipped = 0;
+    const errors: string[] = [];
+
+    for (const studentId of dto.studentIds) {
+      try {
+        await new this.enrollmentModel({
+          studentId: new Types.ObjectId(studentId),
+          cursoLectivoId,
+        }).save();
+        created++;
+      } catch (err) {
+        if (err.code === 11000) {
+          skipped++;
+        } else {
+          errors.push(studentId);
+        }
+      }
+    }
+
+    return { created, skipped, errors };
   }
 
   async getStats(): Promise<{ cursoLectivoId: string; total: number; male: number; female: number }[]> {

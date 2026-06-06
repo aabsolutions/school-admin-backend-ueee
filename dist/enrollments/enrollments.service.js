@@ -17,10 +17,12 @@ const common_1 = require("@nestjs/common");
 const mongoose_1 = require("@nestjs/mongoose");
 const mongoose_2 = require("mongoose");
 const enrollment_schema_1 = require("./schemas/enrollment.schema");
+const student_schema_1 = require("../students/schemas/student.schema");
 const notifications_service_1 = require("../notifications/notifications.service");
 let EnrollmentsService = class EnrollmentsService {
-    constructor(enrollmentModel, notificationsService) {
+    constructor(enrollmentModel, studentModel, notificationsService) {
         this.enrollmentModel = enrollmentModel;
+        this.studentModel = studentModel;
         this.notificationsService = notificationsService;
     }
     async findAll(query) {
@@ -103,6 +105,55 @@ let EnrollmentsService = class EnrollmentsService {
         if (!result)
             throw new common_1.NotFoundException('Matrícula no encontrada');
     }
+    async bulkPreview(dto) {
+        const cursoLectivoId = new mongoose_2.Types.ObjectId(dto.cursoLectivoId);
+        const results = [];
+        for (const raw of dto.dnis) {
+            const dni = raw.trim();
+            const student = await this.studentModel
+                .findOne({ dni })
+                .select('_id name dni')
+                .lean();
+            if (!student) {
+                results.push({ dni, status: 'not_found' });
+                continue;
+            }
+            const existing = await this.enrollmentModel
+                .findOne({ studentId: student._id, cursoLectivoId })
+                .lean();
+            results.push({
+                dni,
+                studentId: student._id.toString(),
+                name: student.name,
+                status: existing ? 'already_enrolled' : 'ready',
+            });
+        }
+        return results;
+    }
+    async bulkCreate(dto) {
+        const cursoLectivoId = new mongoose_2.Types.ObjectId(dto.cursoLectivoId);
+        let created = 0;
+        let skipped = 0;
+        const errors = [];
+        for (const studentId of dto.studentIds) {
+            try {
+                await new this.enrollmentModel({
+                    studentId: new mongoose_2.Types.ObjectId(studentId),
+                    cursoLectivoId,
+                }).save();
+                created++;
+            }
+            catch (err) {
+                if (err.code === 11000) {
+                    skipped++;
+                }
+                else {
+                    errors.push(studentId);
+                }
+            }
+        }
+        return { created, skipped, errors };
+    }
     async getStats() {
         const enrollments = await this.enrollmentModel
             .find({ status: 'enrolled' })
@@ -130,7 +181,9 @@ exports.EnrollmentsService = EnrollmentsService;
 exports.EnrollmentsService = EnrollmentsService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, mongoose_1.InjectModel)(enrollment_schema_1.Enrollment.name)),
+    __param(1, (0, mongoose_1.InjectModel)(student_schema_1.Student.name)),
     __metadata("design:paramtypes", [mongoose_2.Model,
+        mongoose_2.Model,
         notifications_service_1.NotificationsService])
 ], EnrollmentsService);
 //# sourceMappingURL=enrollments.service.js.map

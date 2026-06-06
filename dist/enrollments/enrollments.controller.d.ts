@@ -1,6 +1,8 @@
 import { EnrollmentsService } from './enrollments.service';
 import { CreateEnrollmentDto } from './dto/create-enrollment.dto';
 import { UpdateEnrollmentDto } from './dto/update-enrollment.dto';
+import { BulkPreviewDto } from './dto/bulk-preview.dto';
+import { BulkEnrollDto } from './dto/bulk-enroll.dto';
 import { EnrollmentQueryDto } from './dto/enrollment-query.dto';
 import { Types } from 'mongoose';
 export declare class EnrollmentsController {
@@ -25,6 +27,17 @@ export declare class EnrollmentsController {
         male: number;
         female: number;
     }[]>;
+    bulkPreview(dto: BulkPreviewDto): Promise<{
+        dni: string;
+        studentId?: string;
+        name?: string;
+        status: "ready" | "already_enrolled" | "not_found";
+    }[]>;
+    bulkCreate(dto: BulkEnrollDto): Promise<{
+        created: number;
+        skipped: number;
+        errors: string[];
+    }>;
     findOne(id: Types.ObjectId): Promise<import("./schemas/enrollment.schema").EnrollmentDocument>;
     create(dto: CreateEnrollmentDto): Promise<import("./schemas/enrollment.schema").EnrollmentDocument>;
     update(id: Types.ObjectId, dto: UpdateEnrollmentDto): Promise<import("./schemas/enrollment.schema").EnrollmentDocument>;
