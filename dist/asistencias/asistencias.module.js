@@ -16,6 +16,7 @@ const attendance_record_schema_1 = require("./schemas/attendance-record.schema")
 const curso_lectivo_schema_1 = require("../curso-lectivo/schemas/curso-lectivo.schema");
 const enrollment_schema_1 = require("../enrollments/schemas/enrollment.schema");
 const parent_schema_1 = require("../parents/schemas/parent.schema");
+const student_schema_1 = require("../students/schemas/student.schema");
 const communicados_module_1 = require("../communicados/communicados.module");
 let AsistenciasModule = class AsistenciasModule {
 };
@@ -29,6 +30,7 @@ exports.AsistenciasModule = AsistenciasModule = __decorate([
                 { name: curso_lectivo_schema_1.CursoLectivo.name, schema: curso_lectivo_schema_1.CursoLectivoSchema },
                 { name: enrollment_schema_1.Enrollment.name, schema: enrollment_schema_1.EnrollmentSchema },
                 { name: parent_schema_1.Parent.name, schema: parent_schema_1.ParentSchema },
+                { name: student_schema_1.Student.name, schema: student_schema_1.StudentSchema },
             ]),
             communicados_module_1.CommunicadosModule,
         ],

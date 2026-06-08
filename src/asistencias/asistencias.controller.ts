@@ -13,6 +13,7 @@ import { AsistenciasService } from './asistencias.service';
 import { CreateAssignmentDto } from './dto/create-assignment.dto';
 import { SaveAttendanceDto } from './dto/save-attendance.dto';
 import { AttendanceQueryDto } from './dto/attendance-query.dto';
+import { ReporteMasivoQueryDto } from './dto/reporte-masivo-query.dto';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -107,6 +108,12 @@ export class AsistenciasController {
     @Query() query: AttendanceQueryDto,
   ) {
     return this.asistenciasService.getStudentHistory(id.toString(), query);
+  }
+
+  @Get('records/reporte-masivo')
+  @Roles(Role.Admin, Role.SuperAdmin)
+  getReporteMasivo(@Query() query: ReporteMasivoQueryDto) {
+    return this.asistenciasService.getReporteMasivo(query);
   }
 
   @Get('records')

@@ -4,19 +4,22 @@ import { AttendanceRecord, AttendanceRecordDocument } from './schemas/attendance
 import { CursoLectivoDocument } from '../curso-lectivo/schemas/curso-lectivo.schema';
 import { EnrollmentDocument } from '../enrollments/schemas/enrollment.schema';
 import { ParentDocument } from '../parents/schemas/parent.schema';
+import { StudentDocument } from '../students/schemas/student.schema';
 import { CommunicadosService } from '../communicados/communicados.service';
 import { CreateAssignmentDto } from './dto/create-assignment.dto';
 import { SaveAttendanceDto } from './dto/save-attendance.dto';
 import { AttendanceQueryDto } from './dto/attendance-query.dto';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
+import { ReporteMasivoQueryDto } from './dto/reporte-masivo-query.dto';
 export declare class AsistenciasService {
     private readonly assignmentModel;
     private readonly recordModel;
     private readonly cursoLectivoModel;
     private readonly enrollmentModel;
     private readonly parentModel;
+    private readonly studentModel;
     private readonly communicadosService;
-    constructor(assignmentModel: Model<AttendanceAssignmentDocument>, recordModel: Model<AttendanceRecordDocument>, cursoLectivoModel: Model<CursoLectivoDocument>, enrollmentModel: Model<EnrollmentDocument>, parentModel: Model<ParentDocument>, communicadosService: CommunicadosService);
+    constructor(assignmentModel: Model<AttendanceAssignmentDocument>, recordModel: Model<AttendanceRecordDocument>, cursoLectivoModel: Model<CursoLectivoDocument>, enrollmentModel: Model<EnrollmentDocument>, parentModel: Model<ParentDocument>, studentModel: Model<StudentDocument>, communicadosService: CommunicadosService);
     createAssignment(dto: CreateAssignmentDto): Promise<AttendanceAssignment & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
         _id: Types.ObjectId;
     }> & {
@@ -108,4 +111,12 @@ export declare class AsistenciasService {
         limit: number;
         totalPages: number;
     }>;
+    getReporteMasivo(dto: ReporteMasivoQueryDto): Promise<{
+        studentId: string;
+        name: string;
+        dni: string;
+        cursoNombre: string;
+        academicYear: string;
+        count: number;
+    }[]>;
 }

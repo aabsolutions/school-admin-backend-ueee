@@ -19,6 +19,7 @@ const asistencias_service_1 = require("./asistencias.service");
 const create_assignment_dto_1 = require("./dto/create-assignment.dto");
 const save_attendance_dto_1 = require("./dto/save-attendance.dto");
 const attendance_query_dto_1 = require("./dto/attendance-query.dto");
+const reporte_masivo_query_dto_1 = require("./dto/reporte-masivo-query.dto");
 const pagination_query_dto_1 = require("../common/dto/pagination-query.dto");
 const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
 const roles_guard_1 = require("../auth/guards/roles.guard");
@@ -59,6 +60,9 @@ let AsistenciasController = class AsistenciasController {
     }
     getStudentHistory(id, query) {
         return this.asistenciasService.getStudentHistory(id.toString(), query);
+    }
+    getReporteMasivo(query) {
+        return this.asistenciasService.getReporteMasivo(query);
     }
     findAllRecords(query) {
         return this.asistenciasService.findAllRecords(query);
@@ -152,6 +156,14 @@ __decorate([
     __metadata("design:paramtypes", [mongoose_1.Types.ObjectId, attendance_query_dto_1.AttendanceQueryDto]),
     __metadata("design:returntype", void 0)
 ], AsistenciasController.prototype, "getStudentHistory", null);
+__decorate([
+    (0, common_1.Get)('records/reporte-masivo'),
+    (0, roles_decorator_1.Roles)(user_schema_1.Role.Admin, user_schema_1.Role.SuperAdmin),
+    __param(0, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [reporte_masivo_query_dto_1.ReporteMasivoQueryDto]),
+    __metadata("design:returntype", void 0)
+], AsistenciasController.prototype, "getReporteMasivo", null);
 __decorate([
     (0, common_1.Get)('records'),
     (0, roles_decorator_1.Roles)(user_schema_1.Role.Admin, user_schema_1.Role.SuperAdmin),

@@ -21,14 +21,16 @@ const attendance_record_schema_1 = require("./schemas/attendance-record.schema")
 const curso_lectivo_schema_1 = require("../curso-lectivo/schemas/curso-lectivo.schema");
 const enrollment_schema_1 = require("../enrollments/schemas/enrollment.schema");
 const parent_schema_1 = require("../parents/schemas/parent.schema");
+const student_schema_1 = require("../students/schemas/student.schema");
 const communicados_service_1 = require("../communicados/communicados.service");
 let AsistenciasService = class AsistenciasService {
-    constructor(assignmentModel, recordModel, cursoLectivoModel, enrollmentModel, parentModel, communicadosService) {
+    constructor(assignmentModel, recordModel, cursoLectivoModel, enrollmentModel, parentModel, studentModel, communicadosService) {
         this.assignmentModel = assignmentModel;
         this.recordModel = recordModel;
         this.cursoLectivoModel = cursoLectivoModel;
         this.enrollmentModel = enrollmentModel;
         this.parentModel = parentModel;
+        this.studentModel = studentModel;
         this.communicadosService = communicadosService;
     }
     async createAssignment(dto) {
@@ -238,7 +240,7 @@ let AsistenciasService = class AsistenciasService {
             ]),
         ]);
         const totalStudents = entriesAgg.length;
-        const totalPresences = entriesAgg.reduce((s, e) => s + e.present, 0);
+        const totalPresences = entriesAgg.reduce((s, e) => s + e.present + e.late, 0);
         const totalAbsences = entriesAgg.reduce((s, e) => s + e.absent, 0);
         const totalPossible = totalStudents * totalDays;
         return {
@@ -426,6 +428,69 @@ let AsistenciasService = class AsistenciasService {
             throw new common_1.NotFoundException('Estudiante no encontrado');
         return this.getStudentHistory(studentId, query);
     }
+    async getReporteMasivo(dto) {
+        const { status, dateFrom, dateTo, minCount = 2, jornada } = dto;
+        const dateMatch = {};
+        if (dateFrom)
+            dateMatch.$gte = new Date(dateFrom);
+        if (dateTo) {
+            const to = new Date(dateTo);
+            to.setUTCHours(23, 59, 59, 999);
+            dateMatch.$lte = to;
+        }
+        const pipeline = [];
+        if (Object.keys(dateMatch).length) {
+            pipeline.push({ $match: { date: dateMatch } });
+        }
+        pipeline.push({ $unwind: '$records' }, { $match: { 'records.status': status } }, { $group: { _id: '$records.studentId', count: { $sum: 1 } } }, { $match: { count: { $gte: minCount } } });
+        const counts = await this.recordModel.aggregate(pipeline);
+        if (!counts.length)
+            return [];
+        const studentIds = counts.map((c) => c._id);
+        const countMap = new Map(counts.map((c) => [c._id.toString(), c.count]));
+        const students = await this.studentModel
+            .find({ _id: { $in: studentIds } })
+            .select('name dni')
+            .lean();
+        const studentMap = new Map(students.map((s) => [s._id.toString(), { name: s.name, dni: s.dni }]));
+        const enrollments = await this.enrollmentModel
+            .find({ studentId: { $in: studentIds }, status: 'enrolled' })
+            .sort({ createdAt: -1 })
+            .populate({
+            path: 'cursoLectivoId',
+            populate: { path: 'cursoId', select: 'nivel paralelo jornada' },
+        })
+            .lean();
+        const enrollmentMap = new Map();
+        for (const e of enrollments) {
+            const sid = e.studentId.toString();
+            if (enrollmentMap.has(sid))
+                continue;
+            const cl = e.cursoLectivoId;
+            const curso = cl?.cursoId;
+            const cursoNombre = curso
+                ? [curso.nivel, curso.paralelo, curso.jornada].filter(Boolean).join(' ')
+                : '';
+            enrollmentMap.set(sid, { cursoNombre, academicYear: cl?.academicYear ?? '' });
+        }
+        let result = studentIds.map((id) => {
+            const sid = id.toString();
+            const student = studentMap.get(sid);
+            const enrollment = enrollmentMap.get(sid);
+            return {
+                studentId: sid,
+                name: student?.name ?? 'Desconocido',
+                dni: student?.dni,
+                cursoNombre: enrollment?.cursoNombre ?? '',
+                academicYear: enrollment?.academicYear ?? '',
+                count: countMap.get(sid) ?? 0,
+            };
+        });
+        if (jornada) {
+            result = result.filter((r) => r.cursoNombre.includes(jornada));
+        }
+        return result;
+    }
 };
 exports.AsistenciasService = AsistenciasService;
 exports.AsistenciasService = AsistenciasService = __decorate([
@@ -435,7 +500,9 @@ exports.AsistenciasService = AsistenciasService = __decorate([
     __param(2, (0, mongoose_1.InjectModel)(curso_lectivo_schema_1.CursoLectivo.name)),
     __param(3, (0, mongoose_1.InjectModel)(enrollment_schema_1.Enrollment.name)),
     __param(4, (0, mongoose_1.InjectModel)(parent_schema_1.Parent.name)),
+    __param(5, (0, mongoose_1.InjectModel)(student_schema_1.Student.name)),
     __metadata("design:paramtypes", [mongoose_2.Model,
+        mongoose_2.Model,
         mongoose_2.Model,
         mongoose_2.Model,
         mongoose_2.Model,

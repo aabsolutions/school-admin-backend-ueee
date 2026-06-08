@@ -3,6 +3,7 @@ import { AsistenciasService } from './asistencias.service';
 import { CreateAssignmentDto } from './dto/create-assignment.dto';
 import { SaveAttendanceDto } from './dto/save-attendance.dto';
 import { AttendanceQueryDto } from './dto/attendance-query.dto';
+import { ReporteMasivoQueryDto } from './dto/reporte-masivo-query.dto';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 export declare class AsistenciasController {
     private readonly asistenciasService;
@@ -86,6 +87,14 @@ export declare class AsistenciasController {
         limit: number;
         totalPages: number;
     }>;
+    getReporteMasivo(query: ReporteMasivoQueryDto): Promise<{
+        studentId: string;
+        name: string;
+        dni: string;
+        cursoNombre: string;
+        academicYear: string;
+        count: number;
+    }[]>;
     findAllRecords(query: AttendanceQueryDto): Promise<{
         data: (import("./schemas/attendance-record.schema").AttendanceRecord & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
             _id: Types.ObjectId;
