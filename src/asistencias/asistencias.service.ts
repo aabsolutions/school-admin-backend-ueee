@@ -19,11 +19,13 @@ import {
 } from '../curso-lectivo/schemas/curso-lectivo.schema';
 import { Enrollment, EnrollmentDocument } from '../enrollments/schemas/enrollment.schema';
 import { Parent, ParentDocument } from '../parents/schemas/parent.schema';
+import { Student, StudentDocument } from '../students/schemas/student.schema';
 import { CommunicadosService } from '../communicados/communicados.service';
 import { CreateAssignmentDto } from './dto/create-assignment.dto';
 import { SaveAttendanceDto } from './dto/save-attendance.dto';
 import { AttendanceQueryDto } from './dto/attendance-query.dto';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
+import { ReporteMasivoQueryDto } from './dto/reporte-masivo-query.dto';
 
 @Injectable()
 export class AsistenciasService {
@@ -38,6 +40,8 @@ export class AsistenciasService {
     private readonly enrollmentModel: Model<EnrollmentDocument>,
     @InjectModel(Parent.name)
     private readonly parentModel: Model<ParentDocument>,
+    @InjectModel(Student.name)
+    private readonly studentModel: Model<StudentDocument>,
     private readonly communicadosService: CommunicadosService,
   ) {}
 
@@ -297,7 +301,7 @@ export class AsistenciasService {
     ]);
 
     const totalStudents = entriesAgg.length;
-    const totalPresences = entriesAgg.reduce((s, e) => s + e.present, 0);
+    const totalPresences = entriesAgg.reduce((s, e) => s + e.present + e.late, 0);
     const totalAbsences = entriesAgg.reduce((s, e) => s + e.absent, 0);
     const totalPossible = totalStudents * totalDays;
 
@@ -504,5 +508,85 @@ export class AsistenciasService {
     if (!owns) throw new NotFoundException('Estudiante no encontrado');
 
     return this.getStudentHistory(studentId, query);
+  }
+
+  async getReporteMasivo(dto: ReporteMasivoQueryDto) {
+    const { status, dateFrom, dateTo, minCount = 2, jornada } = dto;
+
+    const dateMatch: Record<string, Date> = {};
+    if (dateFrom) dateMatch.$gte = new Date(dateFrom);
+    if (dateTo) {
+      const to = new Date(dateTo);
+      to.setUTCHours(23, 59, 59, 999);
+      dateMatch.$lte = to;
+    }
+
+    const pipeline: any[] = [];
+    if (Object.keys(dateMatch).length) {
+      pipeline.push({ $match: { date: dateMatch } });
+    }
+    pipeline.push(
+      { $unwind: '$records' },
+      { $match: { 'records.status': status } },
+      { $group: { _id: '$records.studentId', count: { $sum: 1 } } },
+      { $match: { count: { $gte: minCount } } },
+    );
+
+    const counts: Array<{ _id: Types.ObjectId; count: number }> =
+      await this.recordModel.aggregate(pipeline);
+
+    if (!counts.length) return [];
+
+    const studentIds = counts.map((c) => c._id);
+    const countMap = new Map(counts.map((c) => [c._id.toString(), c.count]));
+
+    const students = await this.studentModel
+      .find({ _id: { $in: studentIds } })
+      .select('name dni')
+      .lean();
+    const studentMap = new Map(
+      students.map((s) => [s._id.toString(), { name: s.name as string, dni: s.dni as string | undefined }]),
+    );
+
+    const enrollments = await this.enrollmentModel
+      .find({ studentId: { $in: studentIds }, status: 'enrolled' })
+      .sort({ createdAt: -1 })
+      .populate({
+        path: 'cursoLectivoId',
+        populate: { path: 'cursoId', select: 'nivel paralelo jornada' },
+      })
+      .lean();
+
+    const enrollmentMap = new Map<string, { cursoNombre: string; academicYear: string }>();
+    for (const e of enrollments) {
+      const sid = (e.studentId as Types.ObjectId).toString();
+      if (enrollmentMap.has(sid)) continue;
+      const cl = e.cursoLectivoId as any;
+      const curso = cl?.cursoId as any;
+      const cursoNombre = curso
+        ? [curso.nivel, curso.paralelo, curso.jornada].filter(Boolean).join(' ')
+        : '';
+      enrollmentMap.set(sid, { cursoNombre, academicYear: cl?.academicYear ?? '' });
+    }
+
+    let result = studentIds.map((id) => {
+      const sid = id.toString();
+      const student = studentMap.get(sid);
+      const enrollment = enrollmentMap.get(sid);
+      return {
+        studentId: sid,
+        name: student?.name ?? 'Desconocido',
+        dni: student?.dni,
+        cursoNombre: enrollment?.cursoNombre ?? '',
+        academicYear: enrollment?.academicYear ?? '',
+        count: countMap.get(sid) ?? 0,
+      };
+    });
+
+    if (jornada) {
+      result = result.filter((r) => r.cursoNombre.includes(jornada));
+    }
+
+    return result;
   }
 }
