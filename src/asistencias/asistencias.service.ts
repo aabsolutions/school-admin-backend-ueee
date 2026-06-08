@@ -422,6 +422,40 @@ export class AsistenciasService {
       },
       { $unwind: { path: '$student', preserveNullAndEmptyArrays: true } },
       {
+        $lookup: {
+          from: 'enrollments',
+          localField: '_id',
+          foreignField: 'studentId',
+          as: 'enrollment',
+          pipeline: [
+            { $match: { status: 'enrolled' } },
+            {
+              $lookup: {
+                from: 'cursolectivos',
+                localField: 'cursoLectivoId',
+                foreignField: '_id',
+                as: 'cursoLectivo',
+                pipeline: [
+                  { $match: { status: 'active' } },
+                  {
+                    $lookup: {
+                      from: 'cursos',
+                      localField: 'cursoId',
+                      foreignField: '_id',
+                      as: 'curso',
+                    },
+                  },
+                  { $unwind: { path: '$curso', preserveNullAndEmptyArrays: true } },
+                ],
+              },
+            },
+            { $unwind: { path: '$cursoLectivo', preserveNullAndEmptyArrays: true } },
+            { $limit: 1 },
+          ],
+        },
+      },
+      { $unwind: { path: '$enrollment', preserveNullAndEmptyArrays: true } },
+      {
         $project: {
           _id: 0,
           studentId: '$_id',
@@ -431,8 +465,44 @@ export class AsistenciasService {
           late: 1,
           excused: 1,
           recentRecords: { $slice: ['$recentRecords', -10] },
+          cursoNombre: {
+            $cond: {
+              if: '$enrollment.cursoLectivo.curso',
+              then: {
+                $concat: [
+                  { $ifNull: ['$enrollment.cursoLectivo.curso.nivel', ''] },
+                  ' ',
+                  { $ifNull: ['$enrollment.cursoLectivo.curso.paralelo', ''] },
+                  ' ',
+                  { $ifNull: ['$enrollment.cursoLectivo.curso.jornada', ''] },
+                ],
+              },
+              else: '',
+            },
+          },
+          academicYear: { $ifNull: ['$enrollment.cursoLectivo.academicYear', ''] },
         },
       },
     ]);
+  }
+
+  async getMyChildrenHistory(
+    parentUserId: string,
+    studentId: string,
+    query: AttendanceQueryDto,
+  ) {
+    const parent = await this.parentModel
+      .findOne({ userId: new Types.ObjectId(parentUserId) })
+      .select('studentIds')
+      .lean();
+
+    if (!parent) throw new NotFoundException('Perfil de representante no encontrado');
+
+    const owns = (parent.studentIds ?? []).some(
+      (id) => id.toString() === studentId,
+    );
+    if (!owns) throw new NotFoundException('Estudiante no encontrado');
+
+    return this.getStudentHistory(studentId, query);
   }
 }

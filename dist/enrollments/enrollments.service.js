@@ -89,10 +89,22 @@ let EnrollmentsService = class EnrollmentsService {
         }
     }
     async update(id, dto) {
-        const updated = await this.enrollmentModel.findByIdAndUpdate(id, dto, { new: true });
-        if (!updated)
-            throw new common_1.NotFoundException('Matrícula no encontrada');
-        return this.findOne(id);
+        const payload = { ...dto };
+        if (dto.cursoLectivoId) {
+            payload.cursoLectivoId = new mongoose_2.Types.ObjectId(dto.cursoLectivoId);
+        }
+        try {
+            const updated = await this.enrollmentModel.findByIdAndUpdate(id, { $set: payload }, { new: true });
+            if (!updated)
+                throw new common_1.NotFoundException('Matrícula no encontrada');
+            return this.findOne(id);
+        }
+        catch (err) {
+            if (err.code === 11000) {
+                throw new common_1.ConflictException('El estudiante ya está matriculado en ese curso lectivo');
+            }
+            throw err;
+        }
     }
     async withdraw(id) {
         const updated = await this.enrollmentModel.findByIdAndUpdate(id, { status: 'withdrawn' }, { new: true });

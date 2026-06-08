@@ -52,6 +52,9 @@ let ParentsController = class ParentsController {
     getHijos(user) {
         return this.svc.getHijos(user.id);
     }
+    getHijosDashboard(user) {
+        return this.svc.getHijosDashboard(user.id);
+    }
     getHijosActivos(user) {
         return this.svc.getHijosActivos(user.id);
     }
@@ -129,6 +132,14 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], ParentsController.prototype, "getHijos", null);
+__decorate([
+    (0, common_1.Get)('me/hijos-dashboard'),
+    (0, roles_decorator_1.Roles)(user_schema_1.Role.Parent),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], ParentsController.prototype, "getHijosDashboard", null);
 __decorate([
     (0, common_1.Get)('me/hijos-activos'),
     (0, roles_decorator_1.Roles)(user_schema_1.Role.Parent),

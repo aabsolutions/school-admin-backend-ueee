@@ -101,4 +101,11 @@ export declare class AsistenciasService {
         totalPages: number;
     }>;
     getMyChildrenAttendance(parentUserId: string, query: AttendanceQueryDto): Promise<any[]>;
+    getMyChildrenHistory(parentUserId: string, studentId: string, query: AttendanceQueryDto): Promise<{
+        data: any[];
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
+    }>;
 }

@@ -91,6 +91,15 @@ export class AsistenciasController {
     return this.asistenciasService.getMyChildrenAttendance(user.id, query);
   }
 
+  @Get('records/my-children/history')
+  @Roles(Role.Parent)
+  getMyChildrenHistory(
+    @CurrentUser() user: any,
+    @Query() query: AttendanceQueryDto,
+  ) {
+    return this.asistenciasService.getMyChildrenHistory(user.id, query.studentId!, query);
+  }
+
   @Get('records/student/:id')
   @Roles(Role.Admin, Role.SuperAdmin, Role.Teacher, Role.Student)
   getStudentHistory(

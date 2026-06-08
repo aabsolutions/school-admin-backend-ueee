@@ -20,12 +20,22 @@ const parent_schema_1 = require("./schemas/parent.schema");
 const student_schema_1 = require("../students/schemas/student.schema");
 const user_schema_1 = require("../users/schemas/user.schema");
 const enrollment_schema_1 = require("../enrollments/schemas/enrollment.schema");
+const expediente_schema_1 = require("../expedientes/schemas/expediente.schema");
+const expediente_registro_schema_1 = require("../expedientes/schemas/expediente-registro.schema");
+const dece_expediente_schema_1 = require("../dece/schemas/dece-expediente.schema");
+const dece_registro_schema_1 = require("../dece/schemas/dece-registro.schema");
+const attendance_record_schema_1 = require("../asistencias/schemas/attendance-record.schema");
 let ParentsService = class ParentsService {
-    constructor(parentModel, studentModel, userModel, enrollmentModel) {
+    constructor(parentModel, studentModel, userModel, enrollmentModel, expedienteModel, expedienteRegistroModel, deceExpedienteModel, deceRegistroModel, attendanceRecordModel) {
         this.parentModel = parentModel;
         this.studentModel = studentModel;
         this.userModel = userModel;
         this.enrollmentModel = enrollmentModel;
+        this.expedienteModel = expedienteModel;
+        this.expedienteRegistroModel = expedienteRegistroModel;
+        this.deceExpedienteModel = deceExpedienteModel;
+        this.deceRegistroModel = deceRegistroModel;
+        this.attendanceRecordModel = attendanceRecordModel;
     }
     async create(dto) {
         const { username, password, studentIds, email: rawEmail, ...parentData } = dto;
@@ -282,6 +292,90 @@ let ParentsService = class ParentsService {
         }
         return { total: records.length, successCount: created.length, failureCount: failed.length, created, failed };
     }
+    async getHijosDashboard(parentUserId) {
+        const students = await this.getHijos(parentUserId);
+        if (!students.length)
+            return [];
+        const studentIds = students.map((s) => s._id);
+        const enrollmentDocs = await this.enrollmentModel
+            .find({ studentId: { $in: studentIds }, status: 'enrolled' })
+            .sort({ createdAt: -1 })
+            .populate({
+            path: 'cursoLectivoId',
+            populate: { path: 'cursoId', select: 'nivel paralelo jornada' },
+        })
+            .lean()
+            .exec();
+        const enrollmentMap = new Map();
+        for (const e of enrollmentDocs) {
+            const sid = e.studentId.toString();
+            if (enrollmentMap.has(sid))
+                continue;
+            const cl = e.cursoLectivoId;
+            const curso = cl?.cursoId;
+            const cursoNombre = curso
+                ? [curso.nivel, curso.paralelo, curso.jornada].filter(Boolean).join(' ')
+                : '';
+            enrollmentMap.set(sid, { cursoNombre, academicYear: cl?.academicYear ?? '' });
+        }
+        const expedientes = await this.expedienteModel
+            .find({ studentId: { $in: studentIds } })
+            .select('_id studentId')
+            .lean();
+        const expedienteIdMap = new Map(expedientes.map((e) => [e.studentId.toString(), e._id.toString()]));
+        const expedienteIds = expedientes.map((e) => e._id);
+        const deceExpedientes = await this.deceExpedienteModel
+            .find({ studentId: { $in: studentIds } })
+            .select('_id studentId')
+            .lean();
+        const deceExpedienteIdMap = new Map(deceExpedientes.map((e) => [e.studentId.toString(), e._id.toString()]));
+        const deceExpedienteIds = deceExpedientes.map((e) => e._id);
+        const expRegCounts = await this.expedienteRegistroModel.aggregate([
+            { $match: { expedienteId: { $in: expedienteIds } } },
+            { $group: { _id: '$expedienteId', count: { $sum: 1 } } },
+        ]);
+        const expRegCountMap = new Map(expRegCounts.map((r) => [r._id.toString(), r.count]));
+        const deceRegCounts = await this.deceRegistroModel.aggregate([
+            { $match: { expedienteId: { $in: deceExpedienteIds } } },
+            { $group: { _id: '$expedienteId', count: { $sum: 1 } } },
+        ]);
+        const deceRegCountMap = new Map(deceRegCounts.map((r) => [r._id.toString(), r.count]));
+        const attendanceAgg = await this.attendanceRecordModel.aggregate([
+            { $match: { 'records.studentId': { $in: studentIds } } },
+            { $unwind: '$records' },
+            { $match: { 'records.studentId': { $in: studentIds } } },
+            {
+                $group: {
+                    _id: '$records.studentId',
+                    present: { $sum: { $cond: [{ $eq: ['$records.status', 'present'] }, 1, 0] } },
+                    absent: { $sum: { $cond: [{ $eq: ['$records.status', 'absent'] }, 1, 0] } },
+                    late: { $sum: { $cond: [{ $eq: ['$records.status', 'late'] }, 1, 0] } },
+                    excused: { $sum: { $cond: [{ $eq: ['$records.status', 'excused'] }, 1, 0] } },
+                },
+            },
+        ]);
+        const attendanceMap = new Map(attendanceAgg.map((a) => [a._id.toString(), { present: a.present, absent: a.absent, late: a.late, excused: a.excused }]));
+        return students.map((student) => {
+            const sid = student._id.toString();
+            const enrollment = enrollmentMap.get(sid);
+            const expId = expedienteIdMap.get(sid);
+            const deceId = deceExpedienteIdMap.get(sid);
+            const att = attendanceMap.get(sid) ?? { present: 0, absent: 0, late: 0, excused: 0 };
+            const total = att.present + att.absent + att.late + att.excused;
+            const attended = att.present + att.late;
+            return {
+                student,
+                cursoNombre: enrollment?.cursoNombre ?? '',
+                academicYear: enrollment?.academicYear ?? '',
+                expedientesCount: expId ? (expRegCountMap.get(expId) ?? 0) : 0,
+                deceCount: deceId ? (deceRegCountMap.get(deceId) ?? 0) : 0,
+                attendanceStats: {
+                    ...att,
+                    rate: total > 0 ? Math.round((attended / total) * 100) : 0,
+                },
+            };
+        });
+    }
     async _linkStudents(parentId, studentIds) {
         const parentOid = new mongoose_2.Types.ObjectId(parentId);
         const studentOids = studentIds.map((s) => new mongoose_2.Types.ObjectId(s));
@@ -298,7 +392,17 @@ exports.ParentsService = ParentsService = __decorate([
     __param(1, (0, mongoose_1.InjectModel)(student_schema_1.Student.name)),
     __param(2, (0, mongoose_1.InjectModel)(user_schema_1.User.name)),
     __param(3, (0, mongoose_1.InjectModel)(enrollment_schema_1.Enrollment.name)),
+    __param(4, (0, mongoose_1.InjectModel)(expediente_schema_1.Expediente.name)),
+    __param(5, (0, mongoose_1.InjectModel)(expediente_registro_schema_1.ExpedienteRegistro.name)),
+    __param(6, (0, mongoose_1.InjectModel)(dece_expediente_schema_1.DeceExpediente.name)),
+    __param(7, (0, mongoose_1.InjectModel)(dece_registro_schema_1.DeceRegistro.name)),
+    __param(8, (0, mongoose_1.InjectModel)(attendance_record_schema_1.AttendanceRecord.name)),
     __metadata("design:paramtypes", [mongoose_2.Model,
+        mongoose_2.Model,
+        mongoose_2.Model,
+        mongoose_2.Model,
+        mongoose_2.Model,
+        mongoose_2.Model,
         mongoose_2.Model,
         mongoose_2.Model,
         mongoose_2.Model])

@@ -9,6 +9,11 @@ import { Parent, ParentDocument } from './schemas/parent.schema';
 import { Student, StudentDocument } from '../students/schemas/student.schema';
 import { User, UserDocument, Role } from '../users/schemas/user.schema';
 import { Enrollment, EnrollmentDocument } from '../enrollments/schemas/enrollment.schema';
+import { Expediente, ExpedienteDocument } from '../expedientes/schemas/expediente.schema';
+import { ExpedienteRegistro, ExpedienteRegistroDocument } from '../expedientes/schemas/expediente-registro.schema';
+import { DeceExpediente, DeceExpedienteDocument } from '../dece/schemas/dece-expediente.schema';
+import { DeceRegistro, DeceRegistroDocument } from '../dece/schemas/dece-registro.schema';
+import { AttendanceRecord, AttendanceRecordDocument } from '../asistencias/schemas/attendance-record.schema';
 import { CreateParentDto } from './dto/create-parent.dto';
 import { UpdateParentDto } from './dto/update-parent.dto';
 import { BulkParentItemDto, BulkParentImportResult } from './dto/bulk-create-parent.dto';
@@ -25,6 +30,16 @@ export class ParentsService {
     private readonly userModel: Model<UserDocument>,
     @InjectModel(Enrollment.name)
     private readonly enrollmentModel: Model<EnrollmentDocument>,
+    @InjectModel(Expediente.name)
+    private readonly expedienteModel: Model<ExpedienteDocument>,
+    @InjectModel(ExpedienteRegistro.name)
+    private readonly expedienteRegistroModel: Model<ExpedienteRegistroDocument>,
+    @InjectModel(DeceExpediente.name)
+    private readonly deceExpedienteModel: Model<DeceExpedienteDocument>,
+    @InjectModel(DeceRegistro.name)
+    private readonly deceRegistroModel: Model<DeceRegistroDocument>,
+    @InjectModel(AttendanceRecord.name)
+    private readonly attendanceRecordModel: Model<AttendanceRecordDocument>,
   ) {}
 
   async create(dto: CreateParentDto): Promise<ParentDocument> {
@@ -325,6 +340,110 @@ export class ParentsService {
       }
     }
     return { total: records.length, successCount: created.length, failureCount: failed.length, created, failed };
+  }
+
+  async getHijosDashboard(parentUserId: string) {
+    const students = await this.getHijos(parentUserId);
+    if (!students.length) return [];
+
+    const studentIds = students.map((s) => s._id as Types.ObjectId);
+
+    // Enrollment + curso info via populate (same pattern used across the system)
+    const enrollmentDocs = await this.enrollmentModel
+      .find({ studentId: { $in: studentIds }, status: 'enrolled' })
+      .sort({ createdAt: -1 })
+      .populate({
+        path: 'cursoLectivoId',
+        populate: { path: 'cursoId', select: 'nivel paralelo jornada' },
+      })
+      .lean()
+      .exec();
+
+    const enrollmentMap = new Map<string, { cursoNombre: string; academicYear: string }>();
+    for (const e of enrollmentDocs) {
+      const sid = (e.studentId as Types.ObjectId).toString();
+      if (enrollmentMap.has(sid)) continue; // sorted desc — first is most recent
+      const cl = e.cursoLectivoId as any;
+      const curso = cl?.cursoId as any;
+      const cursoNombre = curso
+        ? [curso.nivel, curso.paralelo, curso.jornada].filter(Boolean).join(' ')
+        : '';
+      enrollmentMap.set(sid, { cursoNombre, academicYear: cl?.academicYear ?? '' });
+    }
+
+    // Expediente IDs per student
+    const expedientes = await this.expedienteModel
+      .find({ studentId: { $in: studentIds } })
+      .select('_id studentId')
+      .lean();
+    const expedienteIdMap = new Map(
+      expedientes.map((e) => [e.studentId.toString(), (e._id as Types.ObjectId).toString()]),
+    );
+    const expedienteIds = expedientes.map((e) => e._id as Types.ObjectId);
+
+    // DECE expediente IDs per student
+    const deceExpedientes = await this.deceExpedienteModel
+      .find({ studentId: { $in: studentIds } })
+      .select('_id studentId')
+      .lean();
+    const deceExpedienteIdMap = new Map(
+      deceExpedientes.map((e) => [e.studentId.toString(), (e._id as Types.ObjectId).toString()]),
+    );
+    const deceExpedienteIds = deceExpedientes.map((e) => e._id as Types.ObjectId);
+
+    // Count registros per expediente
+    const expRegCounts = await this.expedienteRegistroModel.aggregate([
+      { $match: { expedienteId: { $in: expedienteIds } } },
+      { $group: { _id: '$expedienteId', count: { $sum: 1 } } },
+    ]);
+    const expRegCountMap = new Map(expRegCounts.map((r) => [r._id.toString(), r.count]));
+
+    const deceRegCounts = await this.deceRegistroModel.aggregate([
+      { $match: { expedienteId: { $in: deceExpedienteIds } } },
+      { $group: { _id: '$expedienteId', count: { $sum: 1 } } },
+    ]);
+    const deceRegCountMap = new Map(deceRegCounts.map((r) => [r._id.toString(), r.count]));
+
+    // Attendance stats per student
+    const attendanceAgg = await this.attendanceRecordModel.aggregate([
+      { $match: { 'records.studentId': { $in: studentIds } } },
+      { $unwind: '$records' },
+      { $match: { 'records.studentId': { $in: studentIds } } },
+      {
+        $group: {
+          _id: '$records.studentId',
+          present: { $sum: { $cond: [{ $eq: ['$records.status', 'present'] }, 1, 0] } },
+          absent: { $sum: { $cond: [{ $eq: ['$records.status', 'absent'] }, 1, 0] } },
+          late: { $sum: { $cond: [{ $eq: ['$records.status', 'late'] }, 1, 0] } },
+          excused: { $sum: { $cond: [{ $eq: ['$records.status', 'excused'] }, 1, 0] } },
+        },
+      },
+    ]);
+    const attendanceMap = new Map(
+      attendanceAgg.map((a) => [a._id.toString(), { present: a.present, absent: a.absent, late: a.late, excused: a.excused }]),
+    );
+
+    return students.map((student) => {
+      const sid = (student._id as Types.ObjectId).toString();
+      const enrollment = enrollmentMap.get(sid);
+      const expId = expedienteIdMap.get(sid);
+      const deceId = deceExpedienteIdMap.get(sid);
+      const att = attendanceMap.get(sid) ?? { present: 0, absent: 0, late: 0, excused: 0 };
+      const total = att.present + att.absent + att.late + att.excused;
+      // tardanzas cuentan como asistido
+      const attended = att.present + att.late;
+      return {
+        student,
+        cursoNombre: enrollment?.cursoNombre ?? '',
+        academicYear: enrollment?.academicYear ?? '',
+        expedientesCount: expId ? (expRegCountMap.get(expId) ?? 0) : 0,
+        deceCount: deceId ? (deceRegCountMap.get(deceId) ?? 0) : 0,
+        attendanceStats: {
+          ...att,
+          rate: total > 0 ? Math.round((attended / total) * 100) : 0,
+        },
+      };
+    });
   }
 
   private async _linkStudents(parentId: string, studentIds: string[]): Promise<void> {

@@ -54,6 +54,9 @@ let AsistenciasController = class AsistenciasController {
     getMyChildrenAttendance(user, query) {
         return this.asistenciasService.getMyChildrenAttendance(user.id, query);
     }
+    getMyChildrenHistory(user, query) {
+        return this.asistenciasService.getMyChildrenHistory(user.id, query.studentId, query);
+    }
     getStudentHistory(id, query) {
         return this.asistenciasService.getStudentHistory(id.toString(), query);
     }
@@ -131,6 +134,15 @@ __decorate([
     __metadata("design:paramtypes", [Object, attendance_query_dto_1.AttendanceQueryDto]),
     __metadata("design:returntype", void 0)
 ], AsistenciasController.prototype, "getMyChildrenAttendance", null);
+__decorate([
+    (0, common_1.Get)('records/my-children/history'),
+    (0, roles_decorator_1.Roles)(user_schema_1.Role.Parent),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, attendance_query_dto_1.AttendanceQueryDto]),
+    __metadata("design:returntype", void 0)
+], AsistenciasController.prototype, "getMyChildrenHistory", null);
 __decorate([
     (0, common_1.Get)('records/student/:id'),
     (0, roles_decorator_1.Roles)(user_schema_1.Role.Admin, user_schema_1.Role.SuperAdmin, user_schema_1.Role.Teacher, user_schema_1.Role.Student),

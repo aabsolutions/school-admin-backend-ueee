@@ -41,6 +41,24 @@ export declare class ParentsController {
     }> & {
         __v: number;
     })[]>;
+    getHijosDashboard(user: any): Promise<{
+        student: import("../students/schemas/student.schema").Student & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+            _id: Types.ObjectId;
+        }> & {
+            __v: number;
+        };
+        cursoNombre: string;
+        academicYear: string;
+        expedientesCount: any;
+        deceCount: any;
+        attendanceStats: {
+            rate: number;
+            present: any;
+            absent: any;
+            late: any;
+            excused: any;
+        };
+    }[]>;
     getHijosActivos(user: any): Promise<{
         student: any;
         cursoNombre: string;

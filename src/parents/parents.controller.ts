@@ -67,6 +67,12 @@ export class ParentsController {
     return this.svc.getHijos(user.id);
   }
 
+  @Get('me/hijos-dashboard')
+  @Roles(Role.Parent)
+  getHijosDashboard(@CurrentUser() user: any) {
+    return this.svc.getHijosDashboard(user.id);
+  }
+
   @Get('me/hijos-activos')
   @Roles(Role.Parent)
   getHijosActivos(@CurrentUser() user: any) {

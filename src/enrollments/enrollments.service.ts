@@ -101,9 +101,24 @@ export class EnrollmentsService {
   }
 
   async update(id: string, dto: UpdateEnrollmentDto): Promise<EnrollmentDocument> {
-    const updated = await this.enrollmentModel.findByIdAndUpdate(id, dto, { new: true });
-    if (!updated) throw new NotFoundException('Matrícula no encontrada');
-    return this.findOne(id);
+    const payload: Record<string, any> = { ...dto };
+    if (dto.cursoLectivoId) {
+      payload.cursoLectivoId = new Types.ObjectId(dto.cursoLectivoId);
+    }
+    try {
+      const updated = await this.enrollmentModel.findByIdAndUpdate(
+        id,
+        { $set: payload },
+        { new: true },
+      );
+      if (!updated) throw new NotFoundException('Matrícula no encontrada');
+      return this.findOne(id);
+    } catch (err) {
+      if (err.code === 11000) {
+        throw new ConflictException('El estudiante ya está matriculado en ese curso lectivo');
+      }
+      throw err;
+    }
   }
 
   async withdraw(id: string): Promise<EnrollmentDocument> {

@@ -3,6 +3,11 @@ import { Parent, ParentDocument } from './schemas/parent.schema';
 import { Student, StudentDocument } from '../students/schemas/student.schema';
 import { UserDocument } from '../users/schemas/user.schema';
 import { EnrollmentDocument } from '../enrollments/schemas/enrollment.schema';
+import { ExpedienteDocument } from '../expedientes/schemas/expediente.schema';
+import { ExpedienteRegistroDocument } from '../expedientes/schemas/expediente-registro.schema';
+import { DeceExpedienteDocument } from '../dece/schemas/dece-expediente.schema';
+import { DeceRegistroDocument } from '../dece/schemas/dece-registro.schema';
+import { AttendanceRecordDocument } from '../asistencias/schemas/attendance-record.schema';
 import { CreateParentDto } from './dto/create-parent.dto';
 import { UpdateParentDto } from './dto/update-parent.dto';
 import { BulkParentItemDto, BulkParentImportResult } from './dto/bulk-create-parent.dto';
@@ -12,7 +17,12 @@ export declare class ParentsService {
     private readonly studentModel;
     private readonly userModel;
     private readonly enrollmentModel;
-    constructor(parentModel: Model<ParentDocument>, studentModel: Model<StudentDocument>, userModel: Model<UserDocument>, enrollmentModel: Model<EnrollmentDocument>);
+    private readonly expedienteModel;
+    private readonly expedienteRegistroModel;
+    private readonly deceExpedienteModel;
+    private readonly deceRegistroModel;
+    private readonly attendanceRecordModel;
+    constructor(parentModel: Model<ParentDocument>, studentModel: Model<StudentDocument>, userModel: Model<UserDocument>, enrollmentModel: Model<EnrollmentDocument>, expedienteModel: Model<ExpedienteDocument>, expedienteRegistroModel: Model<ExpedienteRegistroDocument>, deceExpedienteModel: Model<DeceExpedienteDocument>, deceRegistroModel: Model<DeceRegistroDocument>, attendanceRecordModel: Model<AttendanceRecordDocument>);
     create(dto: CreateParentDto): Promise<ParentDocument>;
     findAll(query: PaginationQueryDto): Promise<{
         data: (import("mongoose").Document<unknown, {}, ParentDocument, {}, import("mongoose").DefaultSchemaOptions> & Parent & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
@@ -53,5 +63,23 @@ export declare class ParentsService {
         duplicateEmails: string[];
     }>;
     bulkCreate(records: BulkParentItemDto[]): Promise<BulkParentImportResult>;
+    getHijosDashboard(parentUserId: string): Promise<{
+        student: Student & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+            _id: Types.ObjectId;
+        }> & {
+            __v: number;
+        };
+        cursoNombre: string;
+        academicYear: string;
+        expedientesCount: any;
+        deceCount: any;
+        attendanceStats: {
+            rate: number;
+            present: any;
+            absent: any;
+            late: any;
+            excused: any;
+        };
+    }[]>;
     private _linkStudents;
 }

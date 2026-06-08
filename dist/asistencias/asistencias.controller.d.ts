@@ -72,6 +72,13 @@ export declare class AsistenciasController {
         students: any[];
     }>;
     getMyChildrenAttendance(user: any, query: AttendanceQueryDto): Promise<any[]>;
+    getMyChildrenHistory(user: any, query: AttendanceQueryDto): Promise<{
+        data: any[];
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
+    }>;
     getStudentHistory(id: Types.ObjectId, query: AttendanceQueryDto): Promise<{
         data: any[];
         total: number;
