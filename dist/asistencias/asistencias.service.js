@@ -463,7 +463,7 @@ let AsistenciasService = class AsistenciasService {
             .sort({ createdAt: -1 })
             .populate({
             path: 'cursoLectivoId',
-            populate: { path: 'cursoId', select: 'nivel paralelo jornada' },
+            populate: { path: 'cursoId', select: 'nivel paralelo jornada especialidad' },
         })
             .lean();
         const enrollmentMap = new Map();
@@ -474,7 +474,7 @@ let AsistenciasService = class AsistenciasService {
             const cl = e.cursoLectivoId;
             const curso = cl?.cursoId;
             const cursoNombre = curso
-                ? [curso.nivel, curso.paralelo, curso.jornada].filter(Boolean).join(' ')
+                ? [curso.nivel, curso.paralelo, curso.especialidad, curso.jornada].filter(Boolean).join(' ')
                 : '';
             enrollmentMap.set(sid, { cursoNombre, academicYear: cl?.academicYear ?? '' });
         }

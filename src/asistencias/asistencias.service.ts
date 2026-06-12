@@ -560,7 +560,7 @@ export class AsistenciasService {
       .sort({ createdAt: -1 })
       .populate({
         path: 'cursoLectivoId',
-        populate: { path: 'cursoId', select: 'nivel paralelo jornada' },
+        populate: { path: 'cursoId', select: 'nivel paralelo jornada especialidad' },
       })
       .lean();
 
@@ -571,7 +571,7 @@ export class AsistenciasService {
       const cl = e.cursoLectivoId as any;
       const curso = cl?.cursoId as any;
       const cursoNombre = curso
-        ? [curso.nivel, curso.paralelo, curso.jornada].filter(Boolean).join(' ')
+        ? [curso.nivel, curso.paralelo, curso.especialidad, curso.jornada].filter(Boolean).join(' ')
         : '';
       enrollmentMap.set(sid, { cursoNombre, academicYear: cl?.academicYear ?? '' });
     }
