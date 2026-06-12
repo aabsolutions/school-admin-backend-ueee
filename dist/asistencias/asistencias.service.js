@@ -429,7 +429,12 @@ let AsistenciasService = class AsistenciasService {
         return this.getStudentHistory(studentId, query);
     }
     async getReporteMasivo(dto) {
-        const { status, dateFrom, dateTo, minCount = 2, jornada } = dto;
+        const { status, statuses, dateFrom, dateTo, minCount = 2, jornada } = dto;
+        const resolvedStatuses = statuses && statuses.length > 0
+            ? statuses
+            : status
+                ? [status]
+                : ['absent'];
         const dateMatch = {};
         if (dateFrom)
             dateMatch.$gte = new Date(dateFrom);
@@ -442,7 +447,7 @@ let AsistenciasService = class AsistenciasService {
         if (Object.keys(dateMatch).length) {
             pipeline.push({ $match: { date: dateMatch } });
         }
-        pipeline.push({ $unwind: '$records' }, { $match: { 'records.status': status } }, { $group: { _id: '$records.studentId', count: { $sum: 1 } } }, { $match: { count: { $gte: minCount } } });
+        pipeline.push({ $unwind: '$records' }, { $match: { 'records.status': { $in: resolvedStatuses } } }, { $group: { _id: '$records.studentId', count: { $sum: 1 } } }, { $match: { count: { $gte: minCount } } });
         const counts = await this.recordModel.aggregate(pipeline);
         if (!counts.length)
             return [];

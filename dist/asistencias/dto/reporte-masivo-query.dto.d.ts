@@ -1,5 +1,6 @@
 export declare class ReporteMasivoQueryDto {
-    status: string;
+    status?: string;
+    statuses?: string[];
     dateFrom?: string;
     dateTo?: string;
     minCount?: number;

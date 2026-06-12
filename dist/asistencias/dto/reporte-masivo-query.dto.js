@@ -16,9 +16,23 @@ class ReporteMasivoQueryDto {
 }
 exports.ReporteMasivoQueryDto = ReporteMasivoQueryDto;
 __decorate([
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsEnum)(['absent', 'late', 'excused']),
     __metadata("design:type", String)
 ], ReporteMasivoQueryDto.prototype, "status", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsEnum)(['absent', 'late', 'excused'], { each: true }),
+    (0, class_transformer_1.Transform)(({ value }) => {
+        if (Array.isArray(value) && value.length > 0)
+            return value;
+        if (typeof value === 'string' && value.length > 0)
+            return value.split(',').map((s) => s.trim()).filter(Boolean);
+        return undefined;
+    }),
+    __metadata("design:type", Array)
+], ReporteMasivoQueryDto.prototype, "statuses", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),

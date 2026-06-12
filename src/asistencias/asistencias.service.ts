@@ -511,7 +511,14 @@ export class AsistenciasService {
   }
 
   async getReporteMasivo(dto: ReporteMasivoQueryDto) {
-    const { status, dateFrom, dateTo, minCount = 2, jornada } = dto;
+    const { status, statuses, dateFrom, dateTo, minCount = 2, jornada } = dto;
+    // Support both legacy `status` (single) and new `statuses` (multi)
+    const resolvedStatuses: string[] =
+      statuses && statuses.length > 0
+        ? statuses
+        : status
+          ? [status]
+          : ['absent'];
 
     const dateMatch: Record<string, Date> = {};
     if (dateFrom) dateMatch.$gte = new Date(dateFrom);
@@ -527,7 +534,7 @@ export class AsistenciasService {
     }
     pipeline.push(
       { $unwind: '$records' },
-      { $match: { 'records.status': status } },
+      { $match: { 'records.status': { $in: resolvedStatuses } } },
       { $group: { _id: '$records.studentId', count: { $sum: 1 } } },
       { $match: { count: { $gte: minCount } } },
     );
