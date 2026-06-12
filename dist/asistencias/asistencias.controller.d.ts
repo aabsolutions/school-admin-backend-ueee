@@ -93,7 +93,10 @@ export declare class AsistenciasController {
         dni: string;
         cursoNombre: string;
         academicYear: string;
-        count: number;
+        counts: {
+            [k: string]: number;
+        };
+        total: number;
     }[]>;
     findAllRecords(query: AttendanceQueryDto): Promise<{
         data: (import("./schemas/attendance-record.schema").AttendanceRecord & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{

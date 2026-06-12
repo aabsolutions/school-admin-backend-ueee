@@ -535,17 +535,40 @@ export class AsistenciasService {
     pipeline.push(
       { $unwind: '$records' },
       { $match: { 'records.status': { $in: resolvedStatuses } } },
-      { $group: { _id: '$records.studentId', count: { $sum: 1 } } },
-      { $match: { count: { $gte: minCount } } },
+      {
+        $group: {
+          _id: { studentId: '$records.studentId', status: '$records.status' },
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $group: {
+          _id: '$_id.studentId',
+          total: { $sum: '$count' },
+          statusCounts: { $push: { k: '$_id.status', v: '$count' } },
+        },
+      },
+      { $match: { total: { $gte: minCount } } },
     );
 
-    const counts: Array<{ _id: Types.ObjectId; count: number }> =
-      await this.recordModel.aggregate(pipeline);
+    const counts: Array<{
+      _id: Types.ObjectId;
+      total: number;
+      statusCounts: { k: string; v: number }[];
+    }> = await this.recordModel.aggregate(pipeline);
 
     if (!counts.length) return [];
 
     const studentIds = counts.map((c) => c._id);
-    const countMap = new Map(counts.map((c) => [c._id.toString(), c.count]));
+    const countMap = new Map(
+      counts.map((c) => [
+        c._id.toString(),
+        {
+          total: c.total,
+          counts: Object.fromEntries(c.statusCounts.map((sc) => [sc.k, sc.v])),
+        },
+      ]),
+    );
 
     const students = await this.studentModel
       .find({ _id: { $in: studentIds } })
@@ -586,7 +609,8 @@ export class AsistenciasService {
         dni: student?.dni,
         cursoNombre: enrollment?.cursoNombre ?? '',
         academicYear: enrollment?.academicYear ?? '',
-        count: countMap.get(sid) ?? 0,
+        counts: countMap.get(sid)?.counts ?? {},
+        total: countMap.get(sid)?.total ?? 0,
       };
     });
 

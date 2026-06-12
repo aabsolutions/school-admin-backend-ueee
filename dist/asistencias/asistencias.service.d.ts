@@ -117,6 +117,9 @@ export declare class AsistenciasService {
         dni: string;
         cursoNombre: string;
         academicYear: string;
-        count: number;
+        counts: {
+            [k: string]: number;
+        };
+        total: number;
     }[]>;
 }

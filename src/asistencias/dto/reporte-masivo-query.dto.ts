@@ -4,13 +4,13 @@ import { Type, Transform } from 'class-transformer';
 export class ReporteMasivoQueryDto {
   /** Legacy single-status field — kept for backward compat with web frontend */
   @IsOptional()
-  @IsEnum(['absent', 'late', 'excused'])
+  @IsEnum(['present', 'absent', 'late', 'excused'])
   status?: string;
 
   /** New multi-status field — used by mobile app */
   @IsOptional()
   @IsArray()
-  @IsEnum(['absent', 'late', 'excused'], { each: true })
+  @IsEnum(['present', 'absent', 'late', 'excused'], { each: true })
   @Transform(({ value }) => {
     if (Array.isArray(value) && value.length > 0) return value;
     if (typeof value === 'string' && value.length > 0)
