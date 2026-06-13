@@ -135,7 +135,11 @@ export class Student {
 
   @Prop({ type: [{ type: Types.ObjectId, ref: 'Parent' }], default: [] })
   parentIds: Types.ObjectId[];
+
+  @Prop({ type: [{ type: Types.ObjectId, ref: 'Student' }], default: [] })
+  siblingIds: Types.ObjectId[];
 }
 
 export const StudentSchema = SchemaFactory.createForClass(Student);
 StudentSchema.index({ parentIds: 1 });
+StudentSchema.index({ siblingIds: 1 });
