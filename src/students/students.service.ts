@@ -210,6 +210,7 @@ export class StudentsService {
     q: string,
     excludeId?: string,
   ): Promise<{ _id: string; name: string; dni?: string; img?: string }[]> {
+    if (!q || q.trim().length < 2) return [];
     const filter: any = {
       $or: [
         { name: { $regex: q, $options: 'i' } },
@@ -259,7 +260,7 @@ export class StudentsService {
               { fatherId: { $in: parentRefs } },
               { motherId: { $in: parentRefs } },
               { guardianId: { $in: parentRefs } },
-              { parentIds: { $elemMatch: { $in: parentRefs } } },
+              { parentIds: { $in: parentRefs } },
             ],
           },
           { _id: { $nin: excluded } },
@@ -291,9 +292,11 @@ export class StudentsService {
       }),
     ]);
 
-    return this.studentModel
+    const result = await this.studentModel
       .findById(studentId)
-      .populate('siblingIds', 'name dni img') as Promise<StudentDocument>;
+      .populate('siblingIds', 'name dni img');
+    if (!result) throw new NotFoundException('Student not found');
+    return result;
   }
 
   async unlinkSibling(studentId: string, siblingId: string): Promise<void> {
