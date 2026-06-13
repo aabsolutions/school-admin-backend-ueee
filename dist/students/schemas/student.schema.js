@@ -257,9 +257,14 @@ __decorate([
     (0, mongoose_1.Prop)({ type: [{ type: mongoose_2.Types.ObjectId, ref: 'Parent' }], default: [] }),
     __metadata("design:type", Array)
 ], Student.prototype, "parentIds", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ type: [{ type: mongoose_2.Types.ObjectId, ref: 'Student' }], default: [] }),
+    __metadata("design:type", Array)
+], Student.prototype, "siblingIds", void 0);
 exports.Student = Student = __decorate([
     (0, mongoose_1.Schema)({ timestamps: true })
 ], Student);
 exports.StudentSchema = mongoose_1.SchemaFactory.createForClass(Student);
 exports.StudentSchema.index({ parentIds: 1 });
+exports.StudentSchema.index({ siblingIds: 1 });
 //# sourceMappingURL=student.schema.js.map

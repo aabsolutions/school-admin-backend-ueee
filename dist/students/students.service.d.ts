@@ -37,6 +37,20 @@ export declare class StudentsService {
     remove(id: string): Promise<void>;
     toggleStatus(id: string, status: string): Promise<StudentDocument>;
     findByUserId(userId: string): Promise<StudentDocument>;
+    searchForSibling(q: string, excludeId?: string): Promise<{
+        _id: string;
+        name: string;
+        dni?: string;
+        img?: string;
+    }[]>;
+    getSuggestedSiblings(studentId: string): Promise<{
+        _id: string;
+        name: string;
+        dni?: string;
+        img?: string;
+    }[]>;
+    linkSibling(studentId: string, siblingId: string): Promise<StudentDocument>;
+    unlinkSibling(studentId: string, siblingId: string): Promise<void>;
     updateGeneralInfo(id: string, dto: UpdateStudentGeneralDto): Promise<StudentDocument>;
     updateMedicalInfo(id: string, dto: UpdateStudentMedicalInfoDto): Promise<StudentDocument>;
     updateFamilyInfo(id: string, dto: UpdateStudentFamilyInfoDto): Promise<StudentDocument>;

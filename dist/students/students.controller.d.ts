@@ -5,6 +5,7 @@ import { UpdateStudentDto } from './dto/update-student.dto';
 import { UpdateStudentMedicalInfoDto } from './dto/update-medical-info.dto';
 import { UpdateStudentFamilyInfoDto } from './dto/update-family-info.dto';
 import { UpdateStudentGeneralDto } from './dto/update-student-general.dto';
+import { LinkSiblingDto } from './dto/link-sibling.dto';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { Types } from 'mongoose';
 export declare class StudentsController {
@@ -35,6 +36,20 @@ export declare class StudentsController {
         totalPages: number;
     }>;
     bulkCreate(dto: BulkCreateStudentDto): Promise<import("./dto/bulk-create-student.dto").BulkImportResult>;
+    searchForSibling(q: string, excludeId?: string): Promise<{
+        _id: string;
+        name: string;
+        dni?: string;
+        img?: string;
+    }[]>;
+    getSuggestedSiblings(id: Types.ObjectId): Promise<{
+        _id: string;
+        name: string;
+        dni?: string;
+        img?: string;
+    }[]>;
+    linkSibling(id: Types.ObjectId, dto: LinkSiblingDto): Promise<import("./schemas/student.schema").StudentDocument>;
+    unlinkSibling(id: Types.ObjectId, siblingId: Types.ObjectId): Promise<void>;
     findOne(id: Types.ObjectId): Promise<import("./schemas/student.schema").StudentDocument>;
     create(dto: CreateStudentDto): Promise<import("./schemas/student.schema").StudentDocument>;
     update(id: Types.ObjectId, dto: UpdateStudentDto): Promise<import("./schemas/student.schema").StudentDocument>;

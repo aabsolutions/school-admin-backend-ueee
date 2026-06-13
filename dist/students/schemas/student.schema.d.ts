@@ -341,6 +341,7 @@ export declare class Student {
     motherId: Types.ObjectId | null;
     guardianId: Types.ObjectId | null;
     parentIds: Types.ObjectId[];
+    siblingIds: Types.ObjectId[];
 }
 export declare const StudentSchema: import("mongoose").Schema<Student, import("mongoose").Model<Student, any, any, any, any, any, Student>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, Student, Document<unknown, {}, Student, {
     id: string;
@@ -577,6 +578,15 @@ export declare const StudentSchema: import("mongoose").Schema<Student, import("m
         id: string;
     }>;
     parentIds?: import("mongoose").SchemaDefinitionProperty<Types.ObjectId[], Student, Document<unknown, {}, Student, {
+        id: string;
+    }, import("mongoose").DefaultSchemaOptions> & Omit<Student & {
+        _id: Types.ObjectId;
+    } & {
+        __v: number;
+    }, "id"> & {
+        id: string;
+    }>;
+    siblingIds?: import("mongoose").SchemaDefinitionProperty<Types.ObjectId[], Student, Document<unknown, {}, Student, {
         id: string;
     }, import("mongoose").DefaultSchemaOptions> & Omit<Student & {
         _id: Types.ObjectId;

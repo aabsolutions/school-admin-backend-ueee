@@ -81,5 +81,10 @@ export declare class ParentsService {
             excused: any;
         };
     }[]>;
+    getHijoFicha(parentUserId: string, studentId: string): Promise<Student & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+        _id: Types.ObjectId;
+    }> & {
+        __v: number;
+    }>;
     private _linkStudents;
 }

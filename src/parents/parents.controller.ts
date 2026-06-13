@@ -79,6 +79,15 @@ export class ParentsController {
     return this.svc.getHijosActivos(user.id);
   }
 
+  @Get('me/hijos/:studentId/ficha')
+  @Roles(Role.Parent)
+  getHijoFicha(
+    @CurrentUser() user: any,
+    @Param('studentId', ParseObjectIdPipe) studentId: Types.ObjectId,
+  ) {
+    return this.svc.getHijoFicha(user.id, studentId.toString());
+  }
+
   // ── Admin by-id endpoints ─────────────────────────────────────────────────
 
   @Get(':id')

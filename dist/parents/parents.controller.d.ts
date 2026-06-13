@@ -64,6 +64,11 @@ export declare class ParentsController {
         cursoNombre: string;
         academicYear: string;
     }[]>;
+    getHijoFicha(user: any, studentId: Types.ObjectId): Promise<import("../students/schemas/student.schema").Student & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+        _id: Types.ObjectId;
+    }> & {
+        __v: number;
+    }>;
     findOne(id: Types.ObjectId): Promise<import("./schemas/parent.schema").ParentDocument>;
     update(id: Types.ObjectId, dto: UpdateParentDto): Promise<import("./schemas/parent.schema").ParentDocument>;
     linkStudents(id: Types.ObjectId, dto: LinkStudentsDto): Promise<import("./schemas/parent.schema").ParentDocument>;

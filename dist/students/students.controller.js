@@ -22,6 +22,7 @@ const update_student_dto_1 = require("./dto/update-student.dto");
 const update_medical_info_dto_1 = require("./dto/update-medical-info.dto");
 const update_family_info_dto_1 = require("./dto/update-family-info.dto");
 const update_student_general_dto_1 = require("./dto/update-student-general.dto");
+const link_sibling_dto_1 = require("./dto/link-sibling.dto");
 const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
 const roles_guard_1 = require("../auth/guards/roles.guard");
 const roles_decorator_1 = require("../auth/decorators/roles.decorator");
@@ -54,6 +55,18 @@ let StudentsController = class StudentsController {
     }
     bulkCreate(dto) {
         return this.studentsService.bulkCreate(dto.records);
+    }
+    searchForSibling(q, excludeId) {
+        return this.studentsService.searchForSibling(q ?? '', excludeId);
+    }
+    getSuggestedSiblings(id) {
+        return this.studentsService.getSuggestedSiblings(id.toString());
+    }
+    linkSibling(id, dto) {
+        return this.studentsService.linkSibling(id.toString(), dto.siblingId);
+    }
+    unlinkSibling(id, siblingId) {
+        return this.studentsService.unlinkSibling(id.toString(), siblingId.toString());
     }
     findOne(id) {
         return this.studentsService.findOne(id.toString());
@@ -139,6 +152,38 @@ __decorate([
     __metadata("design:paramtypes", [bulk_create_student_dto_1.BulkCreateStudentDto]),
     __metadata("design:returntype", void 0)
 ], StudentsController.prototype, "bulkCreate", null);
+__decorate([
+    (0, common_1.Get)('search'),
+    (0, roles_decorator_1.Roles)(user_schema_1.Role.SuperAdmin, user_schema_1.Role.Admin, user_schema_1.Role.Teacher),
+    __param(0, (0, common_1.Query)('q')),
+    __param(1, (0, common_1.Query)('excludeId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", void 0)
+], StudentsController.prototype, "searchForSibling", null);
+__decorate([
+    (0, common_1.Get)(':id/suggested-siblings'),
+    __param(0, (0, common_1.Param)('id', parse_object_id_pipe_1.ParseObjectIdPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [mongoose_1.Types.ObjectId]),
+    __metadata("design:returntype", void 0)
+], StudentsController.prototype, "getSuggestedSiblings", null);
+__decorate([
+    (0, common_1.Post)(':id/siblings'),
+    __param(0, (0, common_1.Param)('id', parse_object_id_pipe_1.ParseObjectIdPipe)),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [mongoose_1.Types.ObjectId, link_sibling_dto_1.LinkSiblingDto]),
+    __metadata("design:returntype", void 0)
+], StudentsController.prototype, "linkSibling", null);
+__decorate([
+    (0, common_1.Delete)(':id/siblings/:siblingId'),
+    __param(0, (0, common_1.Param)('id', parse_object_id_pipe_1.ParseObjectIdPipe)),
+    __param(1, (0, common_1.Param)('siblingId', parse_object_id_pipe_1.ParseObjectIdPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [mongoose_1.Types.ObjectId, mongoose_1.Types.ObjectId]),
+    __metadata("design:returntype", void 0)
+], StudentsController.prototype, "unlinkSibling", null);
 __decorate([
     (0, common_1.Get)(':id'),
     __param(0, (0, common_1.Param)('id', parse_object_id_pipe_1.ParseObjectIdPipe)),

@@ -58,6 +58,9 @@ let ParentsController = class ParentsController {
     getHijosActivos(user) {
         return this.svc.getHijosActivos(user.id);
     }
+    getHijoFicha(user, studentId) {
+        return this.svc.getHijoFicha(user.id, studentId.toString());
+    }
     findOne(id) {
         return this.svc.findOne(id.toString());
     }
@@ -148,6 +151,15 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], ParentsController.prototype, "getHijosActivos", null);
+__decorate([
+    (0, common_1.Get)('me/hijos/:studentId/ficha'),
+    (0, roles_decorator_1.Roles)(user_schema_1.Role.Parent),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Param)('studentId', parse_object_id_pipe_1.ParseObjectIdPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, mongoose_1.Types.ObjectId]),
+    __metadata("design:returntype", void 0)
+], ParentsController.prototype, "getHijoFicha", null);
 __decorate([
     (0, common_1.Get)(':id'),
     (0, roles_decorator_1.Roles)(user_schema_1.Role.Admin, user_schema_1.Role.SuperAdmin),

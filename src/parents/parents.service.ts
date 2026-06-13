@@ -446,6 +446,31 @@ export class ParentsService {
     });
   }
 
+  async getHijoFicha(parentUserId: string, studentId: string) {
+    const parent = await this.parentModel
+      .findOne({ userId: new Types.ObjectId(parentUserId) })
+      .lean();
+    if (!parent) throw new NotFoundException('Perfil de padre no encontrado');
+
+    const parentOid = parent._id as Types.ObjectId;
+    const studentOid = new Types.ObjectId(studentId);
+
+    const student = await this.studentModel
+      .findOne({
+        _id: studentOid,
+        $or: [
+          { _id: { $in: parent.studentIds ?? [] } },
+          { fatherId: parentOid },
+          { motherId: parentOid },
+          { guardianId: parentOid },
+        ],
+      })
+      .lean();
+
+    if (!student) throw new NotFoundException('Estudiante no encontrado o no vinculado');
+    return student;
+  }
+
   private async _linkStudents(parentId: string, studentIds: string[]): Promise<void> {
     const parentOid = new Types.ObjectId(parentId);
     const studentOids = studentIds.map((s) => new Types.ObjectId(s));

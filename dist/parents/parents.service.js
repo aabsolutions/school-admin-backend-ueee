@@ -376,6 +376,29 @@ let ParentsService = class ParentsService {
             };
         });
     }
+    async getHijoFicha(parentUserId, studentId) {
+        const parent = await this.parentModel
+            .findOne({ userId: new mongoose_2.Types.ObjectId(parentUserId) })
+            .lean();
+        if (!parent)
+            throw new common_1.NotFoundException('Perfil de padre no encontrado');
+        const parentOid = parent._id;
+        const studentOid = new mongoose_2.Types.ObjectId(studentId);
+        const student = await this.studentModel
+            .findOne({
+            _id: studentOid,
+            $or: [
+                { _id: { $in: parent.studentIds ?? [] } },
+                { fatherId: parentOid },
+                { motherId: parentOid },
+                { guardianId: parentOid },
+            ],
+        })
+            .lean();
+        if (!student)
+            throw new common_1.NotFoundException('Estudiante no encontrado o no vinculado');
+        return student;
+    }
     async _linkStudents(parentId, studentIds) {
         const parentOid = new mongoose_2.Types.ObjectId(parentId);
         const studentOids = studentIds.map((s) => new mongoose_2.Types.ObjectId(s));

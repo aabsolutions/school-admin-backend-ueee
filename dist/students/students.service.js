@@ -52,7 +52,10 @@ let StudentsService = StudentsService_1 = class StudentsService {
         return { data, total, page, limit, totalPages: Math.ceil(total / limit) };
     }
     async findOne(id) {
-        const student = await this.studentModel.findById(id);
+        const student = await this.studentModel
+            .findById(id)
+            .populate('fatherId motherId guardianId', 'name email dni')
+            .populate('siblingIds', 'name dni img');
         if (!student)
             throw new common_1.NotFoundException('Student not found');
         return student;
@@ -146,6 +149,7 @@ let StudentsService = StudentsService_1 = class StudentsService {
         await Promise.all([
             this.studentModel.findByIdAndDelete(id),
             this.parentModel.updateMany({ studentIds: studentOid }, { $pull: { studentIds: studentOid } }),
+            this.studentModel.updateMany({ siblingIds: studentOid }, { $pull: { siblingIds: studentOid } }),
         ]);
     }
     async toggleStatus(id, status) {
@@ -171,6 +175,102 @@ let StudentsService = StudentsService_1 = class StudentsService {
         if (!student)
             throw new common_1.NotFoundException('Student profile not found');
         return student;
+    }
+    async searchForSibling(q, excludeId) {
+        if (!q || q.trim().length < 2)
+            return [];
+        const filter = {
+            $or: [
+                { name: { $regex: q, $options: 'i' } },
+                { dni: { $regex: q, $options: 'i' } },
+                { email: { $regex: q, $options: 'i' } },
+            ],
+        };
+        if (excludeId) {
+            filter._id = { $ne: new mongoose_2.Types.ObjectId(excludeId) };
+        }
+        return this.studentModel
+            .find(filter)
+            .select('name dni img')
+            .limit(10)
+            .lean()
+            .exec();
+    }
+    async getSuggestedSiblings(studentId) {
+        const student = await this.studentModel
+            .findById(studentId)
+            .select('fatherId motherId guardianId parentIds siblingIds')
+            .lean();
+        if (!student)
+            throw new common_1.NotFoundException('Student not found');
+        const parentRefs = [
+            ...(student.parentIds ?? []),
+            student.fatherId,
+            student.motherId,
+            student.guardianId,
+        ].filter(Boolean);
+        if (!parentRefs.length)
+            return [];
+        const excluded = [
+            ...(student.siblingIds ?? []),
+            new mongoose_2.Types.ObjectId(studentId),
+        ];
+        return this.studentModel
+            .find({
+            $and: [
+                {
+                    $or: [
+                        { fatherId: { $in: parentRefs } },
+                        { motherId: { $in: parentRefs } },
+                        { guardianId: { $in: parentRefs } },
+                        { parentIds: { $in: parentRefs } },
+                    ],
+                },
+                { _id: { $nin: excluded } },
+            ],
+        })
+            .select('name dni img')
+            .limit(10)
+            .lean()
+            .exec();
+    }
+    async linkSibling(studentId, siblingId) {
+        if (studentId === siblingId) {
+            throw new common_1.BadRequestException('A student cannot be their own sibling');
+        }
+        const [student, sibling] = await Promise.all([
+            this.studentModel.findById(studentId),
+            this.studentModel.findById(siblingId),
+        ]);
+        if (!student)
+            throw new common_1.NotFoundException('Student not found');
+        if (!sibling)
+            throw new common_1.NotFoundException('Sibling student not found');
+        await Promise.all([
+            this.studentModel.findByIdAndUpdate(studentId, {
+                $addToSet: { siblingIds: new mongoose_2.Types.ObjectId(siblingId) },
+            }),
+            this.studentModel.findByIdAndUpdate(siblingId, {
+                $addToSet: { siblingIds: new mongoose_2.Types.ObjectId(studentId) },
+            }),
+        ]);
+        const result = await this.studentModel
+            .findById(studentId)
+            .populate('fatherId motherId guardianId', 'name email dni')
+            .populate('siblingIds', 'name dni img');
+        if (!result)
+            throw new common_1.NotFoundException('Student not found');
+        return result;
+    }
+    async unlinkSibling(studentId, siblingId) {
+        await Promise.all([
+            this.studentModel.findByIdAndUpdate(studentId, {
+                $pull: { siblingIds: new mongoose_2.Types.ObjectId(siblingId) },
+            }),
+            this.studentModel.findByIdAndUpdate(siblingId, {
+                $pull: { siblingIds: new mongoose_2.Types.ObjectId(studentId) },
+            }),
+        ]);
     }
     async updateGeneralInfo(id, dto) {
         const updated = await this.studentModel.findByIdAndUpdate(id, { $set: dto }, { new: true });
