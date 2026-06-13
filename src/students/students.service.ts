@@ -51,7 +51,9 @@ export class StudentsService {
   }
 
   async findOne(id: string): Promise<StudentDocument> {
-    const student = await this.studentModel.findById(id);
+    const student = await this.studentModel
+      .findById(id)
+      .populate('siblingIds', 'name dni img');
     if (!student) throw new NotFoundException('Student not found');
     return student;
   }
