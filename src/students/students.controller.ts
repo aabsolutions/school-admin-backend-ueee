@@ -11,6 +11,7 @@ import { UpdateStudentDto } from './dto/update-student.dto';
 import { UpdateStudentMedicalInfoDto } from './dto/update-medical-info.dto';
 import { UpdateStudentFamilyInfoDto } from './dto/update-family-info.dto';
 import { UpdateStudentGeneralDto } from './dto/update-student-general.dto';
+import { LinkSiblingDto } from './dto/link-sibling.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -77,6 +78,42 @@ export class StudentsController {
   @Post('bulk')
   bulkCreate(@Body() dto: BulkCreateStudentDto) {
     return this.studentsService.bulkCreate(dto.records);
+  }
+
+  // ─── Búsqueda para selector de hermanos ──────────────────────────────────
+
+  @Get('search')
+  @Roles(Role.SuperAdmin, Role.Admin, Role.Teacher)
+  searchForSibling(
+    @Query('q') q: string,
+    @Query('excludeId') excludeId?: string,
+  ) {
+    return this.studentsService.searchForSibling(q ?? '', excludeId);
+  }
+
+  // ─── Hermanos ─────────────────────────────────────────────────────────────
+
+  @Get(':id/suggested-siblings')
+  getSuggestedSiblings(
+    @Param('id', ParseObjectIdPipe) id: Types.ObjectId,
+  ) {
+    return this.studentsService.getSuggestedSiblings(id.toString());
+  }
+
+  @Post(':id/siblings')
+  linkSibling(
+    @Param('id', ParseObjectIdPipe) id: Types.ObjectId,
+    @Body() dto: LinkSiblingDto,
+  ) {
+    return this.studentsService.linkSibling(id.toString(), dto.siblingId);
+  }
+
+  @Delete(':id/siblings/:siblingId')
+  unlinkSibling(
+    @Param('id', ParseObjectIdPipe) id: Types.ObjectId,
+    @Param('siblingId', ParseObjectIdPipe) siblingId: Types.ObjectId,
+  ) {
+    return this.studentsService.unlinkSibling(id.toString(), siblingId.toString());
   }
 
   @Get(':id')
