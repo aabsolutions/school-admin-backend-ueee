@@ -1,6 +1,6 @@
-import { IsMongoId } from 'class-validator';
+import { IsMongoId, IsNotEmpty } from 'class-validator';
 
 export class LinkSiblingDto {
-  @IsMongoId()
+  @IsNotEmpty() @IsMongoId()
   siblingId: string;
 }
