@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException, ConflictException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Student, StudentDocument } from './schemas/student.schema';
@@ -167,6 +167,11 @@ export class StudentsService {
         { studentIds: studentOid },
         { $pull: { studentIds: studentOid } },
       ),
+      // NEW: clean up sibling references
+      this.studentModel.updateMany(
+        { siblingIds: studentOid },
+        { $pull: { siblingIds: studentOid } },
+      ),
     ]);
   }
 
@@ -199,6 +204,107 @@ export class StudentsService {
 
     if (!student) throw new NotFoundException('Student profile not found');
     return student;
+  }
+
+  async searchForSibling(
+    q: string,
+    excludeId?: string,
+  ): Promise<{ _id: string; name: string; dni?: string; img?: string }[]> {
+    const filter: any = {
+      $or: [
+        { name: { $regex: q, $options: 'i' } },
+        { dni: { $regex: q, $options: 'i' } },
+        { email: { $regex: q, $options: 'i' } },
+      ],
+    };
+    if (excludeId) {
+      filter._id = { $ne: new Types.ObjectId(excludeId) };
+    }
+    return this.studentModel
+      .find(filter)
+      .select('name dni img')
+      .limit(10)
+      .lean()
+      .exec() as any;
+  }
+
+  async getSuggestedSiblings(
+    studentId: string,
+  ): Promise<{ _id: string; name: string; dni?: string; img?: string }[]> {
+    const student = await this.studentModel
+      .findById(studentId)
+      .select('fatherId motherId guardianId parentIds siblingIds')
+      .lean();
+    if (!student) throw new NotFoundException('Student not found');
+
+    const parentRefs = [
+      ...(student.parentIds ?? []),
+      student.fatherId,
+      student.motherId,
+      student.guardianId,
+    ].filter(Boolean) as Types.ObjectId[];
+
+    if (!parentRefs.length) return [];
+
+    const excluded = [
+      ...(student.siblingIds ?? []),
+      new Types.ObjectId(studentId),
+    ];
+
+    return this.studentModel
+      .find({
+        $and: [
+          {
+            $or: [
+              { fatherId: { $in: parentRefs } },
+              { motherId: { $in: parentRefs } },
+              { guardianId: { $in: parentRefs } },
+              { parentIds: { $elemMatch: { $in: parentRefs } } },
+            ],
+          },
+          { _id: { $nin: excluded } },
+        ],
+      })
+      .select('name dni img')
+      .limit(10)
+      .lean()
+      .exec() as any;
+  }
+
+  async linkSibling(studentId: string, siblingId: string): Promise<StudentDocument> {
+    if (studentId === siblingId) {
+      throw new BadRequestException('A student cannot be their own sibling');
+    }
+    const [student, sibling] = await Promise.all([
+      this.studentModel.findById(studentId),
+      this.studentModel.findById(siblingId),
+    ]);
+    if (!student) throw new NotFoundException('Student not found');
+    if (!sibling) throw new NotFoundException('Sibling student not found');
+
+    await Promise.all([
+      this.studentModel.findByIdAndUpdate(studentId, {
+        $addToSet: { siblingIds: new Types.ObjectId(siblingId) },
+      }),
+      this.studentModel.findByIdAndUpdate(siblingId, {
+        $addToSet: { siblingIds: new Types.ObjectId(studentId) },
+      }),
+    ]);
+
+    return this.studentModel
+      .findById(studentId)
+      .populate('siblingIds', 'name dni img') as Promise<StudentDocument>;
+  }
+
+  async unlinkSibling(studentId: string, siblingId: string): Promise<void> {
+    await Promise.all([
+      this.studentModel.findByIdAndUpdate(studentId, {
+        $pull: { siblingIds: new Types.ObjectId(siblingId) },
+      }),
+      this.studentModel.findByIdAndUpdate(siblingId, {
+        $pull: { siblingIds: new Types.ObjectId(studentId) },
+      }),
+    ]);
   }
 
   async updateGeneralInfo(id: string, dto: UpdateStudentGeneralDto): Promise<StudentDocument> {
