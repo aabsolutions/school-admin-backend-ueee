@@ -22,6 +22,16 @@ export declare class ExpedientesController {
             id: string;
         })[];
     }>;
+    getHijoExpediente(studentId: Types.ObjectId, user: any): Promise<{
+        expediente: import("./schemas/expediente.schema").ExpedienteDocument;
+        registros: (import("mongoose").Document<unknown, {}, import("./schemas/expediente-registro.schema").ExpedienteRegistroDocument, {}, import("mongoose").DefaultSchemaOptions> & import("./schemas/expediente-registro.schema").ExpedienteRegistro & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+            _id: Types.ObjectId;
+        }> & {
+            __v: number;
+        } & {
+            id: string;
+        })[];
+    }>;
     findAll(query: PaginationQueryDto): Promise<{
         data: any[];
         total: any;

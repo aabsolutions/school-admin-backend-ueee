@@ -50,6 +50,15 @@ export class ExpedientesController {
     return this.svc.findByUserIdWithRegistros(user.id);
   }
 
+  @Get('parent/hijo/:studentId')
+  @Roles(Role.Parent)
+  getHijoExpediente(
+    @Param('studentId', ParseObjectIdPipe) studentId: Types.ObjectId,
+    @CurrentUser() user: any,
+  ) {
+    return this.svc.findHijoExpedienteForParent(user.id, studentId.toString());
+  }
+
   @Get()
   findAll(@Query() query: PaginationQueryDto) {
     return this.svc.findAll(query);

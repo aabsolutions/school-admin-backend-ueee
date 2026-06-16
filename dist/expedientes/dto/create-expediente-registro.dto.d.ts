@@ -4,4 +4,5 @@ export declare class CreateExpedienteRegistroDto {
     descripcion: string;
     evidencias?: string[];
     creadoPor: string;
+    driveFilesJson?: string;
 }

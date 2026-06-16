@@ -9,40 +9,39 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CreateExpedienteRegistroDto = void 0;
+exports.CreateExpedienteAcademicoDocumentoDto = void 0;
 const class_validator_1 = require("class-validator");
-class CreateExpedienteRegistroDto {
+class CreateExpedienteAcademicoDocumentoDto {
 }
-exports.CreateExpedienteRegistroDto = CreateExpedienteRegistroDto;
+exports.CreateExpedienteAcademicoDocumentoDto = CreateExpedienteAcademicoDocumentoDto;
 __decorate([
     (0, class_validator_1.IsNotEmpty)(),
-    (0, class_validator_1.IsEnum)(['Reunión', 'Indisciplina', 'Permiso', 'Atraso', 'Acuerdo', 'Llamado de atención', 'Otro']),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], CreateExpedienteRegistroDto.prototype, "tipo", void 0);
+], CreateExpedienteAcademicoDocumentoDto.prototype, "seccion", void 0);
 __decorate([
     (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateExpedienteAcademicoDocumentoDto.prototype, "nombre", void 0);
+__decorate([
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateExpedienteAcademicoDocumentoDto.prototype, "url", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateExpedienteAcademicoDocumentoDto.prototype, "descripcion", void 0);
+__decorate([
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateExpedienteAcademicoDocumentoDto.prototype, "creadoPor", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsDateString)(),
     __metadata("design:type", String)
-], CreateExpedienteRegistroDto.prototype, "fecha", void 0);
-__decorate([
-    (0, class_validator_1.IsNotEmpty)(),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], CreateExpedienteRegistroDto.prototype, "descripcion", void 0);
-__decorate([
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsArray)(),
-    (0, class_validator_1.IsString)({ each: true }),
-    __metadata("design:type", Array)
-], CreateExpedienteRegistroDto.prototype, "evidencias", void 0);
-__decorate([
-    (0, class_validator_1.IsNotEmpty)(),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], CreateExpedienteRegistroDto.prototype, "creadoPor", void 0);
-__decorate([
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], CreateExpedienteRegistroDto.prototype, "driveFilesJson", void 0);
-//# sourceMappingURL=create-expediente-registro.dto.js.map
+], CreateExpedienteAcademicoDocumentoDto.prototype, "fecha", void 0);
+//# sourceMappingURL=create-expediente-academico-documento.dto.js.map

@@ -30,6 +30,7 @@ import { CommunicadosModule } from './communicados/communicados.module';
 import { RoleConfigModule } from './role-config/role-config.module';
 import { AsistenciasModule } from './asistencias/asistencias.module';
 import { TramitologiaModule } from './tramitologia/tramitologia.module';
+import { ExpedienteAcademicoModule } from './expediente-academico/expediente-academico.module';
 
 @Module({
   imports: [
@@ -87,6 +88,7 @@ import { TramitologiaModule } from './tramitologia/tramitologia.module';
     RoleConfigModule,
     AsistenciasModule,
     TramitologiaModule,
+    ExpedienteAcademicoModule,
   ],
   providers: [
     { provide: APP_INTERCEPTOR, useClass: TransformInterceptor },

@@ -51,6 +51,9 @@ let ExpedientesController = class ExpedientesController {
     getMyExpediente(user) {
         return this.svc.findByUserIdWithRegistros(user.id);
     }
+    getHijoExpediente(studentId, user) {
+        return this.svc.findHijoExpedienteForParent(user.id, studentId.toString());
+    }
     findAll(query) {
         return this.svc.findAll(query);
     }
@@ -101,6 +104,15 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], ExpedientesController.prototype, "getMyExpediente", null);
+__decorate([
+    (0, common_1.Get)('parent/hijo/:studentId'),
+    (0, roles_decorator_1.Roles)(user_schema_1.Role.Parent),
+    __param(0, (0, common_1.Param)('studentId', parse_object_id_pipe_1.ParseObjectIdPipe)),
+    __param(1, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [mongoose_1.Types.ObjectId, Object]),
+    __metadata("design:returntype", void 0)
+], ExpedientesController.prototype, "getHijoExpediente", null);
 __decorate([
     (0, common_1.Get)(),
     __param(0, (0, common_1.Query)()),

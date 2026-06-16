@@ -6,6 +6,10 @@ export declare class ExpedienteRegistro {
     fecha: Date;
     descripcion: string;
     evidencias: string[];
+    driveFiles: {
+        nombre: string;
+        url: string;
+    }[];
     creadoPor: string;
 }
 export declare const ExpedienteRegistroSchema: import("mongoose").Schema<ExpedienteRegistro, import("mongoose").Model<ExpedienteRegistro, any, any, any, any, any, ExpedienteRegistro>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, ExpedienteRegistro, Document<unknown, {}, ExpedienteRegistro, {
@@ -54,6 +58,18 @@ export declare const ExpedienteRegistroSchema: import("mongoose").Schema<Expedie
         id: string;
     }>;
     evidencias?: import("mongoose").SchemaDefinitionProperty<string[], ExpedienteRegistro, Document<unknown, {}, ExpedienteRegistro, {
+        id: string;
+    }, import("mongoose").DefaultSchemaOptions> & Omit<ExpedienteRegistro & {
+        _id: Types.ObjectId;
+    } & {
+        __v: number;
+    }, "id"> & {
+        id: string;
+    }>;
+    driveFiles?: import("mongoose").SchemaDefinitionProperty<{
+        nombre: string;
+        url: string;
+    }[], ExpedienteRegistro, Document<unknown, {}, ExpedienteRegistro, {
         id: string;
     }, import("mongoose").DefaultSchemaOptions> & Omit<ExpedienteRegistro & {
         _id: Types.ObjectId;

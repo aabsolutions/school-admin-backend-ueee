@@ -6,6 +6,7 @@ import { Expediente, ExpedienteSchema } from './schemas/expediente.schema';
 import { ExpedienteRegistro, ExpedienteRegistroSchema } from './schemas/expediente-registro.schema';
 import { StudentsModule } from '../students/students.module';
 import { NotificationsModule } from '../notifications/notifications.module';
+import { ParentsModule } from '../parents/parents.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { NotificationsModule } from '../notifications/notifications.module';
     ]),
     StudentsModule,
     NotificationsModule,
+    ParentsModule,
   ],
   controllers: [ExpedientesController],
   providers: [ExpedientesService],

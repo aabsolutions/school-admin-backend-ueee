@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   ConflictException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
@@ -16,6 +17,7 @@ import { UpdateExpedienteRegistroDto } from './dto/update-expediente-registro.dt
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { StudentsService } from '../students/students.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import { ParentsService } from '../parents/parents.service';
 
 @Injectable()
 export class ExpedientesService {
@@ -26,6 +28,7 @@ export class ExpedientesService {
     private readonly registroModel: Model<ExpedienteRegistroDocument>,
     private readonly studentsService: StudentsService,
     private readonly notificationsService: NotificationsService,
+    private readonly parentsService: ParentsService,
   ) {}
 
   // ─── Expedientes ───────────────────────────────────────────────────────────
@@ -250,6 +253,7 @@ export class ExpedientesService {
     evidencias: string[] = [],
   ): Promise<ExpedienteRegistroDocument> {
     await this.findOne(expedienteId);
+    const driveFiles = this.parseDriveFiles(dto.driveFilesJson);
     return new this.registroModel({
       expedienteId: new Types.ObjectId(expedienteId),
       tipo:         dto.tipo,
@@ -257,6 +261,7 @@ export class ExpedientesService {
       descripcion:  dto.descripcion,
       evidencias:   [...(dto.evidencias ?? []), ...evidencias],
       creadoPor:    dto.creadoPor,
+      driveFiles,
     }).save();
   }
 
@@ -270,8 +275,11 @@ export class ExpedientesService {
       ...dto,
       ...(dto.fecha ? { fecha: new Date(dto.fecha) } : {}),
     };
-    // Remove evidencias from $set — they are managed separately via $push
     delete update.evidencias;
+    delete update.driveFilesJson;
+
+    const driveFiles = this.parseDriveFiles(dto.driveFilesJson);
+    update.driveFiles = driveFiles;
 
     const ops: any = { $set: update };
     if (newEvidencias.length > 0) {
@@ -285,6 +293,48 @@ export class ExpedientesService {
     );
     if (!registro) throw new NotFoundException('Registro no encontrado');
     return registro;
+  }
+
+  async findHijoExpedienteForParent(parentUserId: string, studentId: string) {
+    const parent = await this.parentsService.findByUserId(parentUserId);
+    const parentId = (parent as any)._id.toString();
+
+    // studentIds is populated → compare via _id; fallback to raw ObjectId
+    const inStudentIds = (parent.studentIds as any[]).some((s: any) => {
+      const id = s?._id ?? s;
+      return id?.toString() === studentId;
+    });
+
+    if (!inStudentIds) {
+      // Also accept students linked via fatherId / motherId / guardianId on the Student doc
+      const student = await this.studentsService.findOne(studentId).catch(() => null);
+      const linked = student && [
+        student.fatherId?.toString(),
+        student.motherId?.toString(),
+        student.guardianId?.toString(),
+      ].filter(Boolean).includes(parentId);
+      if (!linked) throw new ForbiddenException('No tenés acceso al expediente de este estudiante');
+    }
+    const expediente = await this.findByStudent(studentId);
+    if (!expediente) return { expediente: null, registros: [] };
+    const registros = await this.registroModel
+      .find({ expedienteId: expediente._id })
+      .sort({ fecha: -1 })
+      .exec();
+    return { expediente, registros };
+  }
+
+  private parseDriveFiles(raw?: string): { nombre: string; url: string }[] {
+    if (!raw) return [];
+    try {
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) return [];
+      return parsed.filter(
+        (item) => item && typeof item.nombre === 'string' && typeof item.url === 'string',
+      );
+    } catch {
+      return [];
+    }
   }
 
   async deleteRegistro(expedienteId: string, registroId: string): Promise<void> {

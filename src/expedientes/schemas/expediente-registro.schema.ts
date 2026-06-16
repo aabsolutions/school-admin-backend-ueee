@@ -23,6 +23,12 @@ export class ExpedienteRegistro {
   @Prop({ type: [String], default: [] })
   evidencias: string[];
 
+  @Prop({
+    type: [{ nombre: { type: String }, url: { type: String } }],
+    default: [],
+  })
+  driveFiles: { nombre: string; url: string }[];
+
   @Prop({ required: true, trim: true })
   creadoPor: string;
 }

@@ -15,6 +15,7 @@ const expediente_schema_1 = require("./schemas/expediente.schema");
 const expediente_registro_schema_1 = require("./schemas/expediente-registro.schema");
 const students_module_1 = require("../students/students.module");
 const notifications_module_1 = require("../notifications/notifications.module");
+const parents_module_1 = require("../parents/parents.module");
 let ExpedientesModule = class ExpedientesModule {
 };
 exports.ExpedientesModule = ExpedientesModule;
@@ -27,6 +28,7 @@ exports.ExpedientesModule = ExpedientesModule = __decorate([
             ]),
             students_module_1.StudentsModule,
             notifications_module_1.NotificationsModule,
+            parents_module_1.ParentsModule,
         ],
         controllers: [expedientes_controller_1.ExpedientesController],
         providers: [expedientes_service_1.ExpedientesService],

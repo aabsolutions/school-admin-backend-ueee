@@ -12,4 +12,7 @@ export class CreateExpedienteRegistroDto {
   @IsOptional() @IsArray() @IsString({ each: true }) evidencias?: string[];
 
   @IsNotEmpty() @IsString() creadoPor: string;
+
+  /** JSON-serialized array: [{nombre: string, url: string}] — sent as FormData string field */
+  @IsOptional() @IsString() driveFilesJson?: string;
 }

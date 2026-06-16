@@ -7,12 +7,14 @@ import { UpdateExpedienteRegistroDto } from './dto/update-expediente-registro.dt
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { StudentsService } from '../students/students.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import { ParentsService } from '../parents/parents.service';
 export declare class ExpedientesService {
     private readonly expedienteModel;
     private readonly registroModel;
     private readonly studentsService;
     private readonly notificationsService;
-    constructor(expedienteModel: Model<ExpedienteDocument>, registroModel: Model<ExpedienteRegistroDocument>, studentsService: StudentsService, notificationsService: NotificationsService);
+    private readonly parentsService;
+    constructor(expedienteModel: Model<ExpedienteDocument>, registroModel: Model<ExpedienteRegistroDocument>, studentsService: StudentsService, notificationsService: NotificationsService, parentsService: ParentsService);
     findAll(query: PaginationQueryDto): Promise<{
         data: any[];
         total: any;
@@ -51,6 +53,17 @@ export declare class ExpedientesService {
     })[]>;
     addRegistro(expedienteId: string, dto: CreateExpedienteRegistroDto, evidencias?: string[]): Promise<ExpedienteRegistroDocument>;
     updateRegistro(expedienteId: string, registroId: string, dto: UpdateExpedienteRegistroDto, newEvidencias?: string[]): Promise<ExpedienteRegistroDocument>;
+    findHijoExpedienteForParent(parentUserId: string, studentId: string): Promise<{
+        expediente: ExpedienteDocument;
+        registros: (import("mongoose").Document<unknown, {}, ExpedienteRegistroDocument, {}, import("mongoose").DefaultSchemaOptions> & ExpedienteRegistro & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+            _id: Types.ObjectId;
+        }> & {
+            __v: number;
+        } & {
+            id: string;
+        })[];
+    }>;
+    private parseDriveFiles;
     deleteRegistro(expedienteId: string, registroId: string): Promise<void>;
     deleteEvidencia(expedienteId: string, registroId: string, url: string): Promise<ExpedienteRegistroDocument>;
 }

@@ -39,6 +39,13 @@ __decorate([
     __metadata("design:type", Array)
 ], ExpedienteRegistro.prototype, "evidencias", void 0);
 __decorate([
+    (0, mongoose_1.Prop)({
+        type: [{ nombre: { type: String }, url: { type: String } }],
+        default: [],
+    }),
+    __metadata("design:type", Array)
+], ExpedienteRegistro.prototype, "driveFiles", void 0);
+__decorate([
     (0, mongoose_1.Prop)({ required: true, trim: true }),
     __metadata("design:type", String)
 ], ExpedienteRegistro.prototype, "creadoPor", void 0);

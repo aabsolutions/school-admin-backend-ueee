@@ -20,12 +20,14 @@ const expediente_schema_1 = require("./schemas/expediente.schema");
 const expediente_registro_schema_1 = require("./schemas/expediente-registro.schema");
 const students_service_1 = require("../students/students.service");
 const notifications_service_1 = require("../notifications/notifications.service");
+const parents_service_1 = require("../parents/parents.service");
 let ExpedientesService = class ExpedientesService {
-    constructor(expedienteModel, registroModel, studentsService, notificationsService) {
+    constructor(expedienteModel, registroModel, studentsService, notificationsService, parentsService) {
         this.expedienteModel = expedienteModel;
         this.registroModel = registroModel;
         this.studentsService = studentsService;
         this.notificationsService = notificationsService;
+        this.parentsService = parentsService;
     }
     async findAll(query) {
         const { page = 1, limit = 10, search, sortBy = 'createdAt', sortOrder = 'desc' } = query;
@@ -220,6 +222,7 @@ let ExpedientesService = class ExpedientesService {
     }
     async addRegistro(expedienteId, dto, evidencias = []) {
         await this.findOne(expedienteId);
+        const driveFiles = this.parseDriveFiles(dto.driveFilesJson);
         return new this.registroModel({
             expedienteId: new mongoose_2.Types.ObjectId(expedienteId),
             tipo: dto.tipo,
@@ -227,6 +230,7 @@ let ExpedientesService = class ExpedientesService {
             descripcion: dto.descripcion,
             evidencias: [...(dto.evidencias ?? []), ...evidencias],
             creadoPor: dto.creadoPor,
+            driveFiles,
         }).save();
     }
     async updateRegistro(expedienteId, registroId, dto, newEvidencias = []) {
@@ -235,6 +239,9 @@ let ExpedientesService = class ExpedientesService {
             ...(dto.fecha ? { fecha: new Date(dto.fecha) } : {}),
         };
         delete update.evidencias;
+        delete update.driveFilesJson;
+        const driveFiles = this.parseDriveFiles(dto.driveFilesJson);
+        update.driveFiles = driveFiles;
         const ops = { $set: update };
         if (newEvidencias.length > 0) {
             ops.$push = { evidencias: { $each: newEvidencias } };
@@ -243,6 +250,45 @@ let ExpedientesService = class ExpedientesService {
         if (!registro)
             throw new common_1.NotFoundException('Registro no encontrado');
         return registro;
+    }
+    async findHijoExpedienteForParent(parentUserId, studentId) {
+        const parent = await this.parentsService.findByUserId(parentUserId);
+        const parentId = parent._id.toString();
+        const inStudentIds = parent.studentIds.some((s) => {
+            const id = s?._id ?? s;
+            return id?.toString() === studentId;
+        });
+        if (!inStudentIds) {
+            const student = await this.studentsService.findOne(studentId).catch(() => null);
+            const linked = student && [
+                student.fatherId?.toString(),
+                student.motherId?.toString(),
+                student.guardianId?.toString(),
+            ].filter(Boolean).includes(parentId);
+            if (!linked)
+                throw new common_1.ForbiddenException('No tenés acceso al expediente de este estudiante');
+        }
+        const expediente = await this.findByStudent(studentId);
+        if (!expediente)
+            return { expediente: null, registros: [] };
+        const registros = await this.registroModel
+            .find({ expedienteId: expediente._id })
+            .sort({ fecha: -1 })
+            .exec();
+        return { expediente, registros };
+    }
+    parseDriveFiles(raw) {
+        if (!raw)
+            return [];
+        try {
+            const parsed = JSON.parse(raw);
+            if (!Array.isArray(parsed))
+                return [];
+            return parsed.filter((item) => item && typeof item.nombre === 'string' && typeof item.url === 'string');
+        }
+        catch {
+            return [];
+        }
     }
     async deleteRegistro(expedienteId, registroId) {
         const result = await this.registroModel.findOneAndDelete({
@@ -267,6 +313,7 @@ exports.ExpedientesService = ExpedientesService = __decorate([
     __metadata("design:paramtypes", [mongoose_2.Model,
         mongoose_2.Model,
         students_service_1.StudentsService,
-        notifications_service_1.NotificationsService])
+        notifications_service_1.NotificationsService,
+        parents_service_1.ParentsService])
 ], ExpedientesService);
 //# sourceMappingURL=expedientes.service.js.map
