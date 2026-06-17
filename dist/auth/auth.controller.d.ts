@@ -9,6 +9,7 @@ export declare class AuthController {
         user: {
             id: string;
             username: string;
+            name: string;
             firstName: string;
             lastName: string;
             img: string;

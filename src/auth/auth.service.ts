@@ -51,6 +51,7 @@ export class AuthService {
       user: {
         id: user._id.toString(),
         username: user.username,
+        name: user.name,
         firstName: user.name.split(' ')[0] ?? user.name,
         lastName: user.name.split(' ').slice(1).join(' ') ?? '',
         img: user.avatar,
