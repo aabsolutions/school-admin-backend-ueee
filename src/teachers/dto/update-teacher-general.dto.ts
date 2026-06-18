@@ -1,4 +1,8 @@
 import { IsDateString, IsEnum, IsNumber, IsOptional, IsString, Min } from 'class-validator';
+import { Transform } from 'class-transformer';
+
+const toUpper = ({ value }: { value: unknown }) =>
+  typeof value === 'string' ? value.toUpperCase() : value;
 
 export class UpdateTeacherGeneralDto {
   @IsOptional() @IsString() mobile?: string;
@@ -8,6 +12,6 @@ export class UpdateTeacherGeneralDto {
   @IsOptional() @IsNumber() @Min(0) peso?: number;
   @IsOptional() @IsNumber() @Min(0) talla?: number;
   @IsOptional() @IsString() bio?: string;
-  @IsOptional() @IsString() emergencyName?: string;
+  @Transform(toUpper) @IsOptional() @IsString() emergencyName?: string;
   @IsOptional() @IsString() emergencyMobile?: string;
 }

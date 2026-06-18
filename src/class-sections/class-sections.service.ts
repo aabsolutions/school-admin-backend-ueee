@@ -54,7 +54,7 @@ export class ClassSectionsService {
   }
 
   async update(id: string, dto: UpdateClassSectionDto): Promise<ClassSectionDocument> {
-    const updated = await this.classSectionModel.findByIdAndUpdate(id, dto, { new: true });
+    const updated = await this.classSectionModel.findByIdAndUpdate(id, dto, { returnDocument: 'after' });
     if (!updated) throw new NotFoundException('Class section not found');
     return updated;
   }

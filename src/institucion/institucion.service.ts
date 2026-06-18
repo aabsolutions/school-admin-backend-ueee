@@ -26,7 +26,7 @@ export class InstitucionService {
 
   async updateInstitucion(dto: UpdateInstitucionDto): Promise<InstitucionDocument> {
     return this.model
-      .findOneAndUpdate({}, { $set: dto }, { upsert: true, new: true })
+      .findOneAndUpdate({}, { $set: dto }, { upsert: true, returnDocument: 'after' })
       .populate('autoridad', 'name email')
       .exec();
   }
@@ -34,7 +34,7 @@ export class InstitucionService {
   async uploadLogo(file: Express.Multer.File): Promise<InstitucionDocument> {
     const url = await this.cloudinaryService.uploadBuffer(file.buffer, 'institucion/logo');
     return this.model
-      .findOneAndUpdate({}, { $set: { logotipo: url } }, { upsert: true, new: true })
+      .findOneAndUpdate({}, { $set: { logotipo: url } }, { upsert: true, returnDocument: 'after' })
       .populate('autoridad', 'name email')
       .exec();
   }
@@ -42,7 +42,7 @@ export class InstitucionService {
   async uploadMembrete(file: Express.Multer.File): Promise<InstitucionDocument> {
     const url = await this.cloudinaryService.uploadBuffer(file.buffer, 'institucion/membrete');
     return this.model
-      .findOneAndUpdate({}, { $set: { membrete: url } }, { upsert: true, new: true })
+      .findOneAndUpdate({}, { $set: { membrete: url } }, { upsert: true, returnDocument: 'after' })
       .populate('autoridad', 'name email')
       .exec();
   }

@@ -34,6 +34,13 @@ export declare class TeachersController {
         limit: number;
         totalPages: number;
     }>;
+    checkBulk(body: {
+        dnis: string[];
+        emails: string[];
+    }): Promise<{
+        duplicateDnis: string[];
+        duplicateEmails: string[];
+    }>;
     bulkCreate(dto: BulkCreateTeacherDto): Promise<any>;
     findOne(id: Types.ObjectId): Promise<import("./schemas/teacher.schema").TeacherDocument>;
     create(dto: CreateTeacherDto): Promise<import("./schemas/teacher.schema").TeacherDocument>;

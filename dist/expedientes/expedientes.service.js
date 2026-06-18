@@ -246,7 +246,7 @@ let ExpedientesService = class ExpedientesService {
         if (newEvidencias.length > 0) {
             ops.$push = { evidencias: { $each: newEvidencias } };
         }
-        const registro = await this.registroModel.findOneAndUpdate({ _id: registroId, expedienteId: new mongoose_2.Types.ObjectId(expedienteId) }, ops, { new: true });
+        const registro = await this.registroModel.findOneAndUpdate({ _id: registroId, expedienteId: new mongoose_2.Types.ObjectId(expedienteId) }, ops, { returnDocument: 'after' });
         if (!registro)
             throw new common_1.NotFoundException('Registro no encontrado');
         return registro;
@@ -299,7 +299,7 @@ let ExpedientesService = class ExpedientesService {
             throw new common_1.NotFoundException('Registro no encontrado');
     }
     async deleteEvidencia(expedienteId, registroId, url) {
-        const registro = await this.registroModel.findOneAndUpdate({ _id: registroId, expedienteId: new mongoose_2.Types.ObjectId(expedienteId) }, { $pull: { evidencias: url } }, { new: true });
+        const registro = await this.registroModel.findOneAndUpdate({ _id: registroId, expedienteId: new mongoose_2.Types.ObjectId(expedienteId) }, { $pull: { evidencias: url } }, { returnDocument: 'after' });
         if (!registro)
             throw new common_1.NotFoundException('Registro no encontrado');
         return registro;

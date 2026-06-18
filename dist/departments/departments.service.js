@@ -34,7 +34,7 @@ let DepartmentsService = class DepartmentsService {
         return new this.departmentModel(dto).save();
     }
     async update(id, dto) {
-        const updated = await this.departmentModel.findByIdAndUpdate(id, dto, { new: true });
+        const updated = await this.departmentModel.findByIdAndUpdate(id, dto, { returnDocument: 'after' });
         if (!updated)
             throw new common_1.NotFoundException('Department not found');
         return updated;

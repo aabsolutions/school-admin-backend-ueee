@@ -233,7 +233,7 @@ let ParentsService = class ParentsService {
     }
     async update(id, dto) {
         const parent = await this.parentModel
-            .findByIdAndUpdate(id, { $set: dto }, { new: true })
+            .findByIdAndUpdate(id, { $set: dto }, { returnDocument: 'after' })
             .populate('studentIds', 'name email dni img status');
         if (!parent)
             throw new common_1.NotFoundException('Padre no encontrado');
@@ -258,8 +258,10 @@ let ParentsService = class ParentsService {
             throw new common_1.NotFoundException('Padre no encontrado');
         const parentOid = parent._id;
         await Promise.all([
-            this.parentModel.findByIdAndUpdate(id, { isActive: false }),
-            this.userModel.findByIdAndUpdate(parent.userId, { isActive: false }),
+            this.parentModel.findByIdAndDelete(id),
+            parent.userId
+                ? this.userModel.findByIdAndDelete(parent.userId).catch(() => { })
+                : Promise.resolve(),
             this.studentModel.updateMany({ _id: { $in: parent.studentIds } }, { $pull: { parentIds: parentOid } }),
             this.studentModel.updateMany({ fatherId: parentOid }, { $set: { fatherId: null } }),
             this.studentModel.updateMany({ motherId: parentOid }, { $set: { motherId: null } }),

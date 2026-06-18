@@ -52,6 +52,9 @@ let TeachersController = class TeachersController {
     findAll(query) {
         return this.teachersService.findAll(query);
     }
+    checkBulk(body) {
+        return this.teachersService.checkBulkDuplicates(body.dnis ?? [], body.emails ?? []);
+    }
     bulkCreate(dto) {
         return this.teachersService.bulkCreate(dto.records);
     }
@@ -128,6 +131,13 @@ __decorate([
     __metadata("design:paramtypes", [pagination_query_dto_1.PaginationQueryDto]),
     __metadata("design:returntype", void 0)
 ], TeachersController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Post)('check-bulk'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], TeachersController.prototype, "checkBulk", null);
 __decorate([
     (0, common_1.Post)('bulk'),
     __param(0, (0, common_1.Body)()),

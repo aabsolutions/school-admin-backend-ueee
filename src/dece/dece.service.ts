@@ -189,7 +189,7 @@ export class DeceService {
     const registro = await this.registroModel.findOneAndUpdate(
       { _id: registroId, expedienteId: new Types.ObjectId(expedienteId) },
       ops,
-      { new: true },
+      { returnDocument: 'after' },
     );
     if (!registro) throw new NotFoundException('Registro DECE no encontrado');
     return registro;
@@ -212,7 +212,7 @@ export class DeceService {
     const registro = await this.registroModel.findOneAndUpdate(
       { _id: registroId, expedienteId: new Types.ObjectId(expedienteId) },
       { $pull: { evidencias: url } },
-      { new: true },
+      { returnDocument: 'after' },
     );
     if (!registro) throw new NotFoundException('Registro DECE no encontrado');
     return registro;

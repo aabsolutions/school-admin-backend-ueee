@@ -83,7 +83,7 @@ export class RoleConfigService implements OnModuleInit {
       if (dto.displayName !== undefined) allowed.displayName = dto.displayName;
       if (dto.description !== undefined) allowed.description = dto.description;
       return this.roleModel
-        .findByIdAndUpdate(id, { $set: allowed }, { new: true })
+        .findByIdAndUpdate(id, { $set: allowed }, { returnDocument: 'after' })
         .lean()
         .exec() as Promise<RoleConfig>;
     }
@@ -94,7 +94,7 @@ export class RoleConfigService implements OnModuleInit {
     }
 
     return this.roleModel
-      .findByIdAndUpdate(id, { $set: dto }, { new: true })
+      .findByIdAndUpdate(id, { $set: dto }, { returnDocument: 'after' })
       .lean()
       .exec() as Promise<RoleConfig>;
   }
@@ -105,7 +105,7 @@ export class RoleConfigService implements OnModuleInit {
       throw new ForbiddenException('SuperAdmin no necesita configuración de permisos');
     }
     return this.roleModel
-      .findByIdAndUpdate(id, { $set: { sidebarPermissions: permissions } }, { new: true })
+      .findByIdAndUpdate(id, { $set: { sidebarPermissions: permissions } }, { returnDocument: 'after' })
       .lean()
       .exec() as Promise<RoleConfig>;
   }

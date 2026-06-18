@@ -12,10 +12,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreateStudentDto = void 0;
 const class_validator_1 = require("class-validator");
 const class_transformer_1 = require("class-transformer");
+const toUpper = ({ value }) => typeof value === 'string' ? value.toUpperCase() : value;
+const emptyToUndefined = ({ value }) => value === '' ? undefined : value;
 class CreateStudentDto {
 }
 exports.CreateStudentDto = CreateStudentDto;
 __decorate([
+    (0, class_transformer_1.Transform)(toUpper),
     (0, class_validator_1.IsNotEmpty)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
@@ -27,11 +30,13 @@ __decorate([
     __metadata("design:type", String)
 ], CreateStudentDto.prototype, "email", void 0);
 __decorate([
+    (0, class_transformer_1.Transform)(emptyToUndefined),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateStudentDto.prototype, "username", void 0);
 __decorate([
+    (0, class_transformer_1.Transform)(emptyToUndefined),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.MinLength)(6),
@@ -70,11 +75,13 @@ __decorate([
     __metadata("design:type", String)
 ], CreateStudentDto.prototype, "mobile", void 0);
 __decorate([
+    (0, class_transformer_1.Transform)(emptyToUndefined),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsEnum)(['Male', 'Female', 'Other']),
     __metadata("design:type", String)
 ], CreateStudentDto.prototype, "gender", void 0);
 __decorate([
+    (0, class_transformer_1.Transform)(emptyToUndefined),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsEnum)(['URBANA', 'RURAL', 'FUERA DEL CANTÓN']),
     __metadata("design:type", String)
@@ -90,6 +97,7 @@ __decorate([
     __metadata("design:type", String)
 ], CreateStudentDto.prototype, "address", void 0);
 __decorate([
+    (0, class_transformer_1.Transform)(toUpper),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
@@ -100,6 +108,7 @@ __decorate([
     __metadata("design:type", String)
 ], CreateStudentDto.prototype, "parentGuardianMobile", void 0);
 __decorate([
+    (0, class_transformer_1.Transform)(toUpper),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
@@ -110,6 +119,7 @@ __decorate([
     __metadata("design:type", String)
 ], CreateStudentDto.prototype, "fatherMobile", void 0);
 __decorate([
+    (0, class_transformer_1.Transform)(toUpper),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
@@ -120,6 +130,7 @@ __decorate([
     __metadata("design:type", String)
 ], CreateStudentDto.prototype, "motherMobile", void 0);
 __decorate([
+    (0, class_transformer_1.Transform)(emptyToUndefined),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsEnum)(['active', 'inactive', 'graduated', 'suspended']),
     __metadata("design:type", String)

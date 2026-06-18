@@ -27,7 +27,7 @@ export class DepartmentsService {
   }
 
   async update(id: string, dto: UpdateDepartmentDto): Promise<DepartmentDocument> {
-    const updated = await this.departmentModel.findByIdAndUpdate(id, dto, { new: true });
+    const updated = await this.departmentModel.findByIdAndUpdate(id, dto, { returnDocument: 'after' });
     if (!updated) throw new NotFoundException('Department not found');
     return updated;
   }

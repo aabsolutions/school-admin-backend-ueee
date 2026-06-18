@@ -12,10 +12,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreateParentDto = void 0;
 const class_validator_1 = require("class-validator");
 const class_transformer_1 = require("class-transformer");
+const toUpper = ({ value }) => typeof value === 'string' ? value.toUpperCase() : value;
+const emptyToUndefined = ({ value }) => value === '' ? undefined : value;
 class CreateParentDto {
 }
 exports.CreateParentDto = CreateParentDto;
 __decorate([
+    (0, class_transformer_1.Transform)(toUpper),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
@@ -37,6 +40,7 @@ __decorate([
     __metadata("design:type", String)
 ], CreateParentDto.prototype, "mobile", void 0);
 __decorate([
+    (0, class_transformer_1.Transform)(emptyToUndefined),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsEnum)(['Male', 'Female', 'Other']),
     __metadata("design:type", String)
@@ -52,16 +56,19 @@ __decorate([
     __metadata("design:type", String)
 ], CreateParentDto.prototype, "occupation", void 0);
 __decorate([
+    (0, class_transformer_1.Transform)(emptyToUndefined),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsEnum)(['Ninguna', 'Primaria', 'Secundaria', 'Superior', 'Posgrado']),
     __metadata("design:type", String)
 ], CreateParentDto.prototype, "educationLevel", void 0);
 __decorate([
+    (0, class_transformer_1.Transform)(emptyToUndefined),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateParentDto.prototype, "username", void 0);
 __decorate([
+    (0, class_transformer_1.Transform)(emptyToUndefined),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)

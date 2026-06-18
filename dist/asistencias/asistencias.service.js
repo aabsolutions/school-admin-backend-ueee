@@ -50,7 +50,7 @@ let AsistenciasService = class AsistenciasService {
             userId: new mongoose_2.Types.ObjectId(dto.userId),
             cursoId: cursoLectivo.cursoId,
             isActive: true,
-        }, { upsert: true, new: true })
+        }, { upsert: true, returnDocument: 'after' })
             .populate('userId', 'name username role')
             .populate({ path: 'cursoLectivoId', populate: { path: 'cursoId' } })
             .lean();
@@ -115,7 +115,7 @@ let AsistenciasService = class AsistenciasService {
             cursoId: cursoLectivo.cursoId,
             takenByUserId: new mongoose_2.Types.ObjectId(takenByUserId),
             records,
-        }, { upsert: true, new: true });
+        }, { upsert: true, returnDocument: 'after' });
         const absentIds = records
             .filter((r) => r.status === 'absent')
             .map((r) => r.studentId.toString());

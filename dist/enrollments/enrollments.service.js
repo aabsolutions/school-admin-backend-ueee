@@ -94,7 +94,7 @@ let EnrollmentsService = class EnrollmentsService {
             payload.cursoLectivoId = new mongoose_2.Types.ObjectId(dto.cursoLectivoId);
         }
         try {
-            const updated = await this.enrollmentModel.findByIdAndUpdate(id, { $set: payload }, { new: true });
+            const updated = await this.enrollmentModel.findByIdAndUpdate(id, { $set: payload }, { returnDocument: 'after' });
             if (!updated)
                 throw new common_1.NotFoundException('Matrícula no encontrada');
             return this.findOne(id);
@@ -107,7 +107,7 @@ let EnrollmentsService = class EnrollmentsService {
         }
     }
     async withdraw(id) {
-        const updated = await this.enrollmentModel.findByIdAndUpdate(id, { status: 'withdrawn' }, { new: true });
+        const updated = await this.enrollmentModel.findByIdAndUpdate(id, { status: 'withdrawn' }, { returnDocument: 'after' });
         if (!updated)
             throw new common_1.NotFoundException('Matrícula no encontrada');
         return this.findOne(id);

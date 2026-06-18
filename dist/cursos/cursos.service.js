@@ -65,7 +65,7 @@ let CursosService = class CursosService {
     }
     async update(id, dto) {
         try {
-            const updated = await this.cursoModel.findByIdAndUpdate(id, dto, { new: true });
+            const updated = await this.cursoModel.findByIdAndUpdate(id, dto, { returnDocument: 'after' });
             if (!updated)
                 throw new common_1.NotFoundException('Curso no encontrado');
             return updated;
@@ -93,7 +93,7 @@ let CursosService = class CursosService {
     }
     async setMaterias(id, materiaIds) {
         const objectIds = materiaIds.map((mid) => new mongoose_2.Types.ObjectId(mid));
-        const updated = await this.cursoModel.findByIdAndUpdate(id, { materias: objectIds }, { new: true }).populate('materias').exec();
+        const updated = await this.cursoModel.findByIdAndUpdate(id, { materias: objectIds }, { returnDocument: 'after' }).populate('materias').exec();
         if (!updated)
             throw new common_1.NotFoundException('Curso no encontrado');
         return updated.materias;

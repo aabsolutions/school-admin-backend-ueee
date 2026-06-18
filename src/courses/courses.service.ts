@@ -46,7 +46,7 @@ export class CoursesService {
   }
 
   async update(id: string, dto: UpdateCourseDto): Promise<CourseDocument> {
-    const updated = await this.courseModel.findByIdAndUpdate(id, dto, { new: true });
+    const updated = await this.courseModel.findByIdAndUpdate(id, dto, { returnDocument: 'after' });
     if (!updated) throw new NotFoundException('Course not found');
     return updated;
   }

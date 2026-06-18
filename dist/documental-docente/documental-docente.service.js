@@ -121,7 +121,7 @@ let DocumentalDocenteService = class DocumentalDocenteService {
         const nuevoDoc = { nombre, url, categoria, fecha: new Date() };
         if (descripcion)
             nuevoDoc.descripcion = descripcion;
-        const updated = await this.model.findByIdAndUpdate(record._id, { $push: { documentos: nuevoDoc } }, { new: true });
+        const updated = await this.model.findByIdAndUpdate(record._id, { $push: { documentos: nuevoDoc } }, { returnDocument: 'after' });
         if (!updated)
             throw new common_1.NotFoundException('Registro no encontrado');
         return updated;
@@ -135,7 +135,7 @@ let DocumentalDocenteService = class DocumentalDocenteService {
         const doc = record.documentos.find((d) => d._id.toString() === docId);
         if (!doc)
             throw new common_1.NotFoundException('Documento no encontrado');
-        const updated = await this.model.findByIdAndUpdate(record._id, { $pull: { documentos: { _id: new mongoose_2.Types.ObjectId(docId) } } }, { new: true });
+        const updated = await this.model.findByIdAndUpdate(record._id, { $pull: { documentos: { _id: new mongoose_2.Types.ObjectId(docId) } } }, { returnDocument: 'after' });
         return { url: doc.url, record: updated };
     }
 };

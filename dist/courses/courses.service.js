@@ -52,7 +52,7 @@ let CoursesService = class CoursesService {
         return new this.courseModel(dto).save();
     }
     async update(id, dto) {
-        const updated = await this.courseModel.findByIdAndUpdate(id, dto, { new: true });
+        const updated = await this.courseModel.findByIdAndUpdate(id, dto, { returnDocument: 'after' });
         if (!updated)
             throw new common_1.NotFoundException('Course not found');
         return updated;

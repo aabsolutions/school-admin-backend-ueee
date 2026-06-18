@@ -58,7 +58,7 @@ export class MateriasService {
 
   async update(id: string, dto: UpdateMateriaDto): Promise<MateriaDocument> {
     try {
-      const updated = await this.materiaModel.findByIdAndUpdate(id, dto, { new: true });
+      const updated = await this.materiaModel.findByIdAndUpdate(id, dto, { returnDocument: 'after' });
       if (!updated) throw new NotFoundException('Materia no encontrada');
       return updated;
     } catch (err) {

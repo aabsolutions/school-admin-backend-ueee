@@ -145,7 +145,7 @@ export class DocumentalEstudianteService {
     const record = await this.model.findByIdAndUpdate(
       id,
       { $set: dto },
-      { new: true },
+      { returnDocument: 'after' },
     );
     if (!record) throw new NotFoundException('Expediente documental no encontrado');
 

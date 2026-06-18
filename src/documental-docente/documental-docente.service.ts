@@ -132,7 +132,7 @@ export class DocumentalDocenteService {
     const updated = await this.model.findByIdAndUpdate(
       record._id,
       { $push: { documentos: nuevoDoc } },
-      { new: true },
+      { returnDocument: 'after' },
     );
     if (!updated) throw new NotFoundException('Registro no encontrado');
     return updated;
@@ -155,7 +155,7 @@ export class DocumentalDocenteService {
     const updated = await this.model.findByIdAndUpdate(
       record._id,
       { $pull: { documentos: { _id: new Types.ObjectId(docId) } } },
-      { new: true },
+      { returnDocument: 'after' },
     );
 
     return { url: doc.url, record: updated! };

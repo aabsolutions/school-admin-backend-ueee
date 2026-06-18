@@ -2,8 +2,16 @@ import {
   IsString, IsEmail, IsOptional,
   IsEnum, IsBoolean,
 } from 'class-validator';
+import { Transform } from 'class-transformer';
+
+const toUpper = ({ value }: { value: unknown }) =>
+  typeof value === 'string' ? value.toUpperCase() : value;
+
+const emptyToUndefined = ({ value }: { value: unknown }) =>
+  value === '' ? undefined : value;
 
 export class UpdateParentDto {
+  @Transform(toUpper)
   @IsOptional()
   @IsString()
   name?: string;
@@ -20,6 +28,7 @@ export class UpdateParentDto {
   @IsString()
   mobile?: string;
 
+  @Transform(emptyToUndefined)
   @IsOptional()
   @IsEnum(['Male', 'Female', 'Other'])
   gender?: string;
@@ -32,6 +41,7 @@ export class UpdateParentDto {
   @IsString()
   occupation?: string;
 
+  @Transform(emptyToUndefined)
   @IsOptional()
   @IsEnum(['Ninguna', 'Primaria', 'Secundaria', 'Superior', 'Posgrado'])
   educationLevel?: string;

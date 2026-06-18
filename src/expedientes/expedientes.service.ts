@@ -289,7 +289,7 @@ export class ExpedientesService {
     const registro = await this.registroModel.findOneAndUpdate(
       { _id: registroId, expedienteId: new Types.ObjectId(expedienteId) },
       ops,
-      { new: true },
+      { returnDocument: 'after' },
     );
     if (!registro) throw new NotFoundException('Registro no encontrado');
     return registro;
@@ -354,7 +354,7 @@ export class ExpedientesService {
     const registro = await this.registroModel.findOneAndUpdate(
       { _id: registroId, expedienteId: new Types.ObjectId(expedienteId) },
       { $pull: { evidencias: url } },
-      { new: true },
+      { returnDocument: 'after' },
     );
     if (!registro) throw new NotFoundException('Registro no encontrado');
     return registro;

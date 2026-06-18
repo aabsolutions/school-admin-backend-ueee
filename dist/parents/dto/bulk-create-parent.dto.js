@@ -12,10 +12,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.BulkCreateParentDto = exports.BulkParentItemDto = void 0;
 const class_transformer_1 = require("class-transformer");
 const class_validator_1 = require("class-validator");
+const toUpper = ({ value }) => typeof value === 'string' ? value.toUpperCase() : value;
 class BulkParentItemDto {
 }
 exports.BulkParentItemDto = BulkParentItemDto;
 __decorate([
+    (0, class_transformer_1.Transform)(toUpper),
     (0, class_validator_1.IsNotEmpty)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)

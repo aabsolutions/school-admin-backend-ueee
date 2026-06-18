@@ -27,7 +27,7 @@ export class AreaEstudioService {
   }
 
   async update(id: string, dto: UpdateAreaEstudioDto): Promise<AreaEstudioDocument> {
-    const updated = await this.model.findByIdAndUpdate(id, dto, { new: true });
+    const updated = await this.model.findByIdAndUpdate(id, dto, { returnDocument: 'after' });
     if (!updated) throw new NotFoundException('Área de estudio no encontrada');
     return updated;
   }

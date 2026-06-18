@@ -109,7 +109,7 @@ export class EnrollmentsService {
       const updated = await this.enrollmentModel.findByIdAndUpdate(
         id,
         { $set: payload },
-        { new: true },
+        { returnDocument: 'after' },
       );
       if (!updated) throw new NotFoundException('Matrícula no encontrada');
       return this.findOne(id);
@@ -125,7 +125,7 @@ export class EnrollmentsService {
     const updated = await this.enrollmentModel.findByIdAndUpdate(
       id,
       { status: 'withdrawn' },
-      { new: true },
+      { returnDocument: 'after' },
     );
     if (!updated) throw new NotFoundException('Matrícula no encontrada');
     return this.findOne(id);

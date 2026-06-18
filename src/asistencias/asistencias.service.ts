@@ -70,7 +70,7 @@ export class AsistenciasService {
           cursoId: cursoLectivo.cursoId,
           isActive: true,
         },
-        { upsert: true, new: true },
+        { upsert: true, returnDocument: 'after' },
       )
       .populate('userId', 'name username role')
       .populate({ path: 'cursoLectivoId', populate: { path: 'cursoId' } })
@@ -151,7 +151,7 @@ export class AsistenciasService {
         takenByUserId: new Types.ObjectId(takenByUserId),
         records,
       },
-      { upsert: true, new: true },
+      { upsert: true, returnDocument: 'after' },
     );
 
     const absentIds = records

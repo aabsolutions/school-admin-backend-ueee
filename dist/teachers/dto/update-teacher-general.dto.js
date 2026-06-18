@@ -11,6 +11,8 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UpdateTeacherGeneralDto = void 0;
 const class_validator_1 = require("class-validator");
+const class_transformer_1 = require("class-transformer");
+const toUpper = ({ value }) => typeof value === 'string' ? value.toUpperCase() : value;
 class UpdateTeacherGeneralDto {
 }
 exports.UpdateTeacherGeneralDto = UpdateTeacherGeneralDto;
@@ -52,6 +54,7 @@ __decorate([
     __metadata("design:type", String)
 ], UpdateTeacherGeneralDto.prototype, "bio", void 0);
 __decorate([
+    (0, class_transformer_1.Transform)(toUpper),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)

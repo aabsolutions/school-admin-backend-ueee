@@ -69,7 +69,7 @@ export class CursoLectivoService {
 
   async update(id: string, dto: UpdateCursoLectivoDto): Promise<CursoLectivoDocument> {
     try {
-      const updated = await this.cursoLectivoModel.findByIdAndUpdate(id, dto, { new: true });
+      const updated = await this.cursoLectivoModel.findByIdAndUpdate(id, dto, { returnDocument: 'after' });
       if (!updated) throw new NotFoundException('Curso lectivo no encontrado');
       return this.findOne(id);
     } catch (err) {

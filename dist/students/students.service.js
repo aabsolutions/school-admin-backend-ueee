@@ -132,7 +132,7 @@ let StudentsService = StudentsService_1 = class StudentsService {
             updateData.parentIds = newParentIds.map((p) => new mongoose_2.Types.ObjectId(p));
         }
         const updated = await this.studentModel
-            .findByIdAndUpdate(id, updateData, { new: true })
+            .findByIdAndUpdate(id, updateData, { returnDocument: 'after' })
             .populate('fatherId motherId guardianId', 'name email dni');
         if (!updated)
             throw new common_1.NotFoundException('Student not found');
@@ -142,18 +142,21 @@ let StudentsService = StudentsService_1 = class StudentsService {
         return [...new Set([fatherId, motherId, guardianId].filter(Boolean))];
     }
     async remove(id) {
-        const student = await this.studentModel.findById(id).select('parentIds fatherId motherId guardianId').lean();
+        const student = await this.studentModel.findById(id).select('parentIds fatherId motherId guardianId userId').lean();
         if (!student)
             throw new common_1.NotFoundException('Student not found');
         const studentOid = new mongoose_2.Types.ObjectId(id);
         await Promise.all([
             this.studentModel.findByIdAndDelete(id),
+            student.userId
+                ? this.userModel.findByIdAndDelete(student.userId).catch(() => { })
+                : Promise.resolve(),
             this.parentModel.updateMany({ studentIds: studentOid }, { $pull: { studentIds: studentOid } }),
             this.studentModel.updateMany({ siblingIds: studentOid }, { $pull: { siblingIds: studentOid } }),
         ]);
     }
     async toggleStatus(id, status) {
-        const updated = await this.studentModel.findByIdAndUpdate(id, { status }, { new: true });
+        const updated = await this.studentModel.findByIdAndUpdate(id, { status }, { returnDocument: 'after' });
         if (!updated)
             throw new common_1.NotFoundException('Student not found');
         return updated;
@@ -273,7 +276,7 @@ let StudentsService = StudentsService_1 = class StudentsService {
         ]);
     }
     async updateGeneralInfo(id, dto) {
-        const updated = await this.studentModel.findByIdAndUpdate(id, { $set: dto }, { new: true });
+        const updated = await this.studentModel.findByIdAndUpdate(id, { $set: dto }, { returnDocument: 'after' });
         if (!updated)
             throw new common_1.NotFoundException('Student not found');
         return updated;
@@ -283,7 +286,7 @@ let StudentsService = StudentsService_1 = class StudentsService {
         for (const [key, val] of Object.entries(dto)) {
             update[`medicalInfo.${key}`] = val;
         }
-        const updated = await this.studentModel.findByIdAndUpdate(id, { $set: update }, { new: true });
+        const updated = await this.studentModel.findByIdAndUpdate(id, { $set: update }, { returnDocument: 'after' });
         if (!updated)
             throw new common_1.NotFoundException('Student not found');
         return updated;
@@ -293,7 +296,7 @@ let StudentsService = StudentsService_1 = class StudentsService {
         for (const [key, val] of Object.entries(dto)) {
             update[`familyInfo.${key}`] = val;
         }
-        const updated = await this.studentModel.findByIdAndUpdate(id, { $set: update }, { new: true });
+        const updated = await this.studentModel.findByIdAndUpdate(id, { $set: update }, { returnDocument: 'after' });
         if (!updated)
             throw new common_1.NotFoundException('Student not found');
         return updated;
@@ -342,7 +345,7 @@ let StudentsService = StudentsService_1 = class StudentsService {
         const update = type === 'credencial'
             ? { img: url }
             : { imgCuerpoEntero: url, ...(peso != null && { peso }), ...(talla != null && { talla }) };
-        const updated = await this.studentModel.findByIdAndUpdate(id, update, { new: true });
+        const updated = await this.studentModel.findByIdAndUpdate(id, update, { returnDocument: 'after' });
         if (!updated)
             throw new common_1.NotFoundException('Student not found');
         return updated;

@@ -4,7 +4,14 @@ import {
 } from 'class-validator';
 import { Transform } from 'class-transformer';
 
+const toUpper = ({ value }: { value: unknown }) =>
+  typeof value === 'string' ? value.toUpperCase() : value;
+
+const emptyToUndefined = ({ value }: { value: unknown }) =>
+  value === '' ? undefined : value;
+
 export class CreateParentDto {
+  @Transform(toUpper)
   @IsString()
   @IsNotEmpty()
   name: string;
@@ -22,6 +29,7 @@ export class CreateParentDto {
   @IsString()
   mobile?: string;
 
+  @Transform(emptyToUndefined)
   @IsOptional()
   @IsEnum(['Male', 'Female', 'Other'])
   gender?: string;
@@ -34,14 +42,17 @@ export class CreateParentDto {
   @IsString()
   occupation?: string;
 
+  @Transform(emptyToUndefined)
   @IsOptional()
   @IsEnum(['Ninguna', 'Primaria', 'Secundaria', 'Superior', 'Posgrado'])
   educationLevel?: string;
 
+  @Transform(emptyToUndefined)
   @IsOptional()
   @IsString()
   username?: string;
 
+  @Transform(emptyToUndefined)
   @IsOptional()
   @IsString()
   password?: string;

@@ -259,7 +259,7 @@ export class ParentsService {
 
   async update(id: string, dto: UpdateParentDto): Promise<ParentDocument> {
     const parent = await this.parentModel
-      .findByIdAndUpdate(id, { $set: dto }, { new: true })
+      .findByIdAndUpdate(id, { $set: dto }, { returnDocument: 'after' })
       .populate('studentIds', 'name email dni img status');
     if (!parent) throw new NotFoundException('Padre no encontrado');
     return parent;
@@ -292,8 +292,10 @@ export class ParentsService {
     if (!parent) throw new NotFoundException('Padre no encontrado');
     const parentOid = parent._id as Types.ObjectId;
     await Promise.all([
-      this.parentModel.findByIdAndUpdate(id, { isActive: false }),
-      this.userModel.findByIdAndUpdate(parent.userId, { isActive: false }),
+      this.parentModel.findByIdAndDelete(id),
+      parent.userId
+        ? this.userModel.findByIdAndDelete(parent.userId).catch(() => {})
+        : Promise.resolve(),
       // Pull parent from studentIds array
       this.studentModel.updateMany(
         { _id: { $in: parent.studentIds } },

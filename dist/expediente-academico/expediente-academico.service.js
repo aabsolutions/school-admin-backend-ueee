@@ -190,7 +190,7 @@ let ExpedienteAcademicoService = class ExpedienteAcademicoService {
         const update = { ...dto };
         if (dto.fecha)
             update.fecha = new Date(dto.fecha);
-        const doc = await this.documentoModel.findOneAndUpdate({ _id: docId, expedienteId: new mongoose_2.Types.ObjectId(expedienteId) }, { $set: update }, { new: true });
+        const doc = await this.documentoModel.findOneAndUpdate({ _id: docId, expedienteId: new mongoose_2.Types.ObjectId(expedienteId) }, { $set: update }, { returnDocument: 'after' });
         if (!doc)
             throw new common_1.NotFoundException('Documento no encontrado');
         return doc;

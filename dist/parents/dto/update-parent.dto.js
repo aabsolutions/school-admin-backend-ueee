@@ -11,10 +11,14 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UpdateParentDto = void 0;
 const class_validator_1 = require("class-validator");
+const class_transformer_1 = require("class-transformer");
+const toUpper = ({ value }) => typeof value === 'string' ? value.toUpperCase() : value;
+const emptyToUndefined = ({ value }) => value === '' ? undefined : value;
 class UpdateParentDto {
 }
 exports.UpdateParentDto = UpdateParentDto;
 __decorate([
+    (0, class_transformer_1.Transform)(toUpper),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
@@ -35,6 +39,7 @@ __decorate([
     __metadata("design:type", String)
 ], UpdateParentDto.prototype, "mobile", void 0);
 __decorate([
+    (0, class_transformer_1.Transform)(emptyToUndefined),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsEnum)(['Male', 'Female', 'Other']),
     __metadata("design:type", String)
@@ -50,6 +55,7 @@ __decorate([
     __metadata("design:type", String)
 ], UpdateParentDto.prototype, "occupation", void 0);
 __decorate([
+    (0, class_transformer_1.Transform)(emptyToUndefined),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsEnum)(['Ninguna', 'Primaria', 'Secundaria', 'Superior', 'Posgrado']),
     __metadata("design:type", String)

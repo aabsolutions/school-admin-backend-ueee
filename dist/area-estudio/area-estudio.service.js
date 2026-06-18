@@ -34,7 +34,7 @@ let AreaEstudioService = class AreaEstudioService {
         return new this.model(dto).save();
     }
     async update(id, dto) {
-        const updated = await this.model.findByIdAndUpdate(id, dto, { new: true });
+        const updated = await this.model.findByIdAndUpdate(id, dto, { returnDocument: 'after' });
         if (!updated)
             throw new common_1.NotFoundException('Área de estudio no encontrada');
         return updated;

@@ -11,6 +11,9 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UpdateStudentGeneralDto = void 0;
 const class_validator_1 = require("class-validator");
+const class_transformer_1 = require("class-transformer");
+const toUpper = ({ value }) => typeof value === 'string' ? value.toUpperCase() : value;
+const emptyToUndefined = ({ value }) => value === '' ? undefined : value;
 class UpdateStudentGeneralDto {
 }
 exports.UpdateStudentGeneralDto = UpdateStudentGeneralDto;
@@ -25,11 +28,13 @@ __decorate([
     __metadata("design:type", String)
 ], UpdateStudentGeneralDto.prototype, "address", void 0);
 __decorate([
+    (0, class_transformer_1.Transform)(emptyToUndefined),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsEnum)(['Male', 'Female', 'Other']),
     __metadata("design:type", String)
 ], UpdateStudentGeneralDto.prototype, "gender", void 0);
 __decorate([
+    (0, class_transformer_1.Transform)(emptyToUndefined),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsEnum)(['URBANA', 'RURAL', 'FUERA DEL CANTÓN']),
     __metadata("design:type", String)
@@ -52,6 +57,7 @@ __decorate([
     __metadata("design:type", Number)
 ], UpdateStudentGeneralDto.prototype, "talla", void 0);
 __decorate([
+    (0, class_transformer_1.Transform)(toUpper),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
@@ -62,6 +68,7 @@ __decorate([
     __metadata("design:type", String)
 ], UpdateStudentGeneralDto.prototype, "parentGuardianMobile", void 0);
 __decorate([
+    (0, class_transformer_1.Transform)(toUpper),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
@@ -72,6 +79,7 @@ __decorate([
     __metadata("design:type", String)
 ], UpdateStudentGeneralDto.prototype, "fatherMobile", void 0);
 __decorate([
+    (0, class_transformer_1.Transform)(toUpper),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)

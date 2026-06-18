@@ -56,8 +56,10 @@ let TeachersService = class TeachersService {
     }
     async create(dto) {
         const { username, password, ...teacherData } = dto;
-        const resolvedUsername = username ?? teacherData.dni ?? teacherData.email;
-        const resolvedPassword = password ?? teacherData.dni ?? teacherData.email;
+        const resolvedEmail = teacherData.email?.trim() || `${(teacherData.dni ?? 'docente').replace(/\s/g, '')}@escuela.local`;
+        teacherData.email = resolvedEmail;
+        const resolvedUsername = username ?? teacherData.dni ?? resolvedEmail;
+        const resolvedPassword = password ?? teacherData.dni ?? resolvedEmail;
         let savedUser = null;
         try {
             const user = new this.userModel({
@@ -85,7 +87,7 @@ let TeachersService = class TeachersService {
     }
     async update(id, dto) {
         const updated = await this.teacherModel
-            .findByIdAndUpdate(id, dto, { new: true })
+            .findByIdAndUpdate(id, dto, { returnDocument: 'after' })
             .populate('departmentId', 'departmentName')
             .populate('areaEstudioId', 'nombre');
         if (!updated)
@@ -93,9 +95,12 @@ let TeachersService = class TeachersService {
         return updated;
     }
     async remove(id) {
-        const result = await this.teacherModel.findByIdAndDelete(id);
-        if (!result)
+        const teacher = await this.teacherModel.findByIdAndDelete(id).select('userId').lean();
+        if (!teacher)
             throw new common_1.NotFoundException('Teacher not found');
+        if (teacher.userId) {
+            await this.userModel.findByIdAndDelete(teacher.userId).catch(() => { });
+        }
     }
     async findByUserId(userId) {
         let teacher = await this.teacherModel
@@ -121,7 +126,7 @@ let TeachersService = class TeachersService {
     }
     async updateGeneralInfo(id, dto) {
         const updated = await this.teacherModel
-            .findByIdAndUpdate(id, { $set: dto }, { new: true })
+            .findByIdAndUpdate(id, { $set: dto }, { returnDocument: 'after' })
             .populate('departmentId', 'departmentName')
             .populate('areaEstudioId', 'nombre');
         if (!updated)
@@ -134,7 +139,7 @@ let TeachersService = class TeachersService {
             update[`medicalInfo.${key}`] = val;
         }
         const updated = await this.teacherModel
-            .findByIdAndUpdate(id, { $set: update }, { new: true })
+            .findByIdAndUpdate(id, { $set: update }, { returnDocument: 'after' })
             .populate('departmentId', 'departmentName')
             .populate('areaEstudioId', 'nombre');
         if (!updated)
@@ -147,7 +152,7 @@ let TeachersService = class TeachersService {
             update[`familyInfo.${key}`] = val;
         }
         const updated = await this.teacherModel
-            .findByIdAndUpdate(id, { $set: update }, { new: true })
+            .findByIdAndUpdate(id, { $set: update }, { returnDocument: 'after' })
             .populate('departmentId', 'departmentName')
             .populate('areaEstudioId', 'nombre');
         if (!updated)
@@ -177,14 +182,37 @@ let TeachersService = class TeachersService {
             .sort({ name: 1 })
             .exec();
     }
+    async checkBulkDuplicates(dnis, emails) {
+        const [byDni, byEmail] = await Promise.all([
+            dnis.length ? this.teacherModel.find({ dni: { $in: dnis } }).select('dni').lean() : [],
+            emails.length ? this.teacherModel.find({ email: { $in: emails.map((e) => e.toLowerCase()) } }).select('email').lean() : [],
+        ]);
+        return {
+            duplicateDnis: byDni.map((t) => t.dni),
+            duplicateEmails: byEmail.map((t) => t.email),
+        };
+    }
     async bulkCreate(records) {
+        const candidates = records.map((r) => this.resolveUsername(r.name));
+        const allPrimaries = [...new Set(candidates.map((c) => c.primary))];
+        const existingUsers = await this.userModel
+            .find({ username: { $in: allPrimaries } })
+            .select('username')
+            .lean();
+        const existingSet = new Set(existingUsers.map((u) => u.username));
+        const usedInBatch = new Set();
         const created = [];
         const failed = [];
         for (let i = 0; i < records.length; i++) {
             try {
                 const record = records[i];
+                const cand = candidates[i];
+                const username = !existingSet.has(cand.primary) && !usedInBatch.has(cand.primary)
+                    ? cand.primary
+                    : cand.fallback;
+                usedInBatch.add(username);
                 const email = record.email?.trim() || `${record.dni.replace(/\s/g, '')}@escuela.local`;
-                const teacher = await this.create({ ...record, email });
+                const teacher = await this.create({ ...record, email, username, password: username });
                 created.push(teacher);
             }
             catch (e) {
@@ -193,13 +221,28 @@ let TeachersService = class TeachersService {
         }
         return { total: records.length, successCount: created.length, failureCount: failed.length, created, failed };
     }
+    resolveUsername(name) {
+        const words = name.trim().split(/\s+/).map((w) => this.normalizeForUsername(w));
+        const w0 = words[0] ?? '';
+        const w1 = words[1] ?? '';
+        const w2 = words[2] ?? '';
+        return { primary: `${w2}.${w0}`, fallback: `${w2}.${w1}` };
+    }
+    normalizeForUsername(str) {
+        return str
+            .toLowerCase()
+            .replace(/ñ/g, 'n')
+            .normalize('NFD')
+            .replace(/[̀-ͯ]/g, '')
+            .replace(/[^a-z0-9]/g, '');
+    }
     async uploadPhoto(id, file, type, peso, talla) {
         const folder = type === 'credencial' ? 'teachers/credencial' : 'teachers/cuerpo';
         const url = await this.cloudinaryService.uploadBuffer(file.buffer, folder);
         const update = type === 'credencial'
             ? { img: url }
             : { imgCuerpoEntero: url, ...(peso != null && { peso }), ...(talla != null && { talla }) };
-        const updated = await this.teacherModel.findByIdAndUpdate(id, update, { new: true });
+        const updated = await this.teacherModel.findByIdAndUpdate(id, update, { returnDocument: 'after' });
         if (!updated)
             throw new common_1.NotFoundException('Teacher not found');
         return updated;

@@ -63,7 +63,7 @@ let MateriasService = class MateriasService {
     }
     async update(id, dto) {
         try {
-            const updated = await this.materiaModel.findByIdAndUpdate(id, dto, { new: true });
+            const updated = await this.materiaModel.findByIdAndUpdate(id, dto, { returnDocument: 'after' });
             if (!updated)
                 throw new common_1.NotFoundException('Materia no encontrada');
             return updated;

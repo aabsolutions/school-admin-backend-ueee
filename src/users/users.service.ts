@@ -82,7 +82,7 @@ export class UsersService {
     }
 
     const updated = await this.userModel
-      .findByIdAndUpdate(id, dto, { new: true })
+      .findByIdAndUpdate(id, dto, { returnDocument: 'after' })
       .select('-password');
     if (!updated) throw new NotFoundException('User not found');
     return updated;

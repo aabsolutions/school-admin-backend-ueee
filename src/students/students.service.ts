@@ -145,7 +145,7 @@ export class StudentsService {
     }
 
     const updated = await this.studentModel
-      .findByIdAndUpdate(id, updateData, { new: true })
+      .findByIdAndUpdate(id, updateData, { returnDocument: 'after' })
       .populate('fatherId motherId guardianId', 'name email dni');
     if (!updated) throw new NotFoundException('Student not found');
     return updated;
@@ -160,17 +160,20 @@ export class StudentsService {
   }
 
   async remove(id: string): Promise<void> {
-    const student = await this.studentModel.findById(id).select('parentIds fatherId motherId guardianId').lean();
+    const student = await this.studentModel.findById(id).select('parentIds fatherId motherId guardianId userId').lean();
     if (!student) throw new NotFoundException('Student not found');
     const studentOid = new Types.ObjectId(id);
     await Promise.all([
       this.studentModel.findByIdAndDelete(id),
+      student.userId
+        ? this.userModel.findByIdAndDelete(student.userId).catch(() => {})
+        : Promise.resolve(),
       // Unlink from all parent records — do not delete parents
       this.parentModel.updateMany(
         { studentIds: studentOid },
         { $pull: { studentIds: studentOid } },
       ),
-      // NEW: clean up sibling references
+      // clean up sibling references
       this.studentModel.updateMany(
         { siblingIds: studentOid },
         { $pull: { siblingIds: studentOid } },
@@ -180,7 +183,7 @@ export class StudentsService {
 
   async toggleStatus(id: string, status: string): Promise<StudentDocument> {
     const updated = await this.studentModel.findByIdAndUpdate(
-      id, { status }, { new: true },
+      id, { status }, { returnDocument: 'after' },
     );
     if (!updated) throw new NotFoundException('Student not found');
     return updated;
@@ -315,7 +318,7 @@ export class StudentsService {
   }
 
   async updateGeneralInfo(id: string, dto: UpdateStudentGeneralDto): Promise<StudentDocument> {
-    const updated = await this.studentModel.findByIdAndUpdate(id, { $set: dto }, { new: true });
+    const updated = await this.studentModel.findByIdAndUpdate(id, { $set: dto }, { returnDocument: 'after' });
     if (!updated) throw new NotFoundException('Student not found');
     return updated;
   }
@@ -325,7 +328,7 @@ export class StudentsService {
     for (const [key, val] of Object.entries(dto)) {
       update[`medicalInfo.${key}`] = val;
     }
-    const updated = await this.studentModel.findByIdAndUpdate(id, { $set: update }, { new: true });
+    const updated = await this.studentModel.findByIdAndUpdate(id, { $set: update }, { returnDocument: 'after' });
     if (!updated) throw new NotFoundException('Student not found');
     return updated;
   }
@@ -335,7 +338,7 @@ export class StudentsService {
     for (const [key, val] of Object.entries(dto)) {
       update[`familyInfo.${key}`] = val;
     }
-    const updated = await this.studentModel.findByIdAndUpdate(id, { $set: update }, { new: true });
+    const updated = await this.studentModel.findByIdAndUpdate(id, { $set: update }, { returnDocument: 'after' });
     if (!updated) throw new NotFoundException('Student not found');
     return updated;
   }
@@ -405,7 +408,7 @@ export class StudentsService {
     const update: any = type === 'credencial'
       ? { img: url }
       : { imgCuerpoEntero: url, ...(peso != null && { peso }), ...(talla != null && { talla }) };
-    const updated = await this.studentModel.findByIdAndUpdate(id, update, { new: true });
+    const updated = await this.studentModel.findByIdAndUpdate(id, update, { returnDocument: 'after' });
     if (!updated) throw new NotFoundException('Student not found');
     return updated;
   }

@@ -62,7 +62,7 @@ let ClassSectionsService = class ClassSectionsService {
         return new this.classSectionModel(dto).save();
     }
     async update(id, dto) {
-        const updated = await this.classSectionModel.findByIdAndUpdate(id, dto, { new: true });
+        const updated = await this.classSectionModel.findByIdAndUpdate(id, dto, { returnDocument: 'after' });
         if (!updated)
             throw new common_1.NotFoundException('Class section not found');
         return updated;

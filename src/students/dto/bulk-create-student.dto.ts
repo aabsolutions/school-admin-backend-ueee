@@ -1,11 +1,14 @@
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import {
   IsArray, IsDateString, IsEnum, IsNotEmpty, IsOptional,
   IsString, ValidateNested,
 } from 'class-validator';
 
+const toUpper = ({ value }: { value: unknown }) =>
+  typeof value === 'string' ? value.toUpperCase() : value;
+
 export class BulkStudentItemDto {
-  @IsNotEmpty() @IsString() name: string;
+  @Transform(toUpper) @IsNotEmpty() @IsString() name: string;
   @IsNotEmpty() @IsString() dni: string;
   @IsOptional() @IsString() email?: string;
   @IsOptional() @IsString() mobile?: string;
@@ -13,11 +16,11 @@ export class BulkStudentItemDto {
   @IsOptional() @IsEnum(['URBANA', 'RURAL', 'FUERA DEL CANTÓN']) residenceZone?: string;
   @IsOptional() @IsDateString() birthdate?: string;
   @IsOptional() @IsString() address?: string;
-  @IsOptional() @IsString() parentGuardianName?: string;
+  @Transform(toUpper) @IsOptional() @IsString() parentGuardianName?: string;
   @IsOptional() @IsString() parentGuardianMobile?: string;
-  @IsOptional() @IsString() fatherName?: string;
+  @Transform(toUpper) @IsOptional() @IsString() fatherName?: string;
   @IsOptional() @IsString() fatherMobile?: string;
-  @IsOptional() @IsString() motherName?: string;
+  @Transform(toUpper) @IsOptional() @IsString() motherName?: string;
   @IsOptional() @IsString() motherMobile?: string;
   @IsOptional() @IsEnum(['active', 'inactive', 'graduated', 'suspended']) status?: string;
 }

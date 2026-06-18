@@ -59,7 +59,7 @@ export class CursosService {
 
   async update(id: string, dto: UpdateCursoDto): Promise<CursoDocument> {
     try {
-      const updated = await this.cursoModel.findByIdAndUpdate(id, dto, { new: true });
+      const updated = await this.cursoModel.findByIdAndUpdate(id, dto, { returnDocument: 'after' });
       if (!updated) throw new NotFoundException('Curso no encontrado');
       return updated;
     } catch (err) {
@@ -89,7 +89,7 @@ export class CursosService {
     const updated = await this.cursoModel.findByIdAndUpdate(
       id,
       { materias: objectIds },
-      { new: true },
+      { returnDocument: 'after' },
     ).populate('materias').exec();
     if (!updated) throw new NotFoundException('Curso no encontrado');
     return updated.materias;

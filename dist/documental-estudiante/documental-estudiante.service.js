@@ -131,7 +131,7 @@ let DocumentalEstudianteService = class DocumentalEstudianteService {
         return { ...record.toObject(), nivelActual };
     }
     async update(id, dto) {
-        const record = await this.model.findByIdAndUpdate(id, { $set: dto }, { new: true });
+        const record = await this.model.findByIdAndUpdate(id, { $set: dto }, { returnDocument: 'after' });
         if (!record)
             throw new common_1.NotFoundException('Expediente documental no encontrado');
         const nivelActual = await this.getNivelActual(record.studentId.toString());

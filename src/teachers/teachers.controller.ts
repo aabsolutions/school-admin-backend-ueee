@@ -72,6 +72,11 @@ export class TeachersController {
     return this.teachersService.findAll(query);
   }
 
+  @Post('check-bulk')
+  checkBulk(@Body() body: { dnis: string[]; emails: string[] }) {
+    return this.teachersService.checkBulkDuplicates(body.dnis ?? [], body.emails ?? []);
+  }
+
   @Post('bulk')
   bulkCreate(@Body() dto: BulkCreateTeacherDto) {
     return this.teachersService.bulkCreate(dto.records);

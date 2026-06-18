@@ -50,6 +50,12 @@ export declare class TeachersService {
     } & {
         id: string;
     })[]>;
+    checkBulkDuplicates(dnis: string[], emails: string[]): Promise<{
+        duplicateDnis: string[];
+        duplicateEmails: string[];
+    }>;
     bulkCreate(records: BulkTeacherItemDto[]): Promise<any>;
+    private resolveUsername;
+    private normalizeForUsername;
     uploadPhoto(id: string, file: Express.Multer.File, type: 'credencial' | 'cuerpo', peso?: number, talla?: number): Promise<TeacherDocument>;
 }

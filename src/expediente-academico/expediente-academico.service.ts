@@ -218,7 +218,7 @@ export class ExpedienteAcademicoService {
     const doc = await this.documentoModel.findOneAndUpdate(
       { _id: docId, expedienteId: new Types.ObjectId(expedienteId) },
       { $set: update },
-      { new: true },
+      { returnDocument: 'after' },
     );
     if (!doc) throw new NotFoundException('Documento no encontrado');
     return doc;

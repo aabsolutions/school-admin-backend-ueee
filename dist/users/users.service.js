@@ -65,7 +65,7 @@ let UsersService = class UsersService {
             return target.save();
         }
         const updated = await this.userModel
-            .findByIdAndUpdate(id, dto, { new: true })
+            .findByIdAndUpdate(id, dto, { returnDocument: 'after' })
             .select('-password');
         if (!updated)
             throw new common_1.NotFoundException('User not found');

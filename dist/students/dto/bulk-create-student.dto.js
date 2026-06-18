@@ -12,10 +12,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.BulkCreateStudentDto = exports.BulkStudentItemDto = void 0;
 const class_transformer_1 = require("class-transformer");
 const class_validator_1 = require("class-validator");
+const toUpper = ({ value }) => typeof value === 'string' ? value.toUpperCase() : value;
 class BulkStudentItemDto {
 }
 exports.BulkStudentItemDto = BulkStudentItemDto;
 __decorate([
+    (0, class_transformer_1.Transform)(toUpper),
     (0, class_validator_1.IsNotEmpty)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
@@ -56,6 +58,7 @@ __decorate([
     __metadata("design:type", String)
 ], BulkStudentItemDto.prototype, "address", void 0);
 __decorate([
+    (0, class_transformer_1.Transform)(toUpper),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
@@ -66,6 +69,7 @@ __decorate([
     __metadata("design:type", String)
 ], BulkStudentItemDto.prototype, "parentGuardianMobile", void 0);
 __decorate([
+    (0, class_transformer_1.Transform)(toUpper),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
@@ -76,6 +80,7 @@ __decorate([
     __metadata("design:type", String)
 ], BulkStudentItemDto.prototype, "fatherMobile", void 0);
 __decorate([
+    (0, class_transformer_1.Transform)(toUpper),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)

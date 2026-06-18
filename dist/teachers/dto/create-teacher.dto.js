@@ -11,25 +11,32 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreateTeacherDto = void 0;
 const class_validator_1 = require("class-validator");
+const class_transformer_1 = require("class-transformer");
+const toUpper = ({ value }) => typeof value === 'string' ? value.toUpperCase() : value;
+const emptyToUndefined = ({ value }) => value === '' ? undefined : value;
 class CreateTeacherDto {
 }
 exports.CreateTeacherDto = CreateTeacherDto;
 __decorate([
+    (0, class_transformer_1.Transform)(toUpper),
     (0, class_validator_1.IsNotEmpty)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateTeacherDto.prototype, "name", void 0);
 __decorate([
-    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_transformer_1.Transform)(emptyToUndefined),
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsEmail)(),
     __metadata("design:type", String)
 ], CreateTeacherDto.prototype, "email", void 0);
 __decorate([
+    (0, class_transformer_1.Transform)(emptyToUndefined),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateTeacherDto.prototype, "username", void 0);
 __decorate([
+    (0, class_transformer_1.Transform)(emptyToUndefined),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.MinLength)(6),
@@ -63,6 +70,7 @@ __decorate([
     __metadata("design:type", String)
 ], CreateTeacherDto.prototype, "dni", void 0);
 __decorate([
+    (0, class_transformer_1.Transform)(emptyToUndefined),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsEnum)(['Male', 'Female', 'Other']),
     __metadata("design:type", String)
@@ -78,21 +86,25 @@ __decorate([
     __metadata("design:type", String)
 ], CreateTeacherDto.prototype, "departmentId", void 0);
 __decorate([
+    (0, class_transformer_1.Transform)(emptyToUndefined),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsMongoId)(),
     __metadata("design:type", String)
 ], CreateTeacherDto.prototype, "areaEstudioId", void 0);
 __decorate([
+    (0, class_transformer_1.Transform)(emptyToUndefined),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsEnum)(['Contrato', 'Nomb. Definitivo', 'Nomb. Provisional']),
     __metadata("design:type", String)
 ], CreateTeacherDto.prototype, "laboralDependency", void 0);
 __decorate([
+    (0, class_transformer_1.Transform)(emptyToUndefined),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsEnum)(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']),
     __metadata("design:type", String)
 ], CreateTeacherDto.prototype, "salarialCategory", void 0);
 __decorate([
+    (0, class_transformer_1.Transform)(toUpper),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
@@ -118,6 +130,7 @@ __decorate([
     __metadata("design:type", Number)
 ], CreateTeacherDto.prototype, "experienceYears", void 0);
 __decorate([
+    (0, class_transformer_1.Transform)(emptyToUndefined),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsEnum)(['active', 'inactive', 'on-leave']),
     __metadata("design:type", String)

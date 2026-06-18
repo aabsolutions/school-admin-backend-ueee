@@ -76,7 +76,7 @@ let CursoLectivoService = CursoLectivoService_1 = class CursoLectivoService {
     }
     async update(id, dto) {
         try {
-            const updated = await this.cursoLectivoModel.findByIdAndUpdate(id, dto, { new: true });
+            const updated = await this.cursoLectivoModel.findByIdAndUpdate(id, dto, { returnDocument: 'after' });
             if (!updated)
                 throw new common_1.NotFoundException('Curso lectivo no encontrado');
             return this.findOne(id);

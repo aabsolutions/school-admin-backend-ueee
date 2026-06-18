@@ -77,7 +77,7 @@ let RoleConfigService = class RoleConfigService {
             if (dto.description !== undefined)
                 allowed.description = dto.description;
             return this.roleModel
-                .findByIdAndUpdate(id, { $set: allowed }, { new: true })
+                .findByIdAndUpdate(id, { $set: allowed }, { returnDocument: 'after' })
                 .lean()
                 .exec();
         }
@@ -87,7 +87,7 @@ let RoleConfigService = class RoleConfigService {
                 throw new common_1.ConflictException(`El rol "${dto.name}" ya existe`);
         }
         return this.roleModel
-            .findByIdAndUpdate(id, { $set: dto }, { new: true })
+            .findByIdAndUpdate(id, { $set: dto }, { returnDocument: 'after' })
             .lean()
             .exec();
     }
@@ -97,7 +97,7 @@ let RoleConfigService = class RoleConfigService {
             throw new common_1.ForbiddenException('SuperAdmin no necesita configuración de permisos');
         }
         return this.roleModel
-            .findByIdAndUpdate(id, { $set: { sidebarPermissions: permissions } }, { new: true })
+            .findByIdAndUpdate(id, { $set: { sidebarPermissions: permissions } }, { returnDocument: 'after' })
             .lean()
             .exec();
     }

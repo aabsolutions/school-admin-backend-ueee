@@ -35,21 +35,21 @@ let InstitucionService = class InstitucionService {
     }
     async updateInstitucion(dto) {
         return this.model
-            .findOneAndUpdate({}, { $set: dto }, { upsert: true, new: true })
+            .findOneAndUpdate({}, { $set: dto }, { upsert: true, returnDocument: 'after' })
             .populate('autoridad', 'name email')
             .exec();
     }
     async uploadLogo(file) {
         const url = await this.cloudinaryService.uploadBuffer(file.buffer, 'institucion/logo');
         return this.model
-            .findOneAndUpdate({}, { $set: { logotipo: url } }, { upsert: true, new: true })
+            .findOneAndUpdate({}, { $set: { logotipo: url } }, { upsert: true, returnDocument: 'after' })
             .populate('autoridad', 'name email')
             .exec();
     }
     async uploadMembrete(file) {
         const url = await this.cloudinaryService.uploadBuffer(file.buffer, 'institucion/membrete');
         return this.model
-            .findOneAndUpdate({}, { $set: { membrete: url } }, { upsert: true, new: true })
+            .findOneAndUpdate({}, { $set: { membrete: url } }, { upsert: true, returnDocument: 'after' })
             .populate('autoridad', 'name email')
             .exec();
     }

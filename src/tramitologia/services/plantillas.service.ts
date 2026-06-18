@@ -86,7 +86,7 @@ export class PlantillasService {
       delete updatePayload.plantillaRespuestaId;
     }
     const updated = await this.plantillaModel
-      .findByIdAndUpdate(id, updatePayload, { new: true })
+      .findByIdAndUpdate(id, updatePayload, { returnDocument: 'after' })
       .exec();
     if (!updated) throw new NotFoundException(`Plantilla ${id} no encontrada`);
     return updated;
