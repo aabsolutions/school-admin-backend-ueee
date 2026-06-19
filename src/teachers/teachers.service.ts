@@ -58,8 +58,15 @@ export class TeachersService {
     const resolvedEmail = teacherData.email?.trim() || `${(teacherData.dni ?? 'docente').replace(/\s/g, '')}@escuela.local`;
     teacherData.email = resolvedEmail;
 
-    const resolvedUsername = username ?? teacherData.dni ?? resolvedEmail;
-    const resolvedPassword = password ?? teacherData.dni ?? resolvedEmail;
+    let resolvedUsername: string;
+    if (username) {
+      resolvedUsername = username;
+    } else {
+      const cand = this.resolveUsername(teacherData.name);
+      const exists = await this.userModel.exists({ username: cand.primary });
+      resolvedUsername = exists ? cand.fallback : cand.primary;
+    }
+    const resolvedPassword = password ?? resolvedUsername;
 
     let savedUser: any = null;
     try {
@@ -247,9 +254,9 @@ export class TeachersService {
   private resolveUsername(name: string): { primary: string; fallback: string } {
     const words = name.trim().split(/\s+/).map((w) => this.normalizeForUsername(w));
     const w0 = words[0] ?? '';
-    const w1 = words[1] ?? '';
-    const w2 = words[2] ?? '';
-    return { primary: `${w2}.${w0}`, fallback: `${w2}.${w1}` };
+    const w2 = words[2] ?? w0;
+    const w3 = words[3] ?? w2;
+    return { primary: `${w2}.${w0}`, fallback: `${w3}.${w0}` };
   }
 
   private normalizeForUsername(str: string): string {

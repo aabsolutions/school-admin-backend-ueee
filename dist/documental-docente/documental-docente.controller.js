@@ -51,6 +51,28 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UploadDocumentoDto.prototype, "descripcion", void 0);
+class UrlDocumentoDto {
+}
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], UrlDocumentoDto.prototype, "nombre", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsIn)(['profesional', 'planificacion']),
+    __metadata("design:type", String)
+], UrlDocumentoDto.prototype, "categoria", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], UrlDocumentoDto.prototype, "url", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UrlDocumentoDto.prototype, "descripcion", void 0);
 let DocumentalDocenteController = class DocumentalDocenteController {
     constructor(svc, cloudinary, teachersService) {
         this.svc = svc;
@@ -69,6 +91,9 @@ let DocumentalDocenteController = class DocumentalDocenteController {
         const url = await this.cloudinary.uploadBuffer(file.buffer, 'documental-docente');
         return this.svc.addDocumento(teacherId.toString(), dto.nombre, dto.categoria, url, dto.descripcion);
     }
+    addUrlForTeacher(teacherId, dto) {
+        return this.svc.addDocumento(teacherId.toString(), dto.nombre, dto.categoria, dto.url, dto.descripcion);
+    }
     async deleteForTeacher(teacherId, docId) {
         const { url, record } = await this.svc.deleteDocumento(teacherId.toString(), docId);
         this.cloudinary.deleteByUrl(url).catch(() => null);
@@ -84,6 +109,10 @@ let DocumentalDocenteController = class DocumentalDocenteController {
         const teacher = await this.teachersService.findByUserId(user.id);
         const url = await this.cloudinary.uploadBuffer(file.buffer, 'documental-docente');
         return this.svc.addDocumento(teacher._id.toString(), dto.nombre, dto.categoria, url, dto.descripcion);
+    }
+    async addUrlMe(user, dto) {
+        const teacher = await this.teachersService.findByUserId(user.id);
+        return this.svc.addDocumento(teacher._id.toString(), dto.nombre, dto.categoria, dto.url, dto.descripcion);
     }
     async deleteMe(user, docId) {
         const teacher = await this.teachersService.findByUserId(user.id);
@@ -130,6 +159,15 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], DocumentalDocenteController.prototype, "uploadForTeacher", null);
 __decorate([
+    (0, common_1.Post)('teacher/:teacherId/documentos/url'),
+    (0, roles_decorator_1.Roles)(user_schema_1.Role.SuperAdmin, user_schema_1.Role.Admin),
+    __param(0, (0, common_1.Param)('teacherId', parse_object_id_pipe_1.ParseObjectIdPipe)),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [mongoose_1.Types.ObjectId, UrlDocumentoDto]),
+    __metadata("design:returntype", void 0)
+], DocumentalDocenteController.prototype, "addUrlForTeacher", null);
+__decorate([
     (0, common_1.Delete)('teacher/:teacherId/documentos/:docId'),
     (0, roles_decorator_1.Roles)(user_schema_1.Role.SuperAdmin, user_schema_1.Role.Admin),
     __param(0, (0, common_1.Param)('teacherId', parse_object_id_pipe_1.ParseObjectIdPipe)),
@@ -166,6 +204,15 @@ __decorate([
     __metadata("design:paramtypes", [Object, UploadDocumentoDto, Object]),
     __metadata("design:returntype", Promise)
 ], DocumentalDocenteController.prototype, "uploadMe", null);
+__decorate([
+    (0, common_1.Post)('me/documentos/url'),
+    (0, roles_decorator_1.Roles)(user_schema_1.Role.Teacher),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, UrlDocumentoDto]),
+    __metadata("design:returntype", Promise)
+], DocumentalDocenteController.prototype, "addUrlMe", null);
 __decorate([
     (0, common_1.Delete)('me/documentos/:docId'),
     (0, roles_decorator_1.Roles)(user_schema_1.Role.Teacher),

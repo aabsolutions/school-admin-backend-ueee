@@ -33,6 +33,13 @@ class UploadDocumentoDto {
   @IsOptional() @IsString() descripcion?: string;
 }
 
+class UrlDocumentoDto {
+  @IsString() @IsNotEmpty() nombre: string;
+  @IsString() @IsIn(['profesional', 'planificacion']) categoria: 'profesional' | 'planificacion';
+  @IsString() @IsNotEmpty() url: string;
+  @IsOptional() @IsString() descripcion?: string;
+}
+
 @Controller('documental-docente')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class DocumentalDocenteController {
@@ -89,6 +96,21 @@ export class DocumentalDocenteController {
     );
   }
 
+  @Post('teacher/:teacherId/documentos/url')
+  @Roles(Role.SuperAdmin, Role.Admin)
+  addUrlForTeacher(
+    @Param('teacherId', ParseObjectIdPipe) teacherId: Types.ObjectId,
+    @Body() dto: UrlDocumentoDto,
+  ) {
+    return this.svc.addDocumento(
+      teacherId.toString(),
+      dto.nombre,
+      dto.categoria,
+      dto.url,
+      dto.descripcion,
+    );
+  }
+
   @Delete('teacher/:teacherId/documentos/:docId')
   @Roles(Role.SuperAdmin, Role.Admin)
   async deleteForTeacher(
@@ -139,6 +161,22 @@ export class DocumentalDocenteController {
       dto.nombre,
       dto.categoria,
       url,
+      dto.descripcion,
+    );
+  }
+
+  @Post('me/documentos/url')
+  @Roles(Role.Teacher)
+  async addUrlMe(
+    @CurrentUser() user: any,
+    @Body() dto: UrlDocumentoDto,
+  ) {
+    const teacher = await this.teachersService.findByUserId(user.id);
+    return this.svc.addDocumento(
+      teacher._id.toString(),
+      dto.nombre,
+      dto.categoria,
+      dto.url,
       dto.descripcion,
     );
   }

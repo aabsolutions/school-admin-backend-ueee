@@ -8,6 +8,12 @@ declare class UploadDocumentoDto {
     categoria: 'profesional' | 'planificacion';
     descripcion?: string;
 }
+declare class UrlDocumentoDto {
+    nombre: string;
+    categoria: 'profesional' | 'planificacion';
+    url: string;
+    descripcion?: string;
+}
 export declare class DocumentalDocenteController {
     private readonly svc;
     private readonly cloudinary;
@@ -22,9 +28,11 @@ export declare class DocumentalDocenteController {
     }>;
     getByTeacher(id: Types.ObjectId): Promise<import("./schemas/documental-docente.schema").DocumentalDocenteDocument>;
     uploadForTeacher(teacherId: Types.ObjectId, dto: UploadDocumentoDto, file: Express.Multer.File): Promise<import("./schemas/documental-docente.schema").DocumentalDocenteDocument>;
+    addUrlForTeacher(teacherId: Types.ObjectId, dto: UrlDocumentoDto): Promise<import("./schemas/documental-docente.schema").DocumentalDocenteDocument>;
     deleteForTeacher(teacherId: Types.ObjectId, docId: string): Promise<import("./schemas/documental-docente.schema").DocumentalDocenteDocument>;
     getMe(user: any): Promise<import("./schemas/documental-docente.schema").DocumentalDocenteDocument>;
     uploadMe(user: any, dto: UploadDocumentoDto, file: Express.Multer.File): Promise<import("./schemas/documental-docente.schema").DocumentalDocenteDocument>;
+    addUrlMe(user: any, dto: UrlDocumentoDto): Promise<import("./schemas/documental-docente.schema").DocumentalDocenteDocument>;
     deleteMe(user: any, docId: string): Promise<import("./schemas/documental-docente.schema").DocumentalDocenteDocument>;
 }
 export {};
