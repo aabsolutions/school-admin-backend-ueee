@@ -73,6 +73,9 @@ let TeachersController = class TeachersController {
     updateFamily(id, dto) {
         return this.teachersService.updateFamilyInfo(id.toString(), dto);
     }
+    removeBulk(ids) {
+        return this.teachersService.removeBulk(ids);
+    }
     remove(id) {
         return this.teachersService.remove(id.toString());
     }
@@ -183,6 +186,13 @@ __decorate([
     __metadata("design:paramtypes", [mongoose_1.Types.ObjectId, update_family_info_dto_1.UpdateTeacherFamilyInfoDto]),
     __metadata("design:returntype", void 0)
 ], TeachersController.prototype, "updateFamily", null);
+__decorate([
+    (0, common_1.Delete)('bulk'),
+    __param(0, (0, common_1.Body)('ids')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Array]),
+    __metadata("design:returntype", void 0)
+], TeachersController.prototype, "removeBulk", null);
 __decorate([
     (0, common_1.Delete)(':id'),
     __param(0, (0, common_1.Param)('id', parse_object_id_pipe_1.ParseObjectIdPipe)),

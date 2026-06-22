@@ -47,6 +47,9 @@ export declare class TeachersController {
     update(id: Types.ObjectId, dto: UpdateTeacherDto): Promise<import("./schemas/teacher.schema").TeacherDocument>;
     updateMedical(id: Types.ObjectId, dto: UpdateTeacherMedicalInfoDto): Promise<import("./schemas/teacher.schema").TeacherDocument>;
     updateFamily(id: Types.ObjectId, dto: UpdateTeacherFamilyInfoDto): Promise<import("./schemas/teacher.schema").TeacherDocument>;
+    removeBulk(ids: string[]): Promise<{
+        deleted: number;
+    }>;
     remove(id: Types.ObjectId): Promise<void>;
     uploadPhoto(id: Types.ObjectId, file: Express.Multer.File, type: 'credencial' | 'cuerpo', peso?: string, talla?: string): Promise<import("./schemas/teacher.schema").TeacherDocument>;
 }

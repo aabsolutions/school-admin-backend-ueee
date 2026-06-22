@@ -113,6 +113,11 @@ export class TeachersController {
     return this.teachersService.updateFamilyInfo(id.toString(), dto);
   }
 
+  @Delete('bulk')
+  removeBulk(@Body('ids') ids: string[]) {
+    return this.teachersService.removeBulk(ids);
+  }
+
   @Delete(':id')
   remove(@Param('id', ParseObjectIdPipe) id: Types.ObjectId) {
     return this.teachersService.remove(id.toString());

@@ -64,4 +64,14 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateTeacherGeneralDto.prototype, "emergencyMobile", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsEnum)(['MATUTINA', 'VESPERTINA', 'NOCTURNA']),
+    __metadata("design:type", String)
+], UpdateTeacherGeneralDto.prototype, "jornadaLaboral", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsEmail)(),
+    __metadata("design:type", String)
+], UpdateTeacherGeneralDto.prototype, "correoInstitucional", void 0);
 //# sourceMappingURL=update-teacher-general.dto.js.map

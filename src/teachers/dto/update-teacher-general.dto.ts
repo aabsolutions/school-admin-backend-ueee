@@ -1,4 +1,4 @@
-import { IsDateString, IsEnum, IsNumber, IsOptional, IsString, Min } from 'class-validator';
+import { IsDateString, IsEmail, IsEnum, IsNumber, IsOptional, IsString, Min } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 const toUpper = ({ value }: { value: unknown }) =>
@@ -14,4 +14,6 @@ export class UpdateTeacherGeneralDto {
   @IsOptional() @IsString() bio?: string;
   @Transform(toUpper) @IsOptional() @IsString() emergencyName?: string;
   @IsOptional() @IsString() emergencyMobile?: string;
+  @IsOptional() @IsEnum(['MATUTINA', 'VESPERTINA', 'NOCTURNA']) jornadaLaboral?: string;
+  @IsOptional() @IsEmail() correoInstitucional?: string;
 }

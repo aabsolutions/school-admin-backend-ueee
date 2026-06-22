@@ -110,6 +110,15 @@ let TeachersService = class TeachersService {
             await this.userModel.findByIdAndDelete(teacher.userId).catch(() => { });
         }
     }
+    async removeBulk(ids) {
+        const teachers = await this.teacherModel.find({ _id: { $in: ids } }).select('userId').lean();
+        const userIds = teachers.map((t) => t.userId).filter(Boolean);
+        const result = await this.teacherModel.deleteMany({ _id: { $in: ids } });
+        if (userIds.length) {
+            await this.userModel.deleteMany({ _id: { $in: userIds } });
+        }
+        return { deleted: result.deletedCount };
+    }
     async findByUserId(userId) {
         let teacher = await this.teacherModel
             .findOne({ userId: new mongoose_2.Types.ObjectId(userId) })
@@ -211,6 +220,15 @@ let TeachersService = class TeachersService {
         const usedInBatch = new Set();
         const created = [];
         const failed = [];
+        const medicalKeys = [
+            'bloodType', 'hasAllergies', 'allergiesDetail', 'hasChronicCondition',
+            'chronicConditionDetail', 'currentMedications', 'hasDisability', 'disabilityDetail',
+            'hasConadis', 'conadisNumber', 'healthInsurance', 'policyNumber',
+        ];
+        const familyKeys = [
+            'maritalStatus', 'spouseName', 'spouseOccupation', 'spouseMobile',
+            'numberOfChildren', 'childrenAges', 'housingType',
+        ];
         for (let i = 0; i < records.length; i++) {
             try {
                 const record = records[i];
@@ -221,6 +239,13 @@ let TeachersService = class TeachersService {
                 usedInBatch.add(username);
                 const email = record.email?.trim() || `${record.dni.replace(/\s/g, '')}@escuela.local`;
                 const teacher = await this.create({ ...record, email, username, password: username });
+                const id = teacher._id.toString();
+                const medicalPayload = Object.fromEntries(medicalKeys.filter((k) => record[k] !== undefined).map((k) => [k, record[k]]));
+                const familyPayload = Object.fromEntries(familyKeys.filter((k) => record[k] !== undefined).map((k) => [k, record[k]]));
+                await Promise.all([
+                    Object.keys(medicalPayload).length ? this.updateMedicalInfo(id, medicalPayload) : Promise.resolve(),
+                    Object.keys(familyPayload).length ? this.updateFamilyInfo(id, familyPayload) : Promise.resolve(),
+                ]);
                 created.push(teacher);
             }
             catch (e) {

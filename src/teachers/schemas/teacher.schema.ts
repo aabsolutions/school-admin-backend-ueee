@@ -73,7 +73,9 @@ export class Teacher {
   @Prop({ unique: true, sparse: true }) dni: string;
   @Prop({ enum: ['Male', 'Female', 'Other'] }) gender: string;
   @Prop() mobile: string;
-  @Prop({ enum: ['Contrato', 'Nomb. Definitivo', 'Nomb. Provisional'] }) laboralDependency: string;
+  @Prop({ enum: ['CONTRATO', 'NOMBRAMIENTO DEFINITIVO', 'NOMBRAMIENTO PROVISIONAL'] }) laboralDependency: string;
+  @Prop({ enum: ['MATUTINA', 'VESPERTINA', 'NOCTURNA'] }) jornadaLaboral: string;
+  @Prop() correoInstitucional: string;
   @Prop({ enum: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'] }) salarialCategory: string;
   @Prop() emergencyName: string;
   @Prop() emergencyMobile: string;

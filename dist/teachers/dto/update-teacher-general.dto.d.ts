@@ -8,4 +8,6 @@ export declare class UpdateTeacherGeneralDto {
     bio?: string;
     emergencyName?: string;
     emergencyMobile?: string;
+    jornadaLaboral?: string;
+    correoInstitucional?: string;
 }

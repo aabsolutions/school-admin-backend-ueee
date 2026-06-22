@@ -110,6 +110,16 @@ export class TeachersService {
     }
   }
 
+  async removeBulk(ids: string[]): Promise<{ deleted: number }> {
+    const teachers = await this.teacherModel.find({ _id: { $in: ids } }).select('userId').lean();
+    const userIds = (teachers as any[]).map((t) => t.userId).filter(Boolean);
+    const result = await this.teacherModel.deleteMany({ _id: { $in: ids } });
+    if (userIds.length) {
+      await this.userModel.deleteMany({ _id: { $in: userIds } });
+    }
+    return { deleted: result.deletedCount };
+  }
+
   async findByUserId(userId: string): Promise<TeacherDocument> {
     // Intento 1: buscar por userId (docentes creados con el nuevo flujo)
     let teacher = await this.teacherModel
@@ -218,7 +228,6 @@ export class TeachersService {
   }
 
   async bulkCreate(records: BulkTeacherItemDto[]): Promise<any> {
-    // Pre-generate candidate usernames and check existing ones in a single query
     const candidates = records.map((r) => this.resolveUsername(r.name));
     const allPrimaries = [...new Set(candidates.map((c) => c.primary))];
     const existingUsers = await this.userModel
@@ -230,6 +239,16 @@ export class TeachersService {
 
     const created: any[] = [];
     const failed: { row: number; data: any; error: string }[] = [];
+
+    const medicalKeys: (keyof BulkTeacherItemDto)[] = [
+      'bloodType', 'hasAllergies', 'allergiesDetail', 'hasChronicCondition',
+      'chronicConditionDetail', 'currentMedications', 'hasDisability', 'disabilityDetail',
+      'hasConadis', 'conadisNumber', 'healthInsurance', 'policyNumber',
+    ];
+    const familyKeys: (keyof BulkTeacherItemDto)[] = [
+      'maritalStatus', 'spouseName', 'spouseOccupation', 'spouseMobile',
+      'numberOfChildren', 'childrenAges', 'housingType',
+    ];
 
     for (let i = 0; i < records.length; i++) {
       try {
@@ -243,6 +262,20 @@ export class TeachersService {
 
         const email = record.email?.trim() || `${record.dni.replace(/\s/g, '')}@escuela.local`;
         const teacher = await this.create({ ...record, email, username, password: username } as CreateTeacherDto);
+        const id = teacher._id.toString();
+
+        const medicalPayload = Object.fromEntries(
+          medicalKeys.filter((k) => record[k] !== undefined).map((k) => [k, record[k]])
+        );
+        const familyPayload = Object.fromEntries(
+          familyKeys.filter((k) => record[k] !== undefined).map((k) => [k, record[k]])
+        );
+
+        await Promise.all([
+          Object.keys(medicalPayload).length ? this.updateMedicalInfo(id, medicalPayload) : Promise.resolve(),
+          Object.keys(familyPayload).length ? this.updateFamilyInfo(id, familyPayload) : Promise.resolve(),
+        ]);
+
         created.push(teacher);
       } catch (e: any) {
         failed.push({ row: i + 2, data: records[i], error: e.message ?? 'Error desconocido' });

@@ -31,6 +31,9 @@ export declare class TeachersService {
     create(dto: CreateTeacherDto): Promise<TeacherDocument>;
     update(id: string, dto: UpdateTeacherDto): Promise<TeacherDocument>;
     remove(id: string): Promise<void>;
+    removeBulk(ids: string[]): Promise<{
+        deleted: number;
+    }>;
     findByUserId(userId: string): Promise<TeacherDocument>;
     updateGeneralInfo(id: string, dto: UpdateTeacherGeneralDto): Promise<TeacherDocument>;
     updateMedicalInfo(id: string, dto: UpdateTeacherMedicalInfoDto): Promise<TeacherDocument>;

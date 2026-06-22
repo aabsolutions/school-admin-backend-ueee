@@ -13,6 +13,8 @@ export declare class CreateTeacherDto {
     departmentId?: string;
     areaEstudioId?: string;
     laboralDependency?: string;
+    jornadaLaboral?: string;
+    correoInstitucional?: string;
     salarialCategory?: string;
     emergencyName?: string;
     emergencyMobile?: string;

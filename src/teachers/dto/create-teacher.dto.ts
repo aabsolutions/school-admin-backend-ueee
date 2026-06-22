@@ -24,7 +24,9 @@ export class CreateTeacherDto {
   @IsOptional() @IsString() mobile?: string;
   @IsOptional() @IsString() departmentId?: string;
   @Transform(emptyToUndefined) @IsOptional() @IsMongoId() areaEstudioId?: string;
-  @Transform(emptyToUndefined) @IsOptional() @IsEnum(['Contrato', 'Nomb. Definitivo', 'Nomb. Provisional']) laboralDependency?: string;
+  @Transform(emptyToUndefined) @IsOptional() @IsEnum(['CONTRATO', 'NOMBRAMIENTO DEFINITIVO', 'NOMBRAMIENTO PROVISIONAL']) laboralDependency?: string;
+  @Transform(emptyToUndefined) @IsOptional() @IsEnum(['MATUTINA', 'VESPERTINA', 'NOCTURNA']) jornadaLaboral?: string;
+  @Transform(emptyToUndefined) @IsOptional() @IsEmail() correoInstitucional?: string;
   @Transform(emptyToUndefined) @IsOptional() @IsEnum(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']) salarialCategory?: string;
   @Transform(toUpper) @IsOptional() @IsString() emergencyName?: string;
   @IsOptional() @IsString() emergencyMobile?: string;

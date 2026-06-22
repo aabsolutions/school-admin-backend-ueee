@@ -276,6 +276,8 @@ export declare class Teacher {
     gender: string;
     mobile: string;
     laboralDependency: string;
+    jornadaLaboral: string;
+    correoInstitucional: string;
     salarialCategory: string;
     emergencyName: string;
     emergencyMobile: string;
@@ -390,6 +392,24 @@ export declare const TeacherSchema: import("mongoose").Schema<Teacher, import("m
         id: string;
     }>;
     laboralDependency?: import("mongoose").SchemaDefinitionProperty<string, Teacher, Document<unknown, {}, Teacher, {
+        id: string;
+    }, import("mongoose").DefaultSchemaOptions> & Omit<Teacher & {
+        _id: Types.ObjectId;
+    } & {
+        __v: number;
+    }, "id"> & {
+        id: string;
+    }>;
+    jornadaLaboral?: import("mongoose").SchemaDefinitionProperty<string, Teacher, Document<unknown, {}, Teacher, {
+        id: string;
+    }, import("mongoose").DefaultSchemaOptions> & Omit<Teacher & {
+        _id: Types.ObjectId;
+    } & {
+        __v: number;
+    }, "id"> & {
+        id: string;
+    }>;
+    correoInstitucional?: import("mongoose").SchemaDefinitionProperty<string, Teacher, Document<unknown, {}, Teacher, {
         id: string;
     }, import("mongoose").DefaultSchemaOptions> & Omit<Teacher & {
         _id: Types.ObjectId;

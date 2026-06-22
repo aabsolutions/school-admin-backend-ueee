@@ -168,9 +168,17 @@ __decorate([
     __metadata("design:type", String)
 ], Teacher.prototype, "mobile", void 0);
 __decorate([
-    (0, mongoose_1.Prop)({ enum: ['Contrato', 'Nomb. Definitivo', 'Nomb. Provisional'] }),
+    (0, mongoose_1.Prop)({ enum: ['CONTRATO', 'NOMBRAMIENTO DEFINITIVO', 'NOMBRAMIENTO PROVISIONAL'] }),
     __metadata("design:type", String)
 ], Teacher.prototype, "laboralDependency", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ enum: ['MATUTINA', 'VESPERTINA', 'NOCTURNA'] }),
+    __metadata("design:type", String)
+], Teacher.prototype, "jornadaLaboral", void 0);
+__decorate([
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", String)
+], Teacher.prototype, "correoInstitucional", void 0);
 __decorate([
     (0, mongoose_1.Prop)({ enum: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'] }),
     __metadata("design:type", String)

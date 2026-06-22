@@ -94,9 +94,21 @@ __decorate([
 __decorate([
     (0, class_transformer_1.Transform)(emptyToUndefined),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsEnum)(['Contrato', 'Nomb. Definitivo', 'Nomb. Provisional']),
+    (0, class_validator_1.IsEnum)(['CONTRATO', 'NOMBRAMIENTO DEFINITIVO', 'NOMBRAMIENTO PROVISIONAL']),
     __metadata("design:type", String)
 ], CreateTeacherDto.prototype, "laboralDependency", void 0);
+__decorate([
+    (0, class_transformer_1.Transform)(emptyToUndefined),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsEnum)(['MATUTINA', 'VESPERTINA', 'NOCTURNA']),
+    __metadata("design:type", String)
+], CreateTeacherDto.prototype, "jornadaLaboral", void 0);
+__decorate([
+    (0, class_transformer_1.Transform)(emptyToUndefined),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsEmail)(),
+    __metadata("design:type", String)
+], CreateTeacherDto.prototype, "correoInstitucional", void 0);
 __decorate([
     (0, class_transformer_1.Transform)(emptyToUndefined),
     (0, class_validator_1.IsOptional)(),
